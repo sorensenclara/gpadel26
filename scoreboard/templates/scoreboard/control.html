@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Control partido {{ match.code }}</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap">
-  <!-- Tu CSS general existente -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
-  <!-- CSS nuevo, aislado para sponsors/carrusel -->
   <link rel="stylesheet" href="{% static 'css/sponsors.css' %}">
 </head>
 <body>
@@ -22,6 +20,25 @@
       </div>
       <div><a class="link" href="/ver/{{ match.code }}/" target="_blank">Ver marcador</a></div>
     </div>
+
+    <h2 style="
+      text-align: center;
+      color: #cbdc00;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: 20px;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    ">
+      {% if match.mode == "3_sets" %}
+        Partido a 3 sets
+      {% elif match.mode == "2_sets_super_tb" %}
+        2 sets + super tie-break
+      {% else %}
+        Modo no definido
+      {% endif %}
+    </h2>
 
     <div class="panel">
       <!-- Cabecera -->
@@ -52,12 +69,16 @@
             <span class="pill" id="ga">0</span>
             <button class="btn inc" onclick="point('a')">+ A</button>
             <button class="btn dec" onclick="undoPoint('a')">− A</button>
+            <!-- Botón chico de guardar/cargar -->
+            <button class="btn save" style="margin-left:8px;padding:4px 8px;font-size:.75rem" onclick="save()">Cargar vivo</button>
           </div>
         </div>
         <div class="center muted">Game actual</div>
         <div class="right" style="text-align:right">
           <div class="teamName" id="nameB">{{ match.team_b }}</div>
           <div class="pills" style="justify-content:flex-end">
+            <!-- Botón chico de guardar/cargar -->
+            <button class="btn save" style="margin-right:8px;padding:4px 8px;font-size:.75rem" onclick="save()">Cargar vivo</button>
             <button class="btn dec" onclick="undoPoint('b')">− B</button>
             <button class="btn inc" onclick="point('b')">+ B</button>
             <span class="pill" id="gb">0</span>
@@ -83,9 +104,11 @@
         </table>
       </div>
 
-      <!-- TIEBREAK -->
-      <div id="tb" class="tb">
-        <div class="muted">Tiebreak (gana a 7 con diferencia de 2)</div>
+      <!-- TIEBREAK / SUPER -->
+      <div id="tb" class="tb" style="display:none;">
+        <div class="muted" id="tbTitle">
+          Tiebreak (gana a 7 con diferencia de 2)
+        </div>
         <div class="row">
           <span class="pill" id="tba">0</span>
           <button class="btn inc" onclick="tbPoint('a')">+ A</button>
@@ -119,131 +142,181 @@
   </div>
 
 <script>
+  /* ===== Config ===== */
+  const mode  = "{{ match.mode }}";  // "3_sets" o "2_sets_super_tb"
+  const code  = "{{ match.code }}";
+  const pointsScale = [0, 15, 30, 40];
+
   /* ===== Estado ===== */
-  const code = "{{ match.code }}";
-  const pointsScale = [0,15,30,40];
   let currentSet = parseInt(document.getElementById('current_set').value) || 1;
 
   const sets = [
-    {a: parseInt(document.getElementById('s1a').textContent)||0, b: parseInt(document.getElementById('s1b').textContent)||0},
-    {a: parseInt(document.getElementById('s2a').textContent)||0, b: parseInt(document.getElementById('s2b').textContent)||0},
-    {a: parseInt(document.getElementById('s3a').textContent)||0, b: parseInt(document.getElementById('s3b').textContent)||0},
+    { a: parseInt(document.getElementById('s1a').textContent) || 0,
+      b: parseInt(document.getElementById('s1b').textContent) || 0 },
+    { a: parseInt(document.getElementById('s2a').textContent) || 0,
+      b: parseInt(document.getElementById('s2b').textContent) || 0 },
+    { a: parseInt(document.getElementById('s3a').textContent) || 0,
+      b: parseInt(document.getElementById('s3b').textContent) || 0 },
   ];
 
-  let idxA = 0, idxB = 0;
+  let idxA = 0, idxB = 0;       // índice en [0,15,30,40] para el game actual
   let tbOn = false, tbA = 0, tbB = 0;
-
-  // === Auspiciantes ===
+  let tbType = null;            // "set" o "super"
   const sponsors = [];
 
-  // refs UI
-  const ga = document.getElementById('ga');
-  const gb = document.getElementById('gb');
+  const ga  = document.getElementById('ga');
+  const gb  = document.getElementById('gb');
   const tbd = document.getElementById('tb');
+  const tbTitle = document.getElementById('tbTitle');
 
-  document.getElementById('current_set').addEventListener('change', e=>{
-    currentSet = parseInt(e.target.value)||1;
+  // Ocultar tercer set en modalidad 2 sets + super TB
+  if (mode === "2_sets_super_tb") {
+    const row3 = document.getElementById('row3');
+    if (row3) row3.style.display = 'none';
+    const opt3 = document.querySelector('#current_set option[value="3"]');
+    if (opt3) opt3.style.display = 'none';
+  }
+
+  document.getElementById('current_set').addEventListener('change', e => {
+    currentSet = parseInt(e.target.value) || 1;
     markCurrentRow();
-    idxA = idxB = 0; tbOn = false; tbA = tbB = 0;
-    refreshPills();
+    resetGame();
+    hideTb();
+    save();
   });
 
-  function markCurrentRow(){
-    [1,2,3].forEach(i=>document.getElementById('row'+i).classList.remove('current'));
-    const r = document.getElementById('row'+currentSet); if(r) r.classList.add('current');
+  function markCurrentRow() {
+    [1,2,3].forEach(i => {
+      const r = document.getElementById('row'+i);
+      if (!r) return;
+      r.classList.toggle('current', i === currentSet);
+    });
   }
   markCurrentRow();
 
-  function refreshPills(){
-    if(!tbOn){ ga.textContent = pointsScale[idxA]; gb.textContent = pointsScale[idxB]; }
-    else { ga.textContent = tbA; gb.textContent = tbB; }
+  function refreshPills() {
+    if (!tbOn) {
+      ga.textContent = pointsScale[idxA];
+      gb.textContent = pointsScale[idxB];
+    } else {
+      ga.textContent = tbA;
+      gb.textContent = tbB;
+    }
   }
   refreshPills();
 
-  function setFinished(s) {
-    return ( (s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2 );
-  }
-
-  function applyWinnersHighlight(){
-    [1,2,3].forEach(i=>{
-      const s = sets[i-1];
-      const cellA = document.getElementById('s'+i+'a');
-      const cellB = document.getElementById('s'+i+'b');
-      cellA.classList.remove('winA','winB');
-      cellB.classList.remove('winA','winB');
-      if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2){
-        if (s.a > s.b) cellA.classList.add('winA'); else cellB.classList.add('winB');
-      }
-    });
-  }
-
-  function paintSets(){
+  function paintSets() {
     document.getElementById('s1a').textContent = sets[0].a;
     document.getElementById('s1b').textContent = sets[0].b;
     document.getElementById('s2a').textContent = sets[1].a;
     document.getElementById('s2b').textContent = sets[1].b;
     document.getElementById('s3a').textContent = sets[2].a;
     document.getElementById('s3b').textContent = sets[2].b;
-    applyWinnersHighlight();
+
+    // resaltar sets ganados
+    [1,2,3].forEach(i => {
+      const s = sets[i-1];
+      const cellA = document.getElementById('s'+i+'a');
+      const cellB = document.getElementById('s'+i+'b');
+      if (!cellA || !cellB) return;
+      cellA.classList.remove('winA','winB');
+      cellB.classList.remove('winA','winB');
+      if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2) {
+        if (s.a > s.b) cellA.classList.add('winA');
+        else cellB.classList.add('winB');
+      }
+    });
+  }
+  paintSets();
+
+  function resetGame() {
+    idxA = 0;
+    idxB = 0;
+    refreshPills();
   }
 
-  /* ===== GAME ===== */
-  function point(side){
-    if (setFinished(sets[currentSet-1])) return;
-    if(tbOn){ return; }
-    if(side === 'a'){ idxA < 3 ? idxA++ : winGame('a'); }
-    else { idxB < 3 ? idxB++ : winGame('b'); }
+  function showTb(type) {
+    tbOn = true;
+    tbType = type;    // "set" o "super"
+    tbA = tbB = 0;
+    tbd.style.display = 'block';
+    if (tbType === 'super') {
+      tbTitle.textContent = 'Super tie-break (a 10 puntos, ganar por 2)';
+    } else {
+      tbTitle.textContent = 'Tiebreak (a 7 puntos, ganar por 2)';
+    }
     refreshPills();
   }
-  function undoPoint(side){
-    if(tbOn){ return; }
-    if(side === 'a'){ idxA = Math.max(0, idxA-1); }
-    else{ idxB = Math.max(0, idxB-1); }
+
+  function hideTb() {
+    tbOn = false;
+    tbType = null;
+    tbA = tbB = 0;
+    tbd.style.display = 'none';
     refreshPills();
   }
-  function winGame(winner){
+
+  /* ===== GAME normal ===== */
+  function point(side) {
+    if (tbOn) return;
+    const s = sets[currentSet-1];
+
+    // si el set ya está ganado, no sumar más games
+    if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2) return;
+
+    if (side === 'a') {
+      idxA < 3 ? idxA++ : winGame('a');
+    } else {
+      idxB < 3 ? idxB++ : winGame('b');
+    }
+    refreshPills();
+    save();
+  }
+
+  function undoPoint(side) {
+    if (tbOn) return;
+    if (side === 'a') idxA = Math.max(0, idxA-1);
+    else idxB = Math.max(0, idxB-1);
+    refreshPills();
+    save();
+  }
+
+  function winGame(winner) {
     const s = sets[currentSet-1];
     s[winner] += 1;
-    idxA = 0; idxB = 0;
-    if(s.a === 6 && s.b === 6){
-      tbOn = true; tbA = 0; tbB = 0;
-      tbd.classList.add('show');
+    resetGame();
+
+    // Si llegamos a 6–6 → tiebreak clásico
+    if (s.a === 6 && s.b === 6) {
+      showTb('set');
     }
+
     paintSets();
     checkSetWinner();
   }
 
-  /* ===== TB ===== */
-  function tbPoint(side){
-    if(!tbOn) return;
-    if(side === 'a') tbA++; else tbB++;
-    refreshPills();
-    if( (tbA >= 7 || tbB >= 7) && Math.abs(tbA - tbB) >= 2 ){
-      const winner = (tbA > tbB) ? 'a' : 'b';
-      sets[currentSet-1][winner] += 1;
-      tbOn = false; tbd.classList.remove('show'); tbA=0; tbB=0; idxA=0; idxB=0;
-      paintSets();
-      checkSetWinner();
-    }
-  }
-  function tbUndo(side){
-    if(!tbOn) return;
-    if(side==='a') tbA = Math.max(0, tbA-1); else tbB = Math.max(0, tbB-1);
-    refreshPills();
-  }
-
-  /* ===== Set ganado + avance ===== */
+  /* ===== Set ganado + avance / super tie-break ===== */
   function checkSetWinner() {
-    const s = sets[currentSet - 1];
+    const s = sets[currentSet-1];
     const a = s.a, b = s.b;
+
     if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) {
-      idxA = idxB = 0;
-      if (tbOn) { tbOn = false; tbA = tbB = 0; tbd.classList.remove('show'); }
-      refreshPills(); paintSets();
-      if (currentSet < 3) {
-        currentSet++;
+      // set cerrado
+      hideTb();
+      resetGame();
+      paintSets();
+
+      if (mode === '3_sets') {
+        if (currentSet < 3) {
+          currentSet++;
+          document.getElementById('current_set').value = String(currentSet);
+          markCurrentRow();
+        }
+      } else if (mode === '2_sets_super_tb') {
+        // no existe set 3, pero hay super tie-break si quedan 1–1 en sets
         document.getElementById('current_set').value = String(currentSet);
         markCurrentRow();
+        checkSuperTiebreakActivation();
       }
       save();
     } else {
@@ -251,7 +324,68 @@
     }
   }
 
-  /* ===== Auspiciantes helpers ===== */
+  function checkSuperTiebreakActivation() {
+    if (mode !== '2_sets_super_tb') return;
+
+    let setsA = 0, setsB = 0;
+    [0,1].forEach(i => {
+      const s = sets[i];
+      if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2) {
+        if (s.a > s.b) setsA++; else setsB++;
+      }
+    });
+
+    // Si quedan 1–1 ⇒ super tie-break
+    if (setsA === 1 && setsB === 1) {
+      showTb('super');
+    } else {
+      hideTb();
+    }
+  }
+
+  /* ===== TB (clásico) / SUPER TB ===== */
+  function tbPoint(side) {
+    if (!tbOn) return;
+    if (side === 'a') tbA++; else tbB++;
+    refreshPills();
+
+    const target = (tbType === 'super') ? 10 : 7;
+    if ((tbA >= target || tbB >= target) && Math.abs(tbA - tbB) >= 2) {
+      const winnerSide = (tbA > tbB) ? 'a' : 'b';
+
+      if (tbType === 'super') {
+        // Super tie-break define el partido (no suma games)
+        const ganador = (winnerSide === 'a')
+          ? (document.getElementById('team_a').value || 'Equipo A')
+          : (document.getElementById('team_b').value || 'Equipo B');
+        alert("¡Ganador del super tie-break: " + ganador + "!");
+        hideTb();
+        resetGame();
+        save();
+        return;
+      }
+
+      // Tiebreak de set: del 6–6 pasamos a 7–6
+      sets[currentSet-1][winnerSide] += 1;
+      hideTb();
+      resetGame();
+      paintSets();
+      checkSetWinner();
+      save();
+    } else {
+      save();
+    }
+  }
+
+  function tbUndo(side) {
+    if (!tbOn) return;
+    if (side === 'a') tbA = Math.max(0, tbA-1);
+    else tbB = Math.max(0, tbB-1);
+    refreshPills();
+    save();
+  }
+
+  /* ===== Sponsors ===== */
   async function fileToSquareDataURL(file, size=400) {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -261,7 +395,6 @@
           const canvas = document.createElement('canvas');
           canvas.width = size; canvas.height = size;
           const ctx = canvas.getContext('2d');
-          // quitar si querés mantener transparencias
           ctx.fillStyle = '#fff';
           ctx.fillRect(0,0,size,size);
           const ratio = Math.min(size/img.width, size/img.height);
@@ -290,46 +423,68 @@
       const dataUrl = await fileToSquareDataURL(f, 400);
       sponsors.push(dataUrl);
 
-      // preview tile
       const tile = document.createElement('div');
       tile.className = 'pb2-s-thumb';
       const img = document.createElement('img');
-      img.src = dataUrl; img.alt = 'sponsor';
+      img.src = dataUrl;
+      img.alt = 'sponsor';
       tile.appendChild(img);
       preview.appendChild(tile);
     }
     input.value = '';
-    save(); // broadcast inmediato
+    save();
   }
 
-  /* ===== Broadcast ===== */
-  async function save(){
-    const payload = {
-      team_a: document.getElementById('team_a').value || 'Equipo A',
-      team_b: document.getElementById('team_b').value || 'Equipo B',
-      current_set: currentSet,
-      sets: sets,
-      current_game: {
-        mode: tbOn ? 'tiebreak' : 'regular',
-        a: tbOn ? tbA : pointsScale[idxA],
-        b: tbOn ? tbB : pointsScale[idxB]
-      },
-      sponsors: sponsors
-    };
-    const res = await fetch(`/api/${code}/update/`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    if(!res.ok){ alert('Error al guardar'); }
+  /* ===== Envío al backend / WebSocket ===== */
+  async function save() {
+  let gameMode = "regular";
+  if (tbOn) gameMode = (tbType === "super") ? "super_tb" : "tiebreak";
+
+  // Determinar valor real del punto mostrado
+  let pointA = tbOn ? tbA : pointsScale[idxA];
+  let pointB = tbOn ? tbB : pointsScale[idxB];
+
+  // En caso de "AD" o "40" más allá de índice 3, forzar texto correcto
+  if (!tbOn && (pointsA > 3 || pointsB > 3)) {
+    const diff = pointsA - pointsB;
+    if (diff === 0) { pointA = 40; pointB = 40; }
+    else if (diff === 1) { pointA = "AD"; pointB = 40; }
+    else if (diff === -1) { pointA = 40; pointB = "AD"; }
   }
+
+  const payload = {
+    team_a: document.getElementById('team_a').value || 'Equipo A',
+    team_b: document.getElementById('team_b').value || 'Equipo B',
+    current_set: currentSet,
+    sets: sets,
+    current_game: {
+      mode: gameMode,
+      a: pointA,
+      b: pointB,
+    },
+    sponsors: sponsors,
+  };
+
+  try {
+    await fetch(`/api/${code}/update/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    console.error("Error al guardar", e);
+  }
+}
+
 
   // Sincronizar nombres
-  document.getElementById('team_a').addEventListener('input', e=>{
+  document.getElementById('team_a').addEventListener('input', e => {
     document.getElementById('nameA').textContent = e.target.value || 'Equipo A';
+    save();
   });
-  document.getElementById('team_b').addEventListener('input', e=>{
+  document.getElementById('team_b').addEventListener('input', e => {
     document.getElementById('nameB').textContent = e.target.value || 'Equipo B';
+    save();
   });
 </script>
 </body>

@@ -6,10 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ver partido {{ match.code }}</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap">
-  <!-- Tu CSS general existente -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
-  <!-- CSS nuevo, aislado para sponsors/carrusel -->
   <link rel="stylesheet" href="{% static 'css/sponsors.css' %}">
+  <style>
+    /* Animaciones */
+    .flash {
+      animation: flashScore 0.6s ease;
+    }
+    @keyframes flashScore {
+      0% { transform: scale(1); color: white; }
+      50% { transform: scale(1.3); color: #cbdc00; }
+      100% { transform: scale(1); color: white; }
+    }
+
+    #modeBanner.flash {
+      animation: flashBanner 0.8s ease;
+    }
+    @keyframes flashBanner {
+      0% { color: white; }
+      50% { color: #cbdc00; }
+      100% { color: white; }
+    }
+
+    .winA { background: #9acd32 !important; color: #12210a; }
+    .winB { background: #64b692 !important; color: #fff; }
+  </style>
 </head>
 <body class="pb2-has-footer">
   <div class="wrap">
@@ -23,15 +44,27 @@
       </div>
     </div>
 
-    <!-- Bloques principales -->
+    <!-- Banner -->
+    <div id="modeBanner" style="
+      text-align:center;
+      margin:8px 0 4px;
+      font-weight:800;
+      font-size:1rem;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      color:#cbdc00;">
+      GAME EN JUEGO
+    </div>
+
+    <!-- Marcador principal -->
     <div class="board">
       <div class="team teamA">
         <div class="name" id="team_a">{{ match.team_a }}</div>
-        <div class="score" id="scoreA">{{ match.set1_a }}</div>
+        <div class="score" id="scoreA">0</div>
       </div>
       <div class="team teamB">
         <div class="name" id="team_b">{{ match.team_b }}</div>
-        <div class="score" id="scoreB">{{ match.set1_b }}</div>
+        <div class="score" id="scoreB">0</div>
       </div>
     </div>
 
@@ -56,119 +89,130 @@
     <div class="legend">Actualización en vivo — no requiere recargar.</div>
   </div>
 
-  <!-- Footer carrusel (full-width, fijo abajo, sin título) -->
+  <!-- Footer carrusel -->
   <div class="pb2-sponsors-footer">
     <div id="pb2SponsorCarousel"></div>
   </div>
 
-<!-- WebSocket + Carrusel -->
 <script>
   const code = "{{ match.code }}";
+  let lastScoreA = null;
+  let lastScoreB = null;
+  let lastMode = null;
+
+  // === WebSocket ===
   const wsProto = (location.protocol === "https:") ? "wss" : "ws";
   const socket = new WebSocket(`${wsProto}://${location.host}/ws/match/${code}/`);
 
-  socket.onopen = () => console.log('WS abierto');
-  socket.onerror = e => console.error('WS error', e);
-  socket.onclose = e => console.warn('WS cerrado', e);
+  socket.onopen = () => console.log("WS abierto");
+  socket.onerror = (e) => console.error("WS error", e);
+  socket.onclose = (e) => console.warn("WS cerrado", e);
 
-  // ===== Marcado de sets ganados =====
+  // Mostrar los puntos tal como vienen del control:
+  // - modo regular: 0 / 15 / 30 / 40 (ya calculados en control.html)
+  // - tiebreak / super_tb: 0,1,2,3,... (puntos del tie-break)
+  function formatPoints(value, mode) {
+    if (value === undefined || value === null) return 0;
+    return value;
+  }
+
+  // Resalta sets ganados (6+ con diferencia de 2)
   function applyWinnersHighlight(sets) {
     [1, 2, 3].forEach(i => {
-      const s = sets[i - 1] || {a:0,b:0};
-      const cellA = document.getElementById('s' + i + 'a');
-      const cellB = document.getElementById('s' + i + 'b');
+      const s = sets[i - 1] || {a:0, b:0};
+      const a = s.a, b = s.b;
+      const cellA = document.getElementById(`s${i}a`);
+      const cellB = document.getElementById(`s${i}b`);
       if (!cellA || !cellB) return;
-      cellA.classList.remove('winA', 'winB');
-      cellB.classList.remove('winA', 'winB');
-      if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2) {
-        if (s.a > s.b) cellA.classList.add('winA');
-        else cellB.classList.add('winB');
+
+      cellA.classList.remove("winA", "winB");
+      cellB.classList.remove("winA", "winB");
+
+      if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) {
+        if (a > b) cellA.classList.add("winA");
+        else cellB.classList.add("winB");
       }
     });
   }
 
-  // ===== Carrusel de auspiciantes (.pb2-) =====
-  let pb2Slides = [];
-  let pb2Index = 0;
-  let pb2Timer = null;
+  socket.onmessage = (event) => {
+    try {
+      const raw = JSON.parse(event.data);
+      const data = (raw && typeof raw === "object" && "payload" in raw) ? raw.payload : raw;
 
-  function pb2Chunk(arr, size) {
-    const out = [];
-    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-    return out;
-  }
+      if (!data) return;
 
-  function pb2RenderSlide(slide = []) {
-    const host = document.getElementById('pb2SponsorCarousel');
-    if (!host) return;
-    if (!slide.length) { host.innerHTML = ''; return; }
-    host.innerHTML = `
-      <div class="pb2-s-grid">
-        ${slide.map(src => `<div class="pb2-s-tile"><img src="${src}" alt="sponsor"></div>`).join('')}
-      </div>
-    `;
-  }
+      // Nombres
+      document.getElementById("team_a").textContent = data.team_a || "Equipo A";
+      document.getElementById("team_b").textContent = data.team_b || "Equipo B";
 
-  function pb2StartAutoplay() {
-    if (pb2Timer) clearInterval(pb2Timer);
-    if (!pb2Slides.length) { pb2RenderSlide([]); return; }
-    pb2Index = 0;
-    pb2RenderSlide(pb2Slides[pb2Index]);
-    pb2Timer = setInterval(() => {
-      pb2Index = (pb2Index + 1) % pb2Slides.length;
-      pb2RenderSlide(pb2Slides[pb2Index]);
-    }, 3500);
-  }
+      // Sets (juegos)
+      const sets = data.sets || [
+        { a: data.set1_a ?? 0, b: data.set1_b ?? 0 },
+        { a: data.set2_a ?? 0, b: data.set2_b ?? 0 },
+        { a: data.set3_a ?? 0, b: data.set3_b ?? 0 },
+      ];
+      document.getElementById("s1a").textContent = sets[0].a;
+      document.getElementById("s1b").textContent = sets[0].b;
+      document.getElementById("s2a").textContent = sets[1].a;
+      document.getElementById("s2b").textContent = sets[1].b;
+      document.getElementById("s3a").textContent = sets[2].a;
+      document.getElementById("s3b").textContent = sets[2].b;
 
-  // ===== WebSocket Listener =====
-socket.onmessage = event => {
-    const raw = JSON.parse(event.data);
-    const data = (raw && typeof raw === 'object' && 'payload' in raw) ? raw.payload : raw; // <— clave
-    console.log('WS raw:', raw, '→ usando data:', data, 'sponsors:', data?.sponsors);
+      applyWinnersHighlight(sets);
 
-    if (data?.error) return;
+      // Puntos actuales (game, tiebreak o super tie-break)
+      const cg = data.current_game || { mode: "regular", a: 0, b: 0 };
+      const scoreAEl = document.getElementById("scoreA");
+      const scoreBEl = document.getElementById("scoreB");
 
-    // Nombres
-    document.getElementById('team_a').textContent = data.team_a || 'Equipo A';
-    document.getElementById('team_b').textContent = data.team_b || 'Equipo B';
+      const shownA = formatPoints(cg.a, cg.mode);
+      const shownB = formatPoints(cg.b, cg.mode);
 
-    // Sets
-    document.getElementById('s1a').textContent = data.sets[0].a;
-    document.getElementById('s1b').textContent = data.sets[0].b;
-    document.getElementById('s2a').textContent = data.sets[1].a;
-    document.getElementById('s2b').textContent = data.sets[1].b;
-    document.getElementById('s3a').textContent = data.sets[2].a;
-    document.getElementById('s3b').textContent = data.sets[2].b;
+      if (cg.a !== lastScoreA) {
+        scoreAEl.classList.add("flash");
+        setTimeout(() => scoreAEl.classList.remove("flash"), 600);
+      }
+      if (cg.b !== lastScoreB) {
+        scoreBEl.classList.add("flash");
+        setTimeout(() => scoreBEl.classList.remove("flash"), 600);
+      }
 
-    // Puntos actuales
-    const cg = data.current_game || {mode:'regular', a:0, b:0};
-    document.getElementById('scoreA').textContent = cg.a ?? 0;
-    document.getElementById('scoreB').textContent = cg.b ?? 0;
+      scoreAEl.textContent = shownA;
+      scoreBEl.textContent = shownB;
+      lastScoreA = cg.a;
+      lastScoreB = cg.b;
 
-    // Set actual
-    const cs = data.current_set || 1;
-    [1,2,3].forEach(i => document.getElementById('row'+i).classList.remove('current'));
-    const row = document.getElementById('row'+cs);
-    if (row) row.classList.add('current');
+      // Banner de modo
+      const banner = document.getElementById("modeBanner");
+      let bannerText = "GAME EN JUEGO";
+      if (cg.mode === "tiebreak") bannerText = "TIE-BREAK";
+      else if (cg.mode === "super_tb") bannerText = "SUPER TIE-BREAK";
 
-    // Resaltado
-    applyWinnersHighlight(data.sets);
+      if (bannerText !== lastMode) {
+        banner.textContent = bannerText;
+        banner.classList.add("flash");
+        setTimeout(() => banner.classList.remove("flash"), 800);
+        lastMode = bannerText;
+      }
 
-    // Sponsors → chunk de a 6 + autoplay
-    const arr = Array.isArray(data.sponsors) ? data.sponsors : [];
-    pb2Slides = arr.length >= 6 ? pb2Chunk(arr, 6) : (arr.length ? [arr] : []);
-    pb2StartAutoplay();
+      // Sponsors (simple grid)
+      const carousel = document.getElementById("pb2SponsorCarousel");
+      const sponsors = Array.isArray(data.sponsors) ? data.sponsors : [];
+      if (carousel) {
+        if (!sponsors.length) {
+          carousel.innerHTML = "";
+        } else {
+          carousel.innerHTML = sponsors
+            .map(src => `<div class="pb2-s-thumb"><img src="${src}" alt="sponsor"></div>`)
+            .join("");
+        }
+      }
+
+    } catch (e) {
+      console.error("Error procesando mensaje WS", e);
+    }
   };
-
-  // ===== Cargar estado inicial =====
-  document.addEventListener('DOMContentLoaded', () => {
-    const sets = [
-      {a: parseInt(document.getElementById('s1a').textContent)||0, b: parseInt(document.getElementById('s1b').textContent)||0},
-      {a: parseInt(document.getElementById('s2a').textContent)||0, b: parseInt(document.getElementById('s2b').textContent)||0},
-      {a: parseInt(document.getElementById('s3a').textContent)||0, b: parseInt(document.getElementById('s3b').textContent)||0},
-    ];
-    applyWinnersHighlight(sets);
-  });
 </script>
 
 </body>
