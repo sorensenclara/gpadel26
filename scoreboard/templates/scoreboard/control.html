@@ -1,0 +1,336 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Control partido {{ match.code }}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap">
+  <!-- Tu CSS general existente -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- CSS nuevo, aislado para sponsors/carrusel -->
+  <link rel="stylesheet" href="{% static 'css/sponsors.css' %}">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <img class="logo" src="{% static 'brand/logo-liga.png' %}" alt="Liga">
+      </div>
+      <div class="brand">
+        <span class="code">Código: {{ match.code }}</span>
+      </div>
+      <div><a class="link" href="/ver/{{ match.code }}/" target="_blank">Ver marcador</a></div>
+    </div>
+
+    <div class="panel">
+      <!-- Cabecera -->
+      <div class="grid">
+        <div>
+          <label>Equipo A</label>
+          <input id="team_a" type="text" value="{{ match.team_a }}" placeholder="Equipo A">
+        </div>
+        <div>
+          <label>Equipo B</label>
+          <input id="team_b" type="text" value="{{ match.team_b }}" placeholder="Equipo B">
+        </div>
+        <div>
+          <label>Set actual</label>
+          <select id="current_set">
+            <option value="1" {% if match.current_set == 1 %}selected{% endif %}>1</option>
+            <option value="2" {% if match.current_set == 2 %}selected{% endif %}>2</option>
+            <option value="3" {% if match.current_set == 3 %}selected{% endif %}>3</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- GAME actual -->
+      <div class="game">
+        <div class="left">
+          <div class="teamName" id="nameA">{{ match.team_a }}</div>
+          <div class="pills">
+            <span class="pill" id="ga">0</span>
+            <button class="btn inc" onclick="point('a')">+ A</button>
+            <button class="btn dec" onclick="undoPoint('a')">− A</button>
+          </div>
+        </div>
+        <div class="center muted">Game actual</div>
+        <div class="right" style="text-align:right">
+          <div class="teamName" id="nameB">{{ match.team_b }}</div>
+          <div class="pills" style="justify-content:flex-end">
+            <button class="btn dec" onclick="undoPoint('b')">− B</button>
+            <button class="btn inc" onclick="point('b')">+ B</button>
+            <span class="pill" id="gb">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla SETS -->
+      <div class="sets">
+        <table>
+          <thead>
+            <tr>
+              <th>SET</th>
+              <th style="color:#12210a;background:var(--green)">Equipo A</th>
+              <th style="background:var(--teamB)">Equipo B</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="row1"><td>1</td><td id="s1a">{{ match.set1_a }}</td><td id="s1b">{{ match.set1_b }}</td></tr>
+            <tr id="row2"><td>2</td><td id="s2a">{{ match.set2_a }}</td><td id="s2b">{{ match.set2_b }}</td></tr>
+            <tr id="row3"><td>3</td><td id="s3a">{{ match.set3_a }}</td><td id="s3b">{{ match.set3_b }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TIEBREAK -->
+      <div id="tb" class="tb">
+        <div class="muted">Tiebreak (gana a 7 con diferencia de 2)</div>
+        <div class="row">
+          <span class="pill" id="tba">0</span>
+          <button class="btn inc" onclick="tbPoint('a')">+ A</button>
+          <button class="btn dec" onclick="tbUndo('a')">− A</button>
+          <span style="width:24px"></span>
+          <button class="btn dec" onclick="tbUndo('b')">− B</button>
+          <button class="btn inc" onclick="tbPoint('b')">+ B</button>
+          <span class="pill" id="tbb">0</span>
+        </div>
+      </div>
+
+      <!-- AUSPCIANTES -->
+      <div class="panel" style="margin-top:16px;">
+        <h3 class="section-title" style="margin:0 0 8px 0;">Auspiciantes</h3>
+        <div class="row" style="display:flex;gap:8px;align-items:center;">
+          <input id="sponsorFiles" type="file" accept="image/*" multiple>
+          <button class="btn inc" onclick="addSponsors()">Agregar logos</button>
+        </div>
+        <div id="sponsorsPreview" class="pb2-s-preview"></div>
+        <div class="muted" style="margin-top:8px">Se normalizan a 400×400 px para verse parejas.</div>
+      </div>
+
+      <div class="cta">
+        <button class="btn save" onclick="save()">Guardar / Cargar a vivo</button>
+        <a class="link" href="/ver/{{ match.code }}/" target="_blank">Abrir Viewer</a>
+      </div>
+      <div class="muted" style="margin-top:8px">
+        Consejo: mantené esta pestaña abierta. El viewer se actualiza en vivo.
+      </div>
+    </div>
+  </div>
+
+<script>
+  /* ===== Estado ===== */
+  const code = "{{ match.code }}";
+  const pointsScale = [0,15,30,40];
+  let currentSet = parseInt(document.getElementById('current_set').value) || 1;
+
+  const sets = [
+    {a: parseInt(document.getElementById('s1a').textContent)||0, b: parseInt(document.getElementById('s1b').textContent)||0},
+    {a: parseInt(document.getElementById('s2a').textContent)||0, b: parseInt(document.getElementById('s2b').textContent)||0},
+    {a: parseInt(document.getElementById('s3a').textContent)||0, b: parseInt(document.getElementById('s3b').textContent)||0},
+  ];
+
+  let idxA = 0, idxB = 0;
+  let tbOn = false, tbA = 0, tbB = 0;
+
+  // === Auspiciantes ===
+  const sponsors = [];
+
+  // refs UI
+  const ga = document.getElementById('ga');
+  const gb = document.getElementById('gb');
+  const tbd = document.getElementById('tb');
+
+  document.getElementById('current_set').addEventListener('change', e=>{
+    currentSet = parseInt(e.target.value)||1;
+    markCurrentRow();
+    idxA = idxB = 0; tbOn = false; tbA = tbB = 0;
+    refreshPills();
+  });
+
+  function markCurrentRow(){
+    [1,2,3].forEach(i=>document.getElementById('row'+i).classList.remove('current'));
+    const r = document.getElementById('row'+currentSet); if(r) r.classList.add('current');
+  }
+  markCurrentRow();
+
+  function refreshPills(){
+    if(!tbOn){ ga.textContent = pointsScale[idxA]; gb.textContent = pointsScale[idxB]; }
+    else { ga.textContent = tbA; gb.textContent = tbB; }
+  }
+  refreshPills();
+
+  function setFinished(s) {
+    return ( (s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2 );
+  }
+
+  function applyWinnersHighlight(){
+    [1,2,3].forEach(i=>{
+      const s = sets[i-1];
+      const cellA = document.getElementById('s'+i+'a');
+      const cellB = document.getElementById('s'+i+'b');
+      cellA.classList.remove('winA','winB');
+      cellB.classList.remove('winA','winB');
+      if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2){
+        if (s.a > s.b) cellA.classList.add('winA'); else cellB.classList.add('winB');
+      }
+    });
+  }
+
+  function paintSets(){
+    document.getElementById('s1a').textContent = sets[0].a;
+    document.getElementById('s1b').textContent = sets[0].b;
+    document.getElementById('s2a').textContent = sets[1].a;
+    document.getElementById('s2b').textContent = sets[1].b;
+    document.getElementById('s3a').textContent = sets[2].a;
+    document.getElementById('s3b').textContent = sets[2].b;
+    applyWinnersHighlight();
+  }
+
+  /* ===== GAME ===== */
+  function point(side){
+    if (setFinished(sets[currentSet-1])) return;
+    if(tbOn){ return; }
+    if(side === 'a'){ idxA < 3 ? idxA++ : winGame('a'); }
+    else { idxB < 3 ? idxB++ : winGame('b'); }
+    refreshPills();
+  }
+  function undoPoint(side){
+    if(tbOn){ return; }
+    if(side === 'a'){ idxA = Math.max(0, idxA-1); }
+    else{ idxB = Math.max(0, idxB-1); }
+    refreshPills();
+  }
+  function winGame(winner){
+    const s = sets[currentSet-1];
+    s[winner] += 1;
+    idxA = 0; idxB = 0;
+    if(s.a === 6 && s.b === 6){
+      tbOn = true; tbA = 0; tbB = 0;
+      tbd.classList.add('show');
+    }
+    paintSets();
+    checkSetWinner();
+  }
+
+  /* ===== TB ===== */
+  function tbPoint(side){
+    if(!tbOn) return;
+    if(side === 'a') tbA++; else tbB++;
+    refreshPills();
+    if( (tbA >= 7 || tbB >= 7) && Math.abs(tbA - tbB) >= 2 ){
+      const winner = (tbA > tbB) ? 'a' : 'b';
+      sets[currentSet-1][winner] += 1;
+      tbOn = false; tbd.classList.remove('show'); tbA=0; tbB=0; idxA=0; idxB=0;
+      paintSets();
+      checkSetWinner();
+    }
+  }
+  function tbUndo(side){
+    if(!tbOn) return;
+    if(side==='a') tbA = Math.max(0, tbA-1); else tbB = Math.max(0, tbB-1);
+    refreshPills();
+  }
+
+  /* ===== Set ganado + avance ===== */
+  function checkSetWinner() {
+    const s = sets[currentSet - 1];
+    const a = s.a, b = s.b;
+    if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) {
+      idxA = idxB = 0;
+      if (tbOn) { tbOn = false; tbA = tbB = 0; tbd.classList.remove('show'); }
+      refreshPills(); paintSets();
+      if (currentSet < 3) {
+        currentSet++;
+        document.getElementById('current_set').value = String(currentSet);
+        markCurrentRow();
+      }
+      save();
+    } else {
+      save();
+    }
+  }
+
+  /* ===== Auspiciantes helpers ===== */
+  async function fileToSquareDataURL(file, size=400) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = e => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = size; canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          // quitar si querés mantener transparencias
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0,0,size,size);
+          const ratio = Math.min(size/img.width, size/img.height);
+          const w = img.width * ratio;
+          const h = img.height * ratio;
+          const x = (size - w) / 2;
+          const y = (size - h) / 2;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, x, y, w, h);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function addSponsors() {
+    const input = document.getElementById('sponsorFiles');
+    if (!input?.files?.length) return;
+    const preview = document.getElementById('sponsorsPreview');
+
+    for (const f of input.files) {
+      const dataUrl = await fileToSquareDataURL(f, 400);
+      sponsors.push(dataUrl);
+
+      // preview tile
+      const tile = document.createElement('div');
+      tile.className = 'pb2-s-thumb';
+      const img = document.createElement('img');
+      img.src = dataUrl; img.alt = 'sponsor';
+      tile.appendChild(img);
+      preview.appendChild(tile);
+    }
+    input.value = '';
+    save(); // broadcast inmediato
+  }
+
+  /* ===== Broadcast ===== */
+  async function save(){
+    const payload = {
+      team_a: document.getElementById('team_a').value || 'Equipo A',
+      team_b: document.getElementById('team_b').value || 'Equipo B',
+      current_set: currentSet,
+      sets: sets,
+      current_game: {
+        mode: tbOn ? 'tiebreak' : 'regular',
+        a: tbOn ? tbA : pointsScale[idxA],
+        b: tbOn ? tbB : pointsScale[idxB]
+      },
+      sponsors: sponsors
+    };
+    const res = await fetch(`/api/${code}/update/`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok){ alert('Error al guardar'); }
+  }
+
+  // Sincronizar nombres
+  document.getElementById('team_a').addEventListener('input', e=>{
+    document.getElementById('nameA').textContent = e.target.value || 'Equipo A';
+  });
+  document.getElementById('team_b').addEventListener('input', e=>{
+    document.getElementById('nameB').textContent = e.target.value || 'Equipo B';
+  });
+</script>
+</body>
+</html>

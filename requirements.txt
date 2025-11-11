@@ -1,0 +1,21 @@
+
+Django==3.2.25
+channels==3.0.5
+asgiref==3.7.2
+daphne==3.0.2
+
+# WebSockets stack estable
+autobahn==22.7.1
+twisted==22.10.0
+txaio==22.2.1
+zope.interface==5.5.0
+hyperlink==21.0.0
+incremental==22.10.0
+constantly==15.1.0
+attrs==22.2.0
+PyHamcrest==2.0.4
+
+# (opcional) utilidades
+six==1.16.0
+qrcode==7.4
+Pillow==9.5.0

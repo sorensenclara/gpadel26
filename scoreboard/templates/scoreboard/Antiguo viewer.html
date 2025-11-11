@@ -1,0 +1,81 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ver partido {{ match.code }}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap">
+  <style>
+    :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--green:#22c55e;--cyan:#06b6d4}
+    *{box-sizing:border-box} body{margin:0; font-family:Montserrat,system-ui; background:var(--bg); color:#fff}
+    .wrap{max-width:900px; margin:24px auto; padding:0 16px}
+    .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .badge{background:#0ea5e9; color:#001; padding:6px 10px; border-radius:999px; font-weight:700}
+    .panel{background:var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:16px}
+    .teams{display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:center}
+    .team{background:#0b1528; border-radius:12px; padding:14px}
+    .team h2{margin:0 0 4px}
+    table{width:100%; border-collapse:collapse; margin-top:10px}
+    th,td{text-align:center; padding:10px; border-bottom:1px solid rgba(255,255,255,.08)}
+    th{color:var(--muted); font-weight:600}
+    .current{outline:2px solid var(--cyan); border-radius:8px}
+    .footer{margin-top:12px; color:var(--muted); font-size:14px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <div><span class="badge">Código: {{ match.code }}</span></div>
+      <div><a href="/control/{{ match.code }}/">Panel</a></div>
+    </div>
+    <div class="panel">
+      <div class="teams">
+        <div class="team"><h2 id="team_a">{{ match.team_a }}</h2></div>
+        <div class="team"><h2 id="team_b">{{ match.team_b }}</h2></div>
+      </div>
+      <table>
+        <thead><tr><th>Set</th><th id="th_a">A</th><th id="th_b">B</th></tr></thead>
+        <tbody>
+          <tr id="row1"><td>1</td><td id="s1a">{{ match.set1_a }}</td><td id="s1b">{{ match.set1_b }}</td></tr>
+          <tr id="row2"><td>2</td><td id="s2a">{{ match.set2_a }}</td><td id="s2b">{{ match.set2_b }}</td></tr>
+          <tr id="row3"><td>3</td><td id="s3a">{{ match.set3_a }}</td><td id="s3b">{{ match.set3_b }}</td></tr>
+        </tbody>
+      </table>
+      <div class="footer">Actualización en vivo — no requiere recargar.</div>
+    </div>
+  </div>
+<script>
+  const code = "{{ match.code }}";
+  const wsProto = (location.protocol === "https:") ? "wss" : "ws";
+  const socket = new WebSocket(`${wsProto}://${location.host}/ws/match/${code}/`);
+
+  socket.onopen = () => console.log('WS abierto');
+  socket.onerror = (e) => console.error('WS error', e);
+  socket.onclose = (e) => console.warn('WS cerrado', e);
+
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    console.log("WS mensaje recibido:", data);
+
+    if (data.error) return;
+
+    document.getElementById('team_a').textContent = data.team_a;
+    document.getElementById('team_b').textContent = data.team_b;
+
+    document.getElementById('s1a').textContent = data.sets[0].a;
+    document.getElementById('s1b').textContent = data.sets[0].b;
+    document.getElementById('s2a').textContent = data.sets[1].a;
+    document.getElementById('s2b').textContent = data.sets[1].b;
+    document.getElementById('s3a').textContent = data.sets[2].a;
+    document.getElementById('s3b').textContent = data.sets[2].b;
+
+    [1,2,3].forEach(i => document.getElementById('row'+i).classList.remove('current'));
+    const cs = data.current_set || 1;
+    const row = document.getElementById('row'+cs);
+    if (row) row.classList.add('current');
+  };
+</script>
+
+</body>
+</html>

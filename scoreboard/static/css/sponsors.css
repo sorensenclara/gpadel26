@@ -1,0 +1,63 @@
+/* ===============================
+   sponsors.css — estilos aislados (.pb2-*)
+   =============================== */
+
+/* Contenedor que asegura que nada quede tapado por el footer (si lo necesitas) */
+.pb2-has-footer { padding-bottom: 116px; }
+
+/* Footer carrusel (full-width, fijo abajo) */
+.pb2-sponsors-footer{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(12, 19, 36, 0.96);
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 10px 14px 12px;
+  z-index: 9000;
+  backdrop-filter: blur(4px);
+}
+
+/* Grid por slide (de a 6) */
+.pb2-s-grid{
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+/* Tile cuadrada */
+.pb2-s-tile{
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.pb2-s-tile img{
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.3));
+}
+
+@media (max-width: 900px){
+  .pb2-s-grid{ grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ===== Control: mini previsualización de logos ===== */
+.pb2-s-preview{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, 80px);
+  gap:8px;
+  margin-top:12px;
+}
+.pb2-s-preview .pb2-s-thumb{
+  width:80px;height:80px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:10px;
+  background:#0b1221;
+  display:grid;place-items:center;
+}
+.pb2-s-preview .pb2-s-thumb img{
+  max-width:70%;max-height:70%;object-fit:contain;
+}

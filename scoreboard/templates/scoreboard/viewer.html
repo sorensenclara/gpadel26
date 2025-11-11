@@ -1,0 +1,175 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ver partido {{ match.code }}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap">
+  <!-- Tu CSS general existente -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- CSS nuevo, aislado para sponsors/carrusel -->
+  <link rel="stylesheet" href="{% static 'css/sponsors.css' %}">
+</head>
+<body class="pb2-has-footer">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <img class="logo" src="{% static 'brand/logo-liga.png' %}" alt="Liga">
+      </div>
+      <span class="code">Código: {{ match.code }}</span>
+      <div class="edition">
+        <img src="{% static 'brand/edicion.png' %}" alt="Edición">
+      </div>
+    </div>
+
+    <!-- Bloques principales -->
+    <div class="board">
+      <div class="team teamA">
+        <div class="name" id="team_a">{{ match.team_a }}</div>
+        <div class="score" id="scoreA">{{ match.set1_a }}</div>
+      </div>
+      <div class="team teamB">
+        <div class="name" id="team_b">{{ match.team_b }}</div>
+        <div class="score" id="scoreB">{{ match.set1_b }}</div>
+      </div>
+    </div>
+
+    <!-- Tabla de sets -->
+    <div class="sets">
+      <table>
+        <thead>
+          <tr>
+            <th>Set</th>
+            <th style="color:#12210a;background:var(--teamA)">Equipo A</th>
+            <th style="background:var(--teamB)">Equipo B</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="row1"><td>1</td><td id="s1a">{{ match.set1_a }}</td><td id="s1b">{{ match.set1_b }}</td></tr>
+          <tr id="row2"><td>2</td><td id="s2a">{{ match.set2_a }}</td><td id="s2b">{{ match.set2_b }}</td></tr>
+          <tr id="row3"><td>3</td><td id="s3a">{{ match.set3_a }}</td><td id="s3b">{{ match.set3_b }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="legend">Actualización en vivo — no requiere recargar.</div>
+  </div>
+
+  <!-- Footer carrusel (full-width, fijo abajo, sin título) -->
+  <div class="pb2-sponsors-footer">
+    <div id="pb2SponsorCarousel"></div>
+  </div>
+
+<!-- WebSocket + Carrusel -->
+<script>
+  const code = "{{ match.code }}";
+  const wsProto = (location.protocol === "https:") ? "wss" : "ws";
+  const socket = new WebSocket(`${wsProto}://${location.host}/ws/match/${code}/`);
+
+  socket.onopen = () => console.log('WS abierto');
+  socket.onerror = e => console.error('WS error', e);
+  socket.onclose = e => console.warn('WS cerrado', e);
+
+  // ===== Marcado de sets ganados =====
+  function applyWinnersHighlight(sets) {
+    [1, 2, 3].forEach(i => {
+      const s = sets[i - 1] || {a:0,b:0};
+      const cellA = document.getElementById('s' + i + 'a');
+      const cellB = document.getElementById('s' + i + 'b');
+      if (!cellA || !cellB) return;
+      cellA.classList.remove('winA', 'winB');
+      cellB.classList.remove('winA', 'winB');
+      if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2) {
+        if (s.a > s.b) cellA.classList.add('winA');
+        else cellB.classList.add('winB');
+      }
+    });
+  }
+
+  // ===== Carrusel de auspiciantes (.pb2-) =====
+  let pb2Slides = [];
+  let pb2Index = 0;
+  let pb2Timer = null;
+
+  function pb2Chunk(arr, size) {
+    const out = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
+  }
+
+  function pb2RenderSlide(slide = []) {
+    const host = document.getElementById('pb2SponsorCarousel');
+    if (!host) return;
+    if (!slide.length) { host.innerHTML = ''; return; }
+    host.innerHTML = `
+      <div class="pb2-s-grid">
+        ${slide.map(src => `<div class="pb2-s-tile"><img src="${src}" alt="sponsor"></div>`).join('')}
+      </div>
+    `;
+  }
+
+  function pb2StartAutoplay() {
+    if (pb2Timer) clearInterval(pb2Timer);
+    if (!pb2Slides.length) { pb2RenderSlide([]); return; }
+    pb2Index = 0;
+    pb2RenderSlide(pb2Slides[pb2Index]);
+    pb2Timer = setInterval(() => {
+      pb2Index = (pb2Index + 1) % pb2Slides.length;
+      pb2RenderSlide(pb2Slides[pb2Index]);
+    }, 3500);
+  }
+
+  // ===== WebSocket Listener =====
+socket.onmessage = event => {
+    const raw = JSON.parse(event.data);
+    const data = (raw && typeof raw === 'object' && 'payload' in raw) ? raw.payload : raw; // <— clave
+    console.log('WS raw:', raw, '→ usando data:', data, 'sponsors:', data?.sponsors);
+
+    if (data?.error) return;
+
+    // Nombres
+    document.getElementById('team_a').textContent = data.team_a || 'Equipo A';
+    document.getElementById('team_b').textContent = data.team_b || 'Equipo B';
+
+    // Sets
+    document.getElementById('s1a').textContent = data.sets[0].a;
+    document.getElementById('s1b').textContent = data.sets[0].b;
+    document.getElementById('s2a').textContent = data.sets[1].a;
+    document.getElementById('s2b').textContent = data.sets[1].b;
+    document.getElementById('s3a').textContent = data.sets[2].a;
+    document.getElementById('s3b').textContent = data.sets[2].b;
+
+    // Puntos actuales
+    const cg = data.current_game || {mode:'regular', a:0, b:0};
+    document.getElementById('scoreA').textContent = cg.a ?? 0;
+    document.getElementById('scoreB').textContent = cg.b ?? 0;
+
+    // Set actual
+    const cs = data.current_set || 1;
+    [1,2,3].forEach(i => document.getElementById('row'+i).classList.remove('current'));
+    const row = document.getElementById('row'+cs);
+    if (row) row.classList.add('current');
+
+    // Resaltado
+    applyWinnersHighlight(data.sets);
+
+    // Sponsors → chunk de a 6 + autoplay
+    const arr = Array.isArray(data.sponsors) ? data.sponsors : [];
+    pb2Slides = arr.length >= 6 ? pb2Chunk(arr, 6) : (arr.length ? [arr] : []);
+    pb2StartAutoplay();
+  };
+
+  // ===== Cargar estado inicial =====
+  document.addEventListener('DOMContentLoaded', () => {
+    const sets = [
+      {a: parseInt(document.getElementById('s1a').textContent)||0, b: parseInt(document.getElementById('s1b').textContent)||0},
+      {a: parseInt(document.getElementById('s2a').textContent)||0, b: parseInt(document.getElementById('s2b').textContent)||0},
+      {a: parseInt(document.getElementById('s3a').textContent)||0, b: parseInt(document.getElementById('s3b').textContent)||0},
+    ];
+    applyWinnersHighlight(sets);
+  });
+</script>
+
+</body>
+</html>
