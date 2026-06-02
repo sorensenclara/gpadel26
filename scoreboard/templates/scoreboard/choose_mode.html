@@ -8,97 +8,31 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
 <style>
-  body {
-    font-family: Montserrat, system-ui;
-    margin: 0;
-    display: grid;
-    place-items: center;
-    min-height: 100vh;
-    background: url("/static/brand/bg-azul.jpg") center/cover no-repeat;
-    color: #fff;
-    text-align: center;
-  }
-  .box {
-    background: rgba(15, 23, 42, 0.8);
-    padding: 40px;
-    border-radius: 20px;
-    max-width: 420px;
-    width: 90%;
-  }
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-  }
-  p {
-    margin-bottom: 25px;
-    color: #cbd5e1;
-  }
-  label {
-    display: block;
-    background: rgba(255,255,255,0.1);
-    border-radius: 12px;
-    margin: 15px 0;
-    padding: 16px 20px;
-    text-align: left;
-    cursor: pointer;
-    font-size: 1.1rem; /* 🔥 aumentada */
-    font-weight: 600;
-    transition: background 0.3s ease, transform 0.1s ease;
-  }
-  label:hover {
-    background: rgba(255,255,255,0.25);
-    transform: scale(1.02);
-  }
-  input[type="radio"] {
-    margin-right: 10px;
-    transform: scale(1.3); /* radio más grande */
-  }
-  button {
-    margin-top: 30px;
-    background: #cbdc00;
-    color: #0f172a;
-    padding: 16px 30px;
-    font-weight: 700;
-    border: none;
-    border-radius: 14px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.1s ease;
-  }
-  button:hover {
-    background: #e6f62b;
-    transform: scale(1.05);
-  }
-  small {
-    display: block;
-    font-size: 0.9rem;
-    color: #94a3b8;
-    margin-top: 15px;
-  }
+
 </style>
 
 </head>
 <body>
-  <div class="box">
+  <div class="box-mode">
     <img src="/static/brand/logo-liga.png" alt="Liga" style="height:120px; margin-bottom:20px;">
     <h1>Elegí la modalidad del partido</h1>
     <p><strong>Código:</strong> {{ match.code }}</p>
 
     <form method="post">
       {% csrf_token %}
-      <label>
+      <label class="label-mode">
         <input type="radio" name="mode" value="3_sets" checked>
         Partido a 3 sets
       </label>
-      <label>
+      <label class="label-mode">
         <input type="radio" name="mode" value="2_sets_super_tb">
         2 sets + super tie-break
       </label>
-      <small>
+      <p class="help-text">
         El super tie-break se juega cuando ambos equipos ganan un set (1–1),
         a 10 puntos y con diferencia mínima de 2.
-      </small>
-      <button type="submit">Ir al marcador</button>
+      </p>
+      <button class="btn-primary">Ir al marcador</button>
     </form>
   </div>
 </body>

@@ -1,50 +1,112 @@
 /* ============================================================
-   STYLE.CSS — Estilos generales para PadelBoard
-   Incluye: Viewer + Control panel
+   STYLE.CSS — PadelBoard
    ============================================================ */
 
-/* ------------------------------
-   Variables globales
------------------------------- */
+/* ============================================================
+   01. VARIABLES GLOBALES
+============================================================ */
 :root {
-  --bg:#0a1e3a;                          /* fondo azul general */
-  --teamA:#cbdc00;                       /* fondo equipo A */
-  --teamA-score: rgba(203,220,0,.54);    /* puntaje A con 54% */
-  --teamB:#144371;                       /* fondo equipo B */
-  --teamB-score: rgba(20,67,113,.54);    /* puntaje B con 54% */
-  --muted:#cbd5e1;
-  --white:#fff;
-  --panel:rgba(0,0,0,.25);
-  --green:#cbdc00;
-  --green-hover:#e6f62b;
-  --danger:#ef4444;
+  --secondary: #008d3e;
+  --secondary-hover: #008d3e;
+
+  --primary: #ff8b1a;
+  --primary-hover: #ca6602;
+
+  --primary-soft: color-mix(in srgb, var(--primary) 25%, transparent);
+  --primary-focus: color-mix(in srgb, var(--primary-hover) 35%, transparent);
+
+  --secondary-soft: color-mix(in srgb, var(--secondary) 25%, transparent);
+  --secondary-dark: color-mix(in srgb, var(--secondary) 35%, #000);
+  --secondary-panel: color-mix(in srgb, var(--secondary) 45%, #000);
+  --secondary-panel-80: color-mix(in srgb, var(--secondary-panel) 80%, transparent);
+
+  --teamA: var(--primary);
+  --teamA-hover: var(--primary-hover);
+  --teamA-score: color-mix(in srgb, var(--primary) 54%, transparent);
+
+  --teamB: var(--secondary);
+  --teamB-hover: var(--secondary-hover);
+  --teamB-score: color-mix(in srgb, var(--secondary) 54%, transparent);
+
+  --bg: #0a1e3a;
+  --muted: #cbd5e1;
+  --white: #fff;
+  --panel: rgba(0,0,0,.25);
+  --danger: #ef4444;
   --shadow: 0 10px 30px rgba(0,0,0,.28);
+
+  --sponsors-height: 110px;
 }
 
-/* ------------------------------
-   Reseteos y tipografía base
------------------------------- */
-* { box-sizing: border-box; }
+/* ============================================================
+   02. RESET / BASE
+============================================================ */
+* {
+  box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   font-family: Montserrat, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   color: var(--white);
   background: var(--bg) url("../brand/bg-azul.jpg") center/cover no-repeat fixed;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  text-align: center;
 }
 
-/* ------------------------------
-   Contenedor general
------------------------------- */
-.wrap {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 20px;
+h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+p {
+  margin-bottom: 25px;
+  color: var(--muted);
 }
 
 /* ============================================================
-   HEADER / TOPBAR
+   03. LAYOUT GENERAL
+============================================================ */
+.wrap {
+  width: min(95vw, 1300px);
+  max-width: 1300px;
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--secondary-panel-80);
+  border-radius: 16px;
+}
+
+.wrap-table {
+  width: min(95vw, 1300px);
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* Viewer con sponsors fijos */
+.viewer-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: var(--sponsors-height);
+}
+
+.viewer-page .wrap {
+  flex: 0 0 auto;
+}
+
+.viewer-page .wrap-table {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ============================================================
+   04. HEADER / TOPBAR
 ============================================================ */
 .topbar {
   display: flex;
@@ -61,7 +123,7 @@ html, body {
 }
 
 .brand img.logo {
-  height: 200px;
+  height: 100px;
   width: auto;
   display: block;
 }
@@ -75,20 +137,448 @@ html, body {
 }
 
 .edition img {
-  height: 96px;
+  height: 76px;
   width: auto;
   display: block;
 }
 
 /* ============================================================
-   VIEWER — Panel de visualización
+   05. BOTONES
 ============================================================ */
+.btn-primary {
+  display: inline-block;
+  min-width: 220px;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 32px;
+  background: var(--primary-hover);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: .05em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s ease, transform .2s ease;
+}
 
-/* Bloques principales de equipos */
-.board {
+.btn-primary:hover {
+  background: var(--primary);
+  color: var(--white);
+  transform: scale(1.05);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn {
+  border-radius: 999px;
+  border: none;
+  padding: 6px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: .85rem;
+}
+
+.inc {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.inc:hover {
+  background: var(--primary-hover);
+}
+
+.dec {
+  color: var(--white);
+  border: 1px solid var(--primary);
+  background: none;
+}
+
+.dec:hover {
+  background: var(--primary);
+}
+
+.save {
+  background: var(--primary);
+  color: #0b1a09;
+}
+
+.save:hover {
+  background: var(--primary-hover);
+}
+
+/* ============================================================
+   06. INPUTS / FORMS
+============================================================ */
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: var(--secondary-dark);
+  color: var(--white);
+  -webkit-text-fill-color: var(--white);
+  font-weight: 600;
+  outline: none;
+}
+
+input::placeholder {
+  color: rgba(255,255,255,.65);
+  -webkit-text-fill-color: rgba(255,255,255,.65);
+}
+
+input:focus,
+select:focus {
+  border-color: var(--primary-hover);
+  box-shadow: 0 0 0 2px var(--primary-focus);
+  color: var(--white);
+  -webkit-text-fill-color: var(--white);
+}
+
+input[type="radio"] {
+  margin-right: 10px;
+  transform: scale(1.3);
+  accent-color: var(--primary);
+}
+
+/* ============================================================
+   07. LABELS
+============================================================ */
+label {
+  display: block;
+  background: var(--secondary-dark);
+  border-radius: 16px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: background .3s ease, transform .1s ease;
+}
+
+label:hover {
+  background: var(--secondary-soft);
+  transform: scale(1.02);
+}
+
+.label-mode {
+  display: block;
+  background: var(--secondary-dark);
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  text-align: left;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  transition: background .3s ease, transform .1s ease;
+}
+
+.label-mode:hover {
+  background: var(--secondary-soft);
+  transform: scale(1.02);
+}
+
+.label-mode input[type="radio"] {
+  margin-right: 8px;
+  transform: scale(1.15);
+}
+
+/* ============================================================
+   08. INDEX
+============================================================ */
+.box img.logo {
+  height: 200px;
+  width: auto;
+  display: block;
+  margin: 0 auto 20px auto;
+}
+
+/* ============================================================
+   09. CHOOSE MODE
+============================================================ */
+.box-mode {
+  background: var(--secondary-panel-80);
+  padding: 40px;
+  border-radius: 20px;
+  max-width: 448px;
+  width: 90%;
+}
+
+.help-text {
+  font-size: .85rem;
+  font-style: italic;
+  color: var(--muted);
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   10. CONTROL
+============================================================ */
+.panel {
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow);
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 14px 0 8px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.h2-control {
+  text-align: center;
+  color: var(--primary);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.grid {
   display: grid;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr 160px;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.game {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  margin: 12px 0 6px;
+}
+
+.teamName {
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.pills {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #000;
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--white);
+  font-weight: 800;
+}
+
+.step {
+  display: none;
+}
+
+.step.active {
+  display: block;
+}
+
+.players-grid {
+  display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.set-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+
+.set-header-left {
+  flex: 1;
+}
+
+.set-header-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.scorebar {
+  background: var(--secondary-panel-80);
+  border-radius: 14px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.score-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+.set-select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  background: var(--secondary-dark);
+  color: var(--white);
+}
+
+.tb {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.08);
+  display: none;
+}
+
+.tb.show {
+  display: block;
+}
+
+.tb .row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.cta {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+a.link {
+  color: var(--muted);
+  text-decoration: underline;
+}
+
+a.link:hover {
+  color: var(--white);
+}
+
+/* Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+.switch:hover {
+  background: transparent;
+  transform: none;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: var(--danger);
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--white);
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background-color: var(--primary);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.toggle-label {
+  font-size: .75rem;
+  text-align: center;
+  opacity: .9;
+}
+
+.current {
+  outline: 2px solid var(--primary);
+}
+
+/* ============================================================
+   11. VIEWER / MARCADOR
+============================================================ */
+.modeBanner-text {
+  text-align: center;
+  margin: 8px 0 4px;
+  font-weight: 800;
+  font-size: 1.9rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--primary);
+  padding-bottom: 16px;
+}
+
+.board {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  gap: 12px;
 }
 
 .team {
@@ -97,21 +587,33 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 20px;
+  padding: 0 5px;
   box-shadow: var(--shadow);
   min-height: 110px;
+  width: 100%;
+  flex: 1;
+  text-align: center;
 }
 
-.teamA { background: var(--teamA); color: #12210a; }
-.teamB { background: var(--teamB); }
+.teamA {
+  background: var(--teamA);
+  color: #12210a;
+}
+
+.teamB {
+  background: var(--teamB);
+}
 
 .team .name {
   font-weight: 800;
-  font-size: clamp(22px, 3.6vw, 40px);
+  font-size: clamp(22px, 3.6vw, 30px);
   text-transform: uppercase;
   line-height: 1;
   letter-spacing: .6px;
   text-shadow: 0 1px 0 rgba(0,0,0,.12);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .team .score {
@@ -124,11 +626,24 @@ html, body {
   text-align: center;
 }
 
-.teamA .score { background: var(--teamA-score); }
-.teamB .score { background: var(--teamB-score); }
+.teamA .score {
+  background: var(--teamA-score);
+}
 
-/* Tabla de sets */
+.teamB .score {
+  background: var(--teamB-score);
+}
+
+.tiebreak .score {
+  color: var(--white);
+  text-shadow: 0 0 8px var(--primary-focus);
+}
+
+/* ============================================================
+   12. TABLAS / SETS
+============================================================ */
 .sets {
+  width: 100%;
   margin-top: 14px;
   background: rgba(0,0,0,.25);
   border: 1px solid rgba(255,255,255,.12);
@@ -157,12 +672,38 @@ tbody td {
   text-align: center;
   padding: 14px 10px;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 30px;
   border-top: 1px solid rgba(255,255,255,.08);
 }
 
 tbody tr.current {
   background: rgba(255,255,255,.06);
+}
+
+tbody tr.winA td {
+  background: var(--teamA);
+  color: #12210a;
+}
+
+tbody tr.winB td {
+  background: var(--teamB);
+  color: var(--white);
+}
+
+td.winA,
+.winA {
+  background: #000 !important;
+  color: var(--teamA) !important;
+  font-weight: 900;
+  text-shadow: 0 0 6px var(--primary-focus);
+}
+
+td.winB,
+.winB {
+  background: #000 !important;
+  color: var(--teamB) !important;
+  font-weight: 900;
+  text-shadow: 0 0 6px var(--secondary-soft);
 }
 
 .legend {
@@ -173,213 +714,137 @@ tbody tr.current {
 }
 
 /* ============================================================
-   CONTROL — Panel de administración de partido
+   13. ESTADOS / ANIMACIONES
 ============================================================ */
-.panel {
-  background: var(--panel);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 16px;
+.flash {
+  animation: flashScore .6s ease;
+}
+
+@keyframes flashScore {
+  0% {
+    transform: scale(1);
+    color: var(--white);
+  }
+
+  50% {
+    transform: scale(1.3);
+    color: var(--primary);
+  }
+
+  100% {
+    transform: scale(1);
+    color: var(--white);
+  }
+}
+
+#modeBanner.flash {
+  animation: flashBanner .8s ease;
+}
+
+@keyframes flashBanner {
+  0% {
+    color: var(--white);
+  }
+
+  50% {
+    color: var(--primary);
+  }
+
+  100% {
+    color: var(--white);
+  }
+}
+
+.final-msg {
+  background: var(--primary);
+  color: #12210a;
+  font-weight: 800;
+  text-align: center;
   padding: 16px;
-  backdrop-filter: blur(6px);
-  box-shadow: var(--shadow);
+  font-size: 1.2rem;
+  border-radius: 24px;
+  margin: 16px auto;
+  max-width: 600px;
 }
 
-.section-title {
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-}
-
-/* Botones */
-.btn {
-  border: none;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: background .2s ease, transform .04s ease;
-}
-
-.btn:active { transform: translateY(1px); }
-
-.inc {
-  background: var(--green);
-  color: #0b1a09;
-}
-.inc:hover {
-  background: var(--green-hover);
-}
-
-.dec {
-  background: var(--danger);
-  color: #fff;
-}
-.dec:hover {
-  background: #f87171;
-}
-
-.save {
-  background: var(--green);
-  color: #0b1a09;
-}
-.save:hover {
-  background: var(--green-hover);
-}
-
-/* Inputs / campos */
-input[type="text"],
-input[type="number"] {
-  background: rgba(255,255,255,.1);
-  border: none;
-  padding: 8px 10px;
-  border-radius: 8px;
-  color: var(--white);
-  font-weight: 600;
-  width: 100%;
-}
-
-label {
-  display: block;
+.final-msg .final-title {
+  font-size: 1.4rem;
   margin-bottom: 4px;
-  font-size: 14px;
-  color: var(--muted);
+}
+
+.final-msg .final-winner {
+  text-transform: uppercase;
+}
+
+.winner-banner {
+  background: var(--primary);
+  color: #12210a;
+  font-weight: 800;
+  text-align: center;
+  padding: 10px;
+  font-size: 1.8rem;
+  margin-top: 16px;
+  border-radius: 8px;
 }
 
 /* ============================================================
-   RESPONSIVE
+   14. SPONSORS
 ============================================================ */
-@media (max-width: 860px) {
-  .board { grid-template-columns: 1fr; }
-  .edition img { height: 48px; }
-  .brand img.logo { height: 120px; }
-  .panel { padding: 12px; }
-  .team .name { font-size: 20px; }
-  .team .score { font-size: 48px; }
+.pb2-sponsors-section {
+  width: 100%;
+  height: var(--sponsors-height);
+  background: var(--secondary-dark);
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 10px 0;
+  overflow: hidden;
+  box-shadow: 0 -4px 10px rgba(0,0,0,.3);
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 20;
 }
 
-
-/* ============================================================
-   CONTROL — Estilos que faltaban (migrados desde <style>)
-============================================================ */
-
-/* Grid de cabecera (nombres + set actual) */
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr 160px;
-  gap:10px;
-  margin-bottom:12px;
+.pb2-carousel-track {
+  display: flex;
+  width: fit-content;
 }
 
-/* Labels e inputs (ya tenías inputs base, mantengo coherencia) */
-label{
-  display:block;
-  font-size:13px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-input[type="text"],
-select{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(10,30,58,.55);
-  color:#fff;
-  font-weight:600;
+.pb2-s-thumb {
+  flex: 0 0 calc(100% / 12);
+  height: calc(var(--sponsors-height) - 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
 }
 
-/* Bloque del GAME actual */
-.game{
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  gap:14px;
-  align-items:center;
-  padding:16px;
-  border-radius:14px;
-  background:rgba(255,255,255,.06);
-  margin:12px 0 6px;
-}
-.teamName{
-  font-weight:800;
-  font-size:20px;
+.pb2-s-thumb img {
+  max-height: 100%;
+  max-width: 95%;
+  object-fit: contain;
 }
 
-/* Píldoras de marcador y botones +/- */
-.pills{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-.pill{
-  min-width:56px;
-  text-align:center;
-  padding:8px 12px;
-  border-radius:999px;
-  background:#0b1528;
-  border:1px solid rgba(255,255,255,.12);
-  font-weight:800;
+.pb2-s-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 80px);
+  gap: 8px;
+  margin-top: 12px;
 }
 
-/* Tabla de SETS (ya tenías base; sólo aseguro current) */
-tbody tr.current{ background:rgba(255,255,255,.06) }
-
-/* Tiebreak */
-.tb{
-  margin-top:12px;
-  padding:12px;
-  border-radius:12px;
-  background:rgba(255,255,255,.08);
-  display:none;
-}
-.tb.show{ display:block; }
-.tb .row{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-  margin:8px 0;
+.pb2-s-preview .pb2-s-thumb {
+  width: 80px;
+  height: 80px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 10px;
+  background: var(--secondary-dark);
+  display: grid;
+  place-items: center;
 }
 
-/* Textos auxiliares y CTA */
-.muted{ color:var(--muted); font-size:14px; }
-.cta{ margin-top:14px; display:flex; gap:10px; align-items:center; }
-a.link{ color:var(--muted); text-decoration:underline; }
-a.link:hover{ color:#fff; }
-
-/* Resaltar el ganador en el SET */
-tbody tr.winA td { background: var(--teamA); color:#12210a; }
-tbody tr.winB td { background: var(--teamB); color:#fff; }
-
-/* =======================================
-   Resaltado del número ganador del set
-======================================= */
-td.winA {
-  color: var(--teamA);
-  font-weight: 900;
-  text-shadow: 0 0 6px rgba(203,220,0,.4);
-}
-td.winB {
-  color: var(--teamB);
-  font-weight: 900;
-  text-shadow: 0 0 6px rgba(20,67,113,.5);
-}
-
-
-/* =======================================
-   Resaltado del número ganador del set
-======================================= */
-td.winA {
-  color: #cbdc00; /* verde equipo A */
-  font-weight: 900;
-  text-shadow: 0 0 6px rgba(203,220,0,.4);
-}
-
-td.winB {
-  color: #0081ff; /* azul brillante equipo B */
-  font-weight: 900;
-  text-shadow: 0 0 6px rgba(0,129,255,.5);
+.pb2-s-preview .pb2-s-thumb img {
+  max-width: 70%;
+  max-height: 70%;
+  object-fit: contain;
 }
 
 .sponsor-grid {
@@ -388,6 +853,7 @@ td.winB {
   gap: 10px;
   align-items: center;
 }
+
 .sponsor-tile {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -397,14 +863,104 @@ td.winB {
   place-items: center;
   overflow: hidden;
 }
+
 .sponsor-tile img {
   max-width: 80%;
   max-height: 80%;
   object-fit: contain;
   filter: drop-shadow(0 2px 6px rgba(0,0,0,.3));
 }
-@media (max-width: 900px){
-  .sponsor-grid { grid-template-columns: repeat(3, 1fr); }
+
+.pb2-sponsors-section {
+  overflow: hidden;
 }
 
+.pb2-carousel-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
 
+.pb2-carousel-moving {
+  animation: pb2SponsorScroll 28s linear infinite;
+}
+
+@keyframes pb2SponsorScroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ============================================================
+   15. RESPONSIVE
+============================================================ */
+@media (max-width: 1200px) {
+  .pb2-s-thumb {
+    flex: 0 0 calc(100% / 8);
+  }
+}
+
+@media (max-width: 900px) {
+  .sponsor-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .pb2-s-thumb {
+    flex: 0 0 calc(100% / 6);
+    height: 50px;
+  }
+}
+
+@media (max-width: 860px) {
+  .board {
+    flex-direction: column;
+  }
+
+  .edition img {
+    height: 48px;
+  }
+
+  .brand img.logo {
+    height: 100px;
+  }
+
+  .panel {
+    padding: 12px;
+  }
+
+  .team .name {
+    font-size: 20px;
+  }
+
+  .team .score {
+    font-size: 48px;
+  }
+
+  .players-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .set-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .scorebar {
+    flex-direction: column;
+  }
+
+  .score-side {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 500px) {
+  .pb2-s-thumb {
+    flex: 0 0 calc(100% / 2);
+    height: 40px;
+  }
+}

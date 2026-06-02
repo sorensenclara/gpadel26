@@ -5,34 +5,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ver partido {{ match.code }}</title>
+
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap">
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <link rel="stylesheet" href="{% static 'css/sponsors.css' %}">
-  <style>
-    /* Animaciones */
-    .flash {
-      animation: flashScore 0.6s ease;
-    }
-    @keyframes flashScore {
-      0% { transform: scale(1); color: white; }
-      50% { transform: scale(1.3); color: #cbdc00; }
-      100% { transform: scale(1); color: white; }
-    }
-
-    #modeBanner.flash {
-      animation: flashBanner 0.8s ease;
-    }
-    @keyframes flashBanner {
-      0% { color: white; }
-      50% { color: #cbdc00; }
-      100% { color: white; }
-    }
-
-    .winA { background: #9acd32 !important; color: #12210a; }
-    .winB { background: #64b692 !important; color: #fff; }
-  </style>
 </head>
-<body class="pb2-has-footer">
+
+<body class="viewer-page">
   <div class="wrap">
     <div class="topbar">
       <div class="brand">
@@ -43,45 +22,38 @@
         <img src="{% static 'brand/edicion.png' %}" alt="Edición">
       </div>
     </div>
+  </div>
 
-    <!-- Banner -->
-    <div id="modeBanner" style="
-      text-align:center;
-      margin:8px 0 4px;
-      font-weight:800;
-      font-size:1rem;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-      color:#cbdc00;">
-      GAME EN JUEGO
-    </div>
+  <div class="wrap-table">
+    <div id="modeBanner" class="modeBanner-text">GAME EN JUEGO</div>
 
-    <!-- Marcador principal -->
     <div class="board">
       <div class="team teamA">
         <div class="name" id="team_a">{{ match.team_a }}</div>
         <div class="score" id="scoreA">0</div>
       </div>
+
       <div class="team teamB">
         <div class="name" id="team_b">{{ match.team_b }}</div>
         <div class="score" id="scoreB">0</div>
       </div>
     </div>
 
-    <!-- Tabla de sets -->
     <div class="sets">
       <table>
-        <thead>
-          <tr>
-            <th>Set</th>
-            <th style="color:#12210a;background:var(--teamA)">Equipo A</th>
-            <th style="background:var(--teamB)">Equipo B</th>
-          </tr>
-        </thead>
         <tbody>
-          <tr id="row1"><td>1</td><td id="s1a">{{ match.set1_a }}</td><td id="s1b">{{ match.set1_b }}</td></tr>
-          <tr id="row2"><td>2</td><td id="s2a">{{ match.set2_a }}</td><td id="s2b">{{ match.set2_b }}</td></tr>
-          <tr id="row3"><td>3</td><td id="s3a">{{ match.set3_a }}</td><td id="s3b">{{ match.set3_b }}</td></tr>
+          <tr id="row1">
+            <td id="s1a">{{ match.set1_a }}</td>
+            <td id="s1b">{{ match.set1_b }}</td>
+          </tr>
+          <tr id="row2">
+            <td id="s2a">{{ match.set2_a }}</td>
+            <td id="s2b">{{ match.set2_b }}</td>
+          </tr>
+          <tr id="row3">
+            <td id="s3a">{{ match.set3_a }}</td>
+            <td id="s3b">{{ match.set3_b }}</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -89,69 +61,141 @@
     <div class="legend">Actualización en vivo — no requiere recargar.</div>
   </div>
 
-  <!-- Footer carrusel -->
-  <div class="pb2-sponsors-footer">
-    <div id="pb2SponsorCarousel"></div>
+  <div class="pb2-sponsors-section">
+    <div id="pb2SponsorCarousel" class="pb2-carousel-track"></div>
   </div>
 
 <script>
   const code = "{{ match.code }}";
+  const mode = "{{ match.mode }}";
+
   let lastScoreA = null;
   let lastScoreB = null;
   let lastMode = null;
+  let matchIsFinished = false;
 
-  // === WebSocket ===
-  const wsProto = (location.protocol === "https:") ? "wss" : "ws";
+  let lastSponsorsKey = "";
+
+  const wsProto = location.protocol === "https:" ? "wss" : "ws";
   const socket = new WebSocket(`${wsProto}://${location.host}/ws/match/${code}/`);
 
   socket.onopen = () => console.log("WS abierto");
-  socket.onerror = (e) => console.error("WS error", e);
-  socket.onclose = (e) => console.warn("WS cerrado", e);
+  socket.onerror = e => console.error("WS error", e);
+  socket.onclose = e => console.warn("WS cerrado", e);
 
-  // Mostrar los puntos tal como vienen del control:
-  // - modo regular: 0 / 15 / 30 / 40 (ya calculados en control.html)
-  // - tiebreak / super_tb: 0,1,2,3,... (puntos del tie-break)
   function formatPoints(value, mode) {
-    if (value === undefined || value === null) return 0;
+    if (mode === "tiebreak") return "TIE-BREAK";
+    if (mode === "super_tb") return "SUPER TB";
+    if (value === undefined || value === null) return "";
     return value;
   }
 
-  // Resalta sets ganados (6+ con diferencia de 2)
+  function isSetWon(a, b) {
+    if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) return true;
+    if ((a === 7 && b === 6) || (a === 6 && b === 7)) return true;
+    return false;
+  }
+
   function applyWinnersHighlight(sets) {
     [1, 2, 3].forEach(i => {
-      const s = sets[i - 1] || {a:0, b:0};
-      const a = s.a, b = s.b;
+      const s = sets[i - 1] || { a: 0, b: 0 };
       const cellA = document.getElementById(`s${i}a`);
       const cellB = document.getElementById(`s${i}b`);
+
       if (!cellA || !cellB) return;
 
       cellA.classList.remove("winA", "winB");
       cellB.classList.remove("winA", "winB");
 
-      if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) {
-        if (a > b) cellA.classList.add("winA");
+      if (isSetWon(s.a, s.b)) {
+        if (s.a > s.b) cellA.classList.add("winA");
         else cellB.classList.add("winB");
       }
     });
   }
 
-  socket.onmessage = (event) => {
+  function deriveMatchStatus(data, sets) {
+    const teamAName = data.team_a || document.getElementById("team_a")?.textContent || "Equipo A";
+    const teamBName = data.team_b || document.getElementById("team_b")?.textContent || "Equipo B";
+
+    let finished = !!data.finished;
+    let winner = data.winner || null;
+
+    let setsA = 0;
+    let setsB = 0;
+
+    sets.forEach(s => {
+      if (!s) return;
+
+      if (isSetWon(s.a, s.b)) {
+        if (s.a > s.b) setsA++;
+        else setsB++;
+      }
+    });
+
+    if (!finished) {
+      if (mode === "3_sets" || mode === "2_sets_super_tb") {
+        if (setsA === 2 || setsB === 2) {
+          finished = true;
+          winner = setsA > setsB ? teamAName : teamBName;
+        }
+      }
+    }
+
+    return { finished, winner };
+  }
+
+  function updateSponsorsCarousel(sponsors) {
+    const carousel = document.getElementById("pb2SponsorCarousel");
+    if (!carousel) return;
+
+    const sponsorsKey = JSON.stringify(sponsors);
+
+    if (sponsorsKey === lastSponsorsKey) return;
+
+    lastSponsorsKey = sponsorsKey;
+
+    if (!Array.isArray(sponsors) || sponsors.length === 0) {
+      carousel.innerHTML = "";
+      carousel.classList.remove("pb2-carousel-moving");
+      return;
+    }
+
+    const baseHtml = sponsors
+      .map(src => `
+        <div class="pb2-s-thumb">
+          <img src="${src}" alt="sponsor">
+        </div>
+      `)
+      .join("");
+
+    carousel.innerHTML = baseHtml + baseHtml;
+    carousel.classList.remove("pb2-carousel-moving");
+
+    carousel.offsetHeight;
+
+    carousel.classList.add("pb2-carousel-moving");
+  }
+
+  socket.onmessage = event => {
     try {
       const raw = JSON.parse(event.data);
-      const data = (raw && typeof raw === "object" && "payload" in raw) ? raw.payload : raw;
+      const data = raw.payload ?? raw;
 
       if (!data) return;
 
-      // Nombres
-      document.getElementById("team_a").textContent = data.team_a || "Equipo A";
-      document.getElementById("team_b").textContent = data.team_b || "Equipo B";
+      const ta = data.team_a || "Equipo A";
+      const tb = data.team_b || "Equipo B";
 
-      // Sets (juegos)
+      document.getElementById("team_a").textContent = ta;
+      document.getElementById("team_b").textContent = tb;
+
       const sets = data.sets || [
         { a: data.set1_a ?? 0, b: data.set1_b ?? 0 },
         { a: data.set2_a ?? 0, b: data.set2_b ?? 0 },
         { a: data.set3_a ?? 0, b: data.set3_b ?? 0 },
       ];
+
       document.getElementById("s1a").textContent = sets[0].a;
       document.getElementById("s1b").textContent = sets[0].b;
       document.getElementById("s2a").textContent = sets[1].a;
@@ -161,59 +205,132 @@
 
       applyWinnersHighlight(sets);
 
-      // Puntos actuales (game, tiebreak o super tie-break)
+      const status = deriveMatchStatus(data, sets);
+      const isFinished = status.finished;
+      const winnerName = status.winner;
+
+      if (isFinished && winnerName && !matchIsFinished) {
+        const board = document.querySelector(".board");
+        const banner = document.getElementById("modeBanner");
+
+        if (banner) {
+          banner.textContent = `Ganador: ${winnerName}`;
+          banner.classList.add("winner-banner");
+        }
+
+        if (board) {
+          board.style.display = "none";
+
+          let finalDiv = document.getElementById("finalMessage");
+
+          if (!finalDiv) {
+            finalDiv = document.createElement("div");
+            finalDiv.id = "finalMessage";
+            finalDiv.className = "final-msg";
+
+            const setsBlock = document.querySelector(".sets");
+            const wrapTable = document.querySelector(".wrap-table");
+
+            if (wrapTable && setsBlock) wrapTable.insertBefore(finalDiv, setsBlock);
+            else if (wrapTable) wrapTable.appendChild(finalDiv);
+          }
+
+          finalDiv.innerHTML = `
+            <div class="final-title">PARTIDO FINALIZADO</div>
+            <div class="final-winner">Ganador: ${winnerName}</div>
+          `;
+        }
+
+        matchIsFinished = true;
+      } else if (!isFinished) {
+        const board = document.querySelector(".board");
+        const banner = document.getElementById("modeBanner");
+
+        if (board) board.style.display = "flex";
+
+        if (banner) {
+          banner.classList.remove("winner-banner");
+        }
+
+        const finalDiv = document.getElementById("finalMessage");
+        if (finalDiv) finalDiv.remove();
+
+        matchIsFinished = false;
+      }
+
       const cg = data.current_game || { mode: "regular", a: 0, b: 0 };
+
       const scoreAEl = document.getElementById("scoreA");
       const scoreBEl = document.getElementById("scoreB");
 
-      const shownA = formatPoints(cg.a, cg.mode);
-      const shownB = formatPoints(cg.b, cg.mode);
+      const hidePoints =
+        data.showPoints === false ||
+        data.showPoints === 0 ||
+        data.showPoints === "0" ||
+        data.show_points === false ||
+        data.show_points === 0 ||
+        data.show_points === "0";
 
-      if (cg.a !== lastScoreA) {
-        scoreAEl.classList.add("flash");
-        setTimeout(() => scoreAEl.classList.remove("flash"), 600);
+      if (hidePoints) {
+        scoreAEl.textContent = "";
+        scoreBEl.textContent = "";
+        scoreAEl.style.visibility = "hidden";
+        scoreBEl.style.visibility = "hidden";
+      } else {
+        scoreAEl.style.visibility = "visible";
+        scoreBEl.style.visibility = "visible";
+
+        let shownA = formatPoints(cg.a, cg.mode);
+        let shownB = formatPoints(cg.b, cg.mode);
+
+        if (cg.mode === "tiebreak" || cg.mode === "super_tb") {
+          shownA = cg.a;
+          shownB = cg.b;
+        }
+
+        if (cg.a !== lastScoreA) {
+          scoreAEl.classList.add("flash");
+          setTimeout(() => scoreAEl.classList.remove("flash"), 600);
+        }
+
+        if (cg.b !== lastScoreB) {
+          scoreBEl.classList.add("flash");
+          setTimeout(() => scoreBEl.classList.remove("flash"), 600);
+        }
+
+        scoreAEl.textContent = shownA;
+        scoreBEl.textContent = shownB;
+
+        lastScoreA = cg.a;
+        lastScoreB = cg.b;
       }
-      if (cg.b !== lastScoreB) {
-        scoreBEl.classList.add("flash");
-        setTimeout(() => scoreBEl.classList.remove("flash"), 600);
-      }
 
-      scoreAEl.textContent = shownA;
-      scoreBEl.textContent = shownB;
-      lastScoreA = cg.a;
-      lastScoreB = cg.b;
-
-      // Banner de modo
       const banner = document.getElementById("modeBanner");
       let bannerText = "GAME EN JUEGO";
-      if (cg.mode === "tiebreak") bannerText = "TIE-BREAK";
-      else if (cg.mode === "super_tb") bannerText = "SUPER TIE-BREAK";
 
-      if (bannerText !== lastMode) {
+      if (cg.mode === "tiebreak") bannerText = "TIE-BREAK";
+      if (cg.mode === "super_tb") bannerText = "SUPER TIE-BREAK";
+      if (isFinished) bannerText = "PARTIDO FINALIZADO";
+
+      if (banner && bannerText !== lastMode) {
         banner.textContent = bannerText;
         banner.classList.add("flash");
         setTimeout(() => banner.classList.remove("flash"), 800);
         lastMode = bannerText;
       }
 
-      // Sponsors (simple grid)
-      const carousel = document.getElementById("pb2SponsorCarousel");
+      document.body.classList.toggle(
+        "tiebreak",
+        cg.mode === "tiebreak" || cg.mode === "super_tb"
+      );
+
       const sponsors = Array.isArray(data.sponsors) ? data.sponsors : [];
-      if (carousel) {
-        if (!sponsors.length) {
-          carousel.innerHTML = "";
-        } else {
-          carousel.innerHTML = sponsors
-            .map(src => `<div class="pb2-s-thumb"><img src="${src}" alt="sponsor"></div>`)
-            .join("");
-        }
-      }
+      updateSponsorsCarousel(sponsors);
 
     } catch (e) {
       console.error("Error procesando mensaje WS", e);
     }
   };
 </script>
-
 </body>
 </html>

@@ -11,4 +11,7 @@ urlpatterns = [
     # API endpoints
     path("api/<slug:code>/update/", views.update_scores, name="update_scores"),
     path("api/<slug:code>/state/", views.get_state, name="get_state"),
+
+    path("api/upload-sponsor/", views.upload_sponsor, name="upload_sponsor"),
+
 ]

@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap">
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <link rel="stylesheet" href="{% static 'css/sponsors.css' %}">
+
 </head>
 <body>
   <div class="wrap">
@@ -21,16 +22,7 @@
       <div><a class="link" href="/ver/{{ match.code }}/" target="_blank">Ver marcador</a></div>
     </div>
 
-    <h2 style="
-      text-align: center;
-      color: #cbdc00;
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-top: 20px;
-      margin-bottom: 30px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    ">
+    <h2 class= "h2-control">
       {% if match.mode == "3_sets" %}
         Partido a 3 sets
       {% elif match.mode == "2_sets_super_tb" %}
@@ -40,20 +32,71 @@
       {% endif %}
     </h2>
 
-    <div class="panel">
-      <!-- Cabecera -->
-      <div class="grid">
-        <div>
-          <label>Equipo A</label>
-          <input id="team_a" type="text" value="{{ match.team_a }}" placeholder="Equipo A">
+    <!-- ===== PASO 1: Carga de jugadores ===== -->
+    <div id="step1" class="panel step active">
+      <h3 class="section-title">Equipo A</h3>
+      <div class="players-grid">
+        <input id="a1_name" type="text" placeholder="Nombre">
+        <input id="a1_last" type="text" placeholder="Apellido*" required>
+        <input id="a2_name" type="text" placeholder="Nombre 2">
+        <input id="a2_last" type="text" placeholder="Apellido 2*" required>
+      </div>
+
+      <h3 class="section-title" style="margin-top:22px;">Equipo B</h3>
+      <div class="players-grid">
+        <input id="b1_name" type="text" placeholder="Nombre">
+        <input id="b1_last" type="text" placeholder="Apellido*" required>
+        <input id="b2_name" type="text" placeholder="Nombre 2">
+        <input id="b2_last" type="text" placeholder="Apellido 2*" required>
+      </div>
+
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn-primary" onclick="goToStep2()">Continuar al marcador</button>
+      </div>
+    </div>
+
+    <!-- ===== PASO 2: Control del partido ===== -->
+    <div id="step2" class="panel step">
+      <!-- inputs ocultos para team_a / team_b (para JS y payload) -->
+      <input id="team_a" type="hidden" value="{{ match.team_a }}">
+      <input id="team_b" type="hidden" value="{{ match.team_b }}">
+
+      <!-- Fila SET ACTUAL + marcador + selector de set -->
+      <div class="set-header-row">
+        <div class="set-header-left">
+          <div class="set-header-title">SET ACTUAL</div>
+
+          <div class="scorebar">
+            <!-- Lado A: 30 / +A / -A -->
+            <div class="score-side">
+              <span class="pill" id="ga">0</span>
+              <button class="btn inc" onclick="point('a')">+ A</button>
+              <button class="btn dec" onclick="undoPoint('a')">− A</button>
+            </div>
+
+            <!-- Centro: Game actual + toggle mostrar texto 15/30/40 -->
+            <div class="score-center">
+              <div class="muted">Game actual</div>
+              <label>
+                <label class="switch">
+                  <input type="checkbox" id="showPoints" checked onchange="save()">
+                  <span class="slider"></span>
+                </label>
+              </label>
+            </div>
+
+            <!-- Lado B: -B / +B / 0 -->
+            <div class="score-side" style="justify-content:flex-end;">
+              <button class="btn dec" onclick="undoPoint('b')">− B</button>
+              <button class="btn inc" onclick="point('b')">+ B</button>
+              <span class="pill" id="gb">0</span>
+            </div>
+          </div>
         </div>
+
+        <!-- Selector de set a la derecha -->
         <div>
-          <label>Equipo B</label>
-          <input id="team_b" type="text" value="{{ match.team_b }}" placeholder="Equipo B">
-        </div>
-        <div>
-          <label>Set actual</label>
-          <select id="current_set">
+          <select id="current_set" class="set-select">
             <option value="1" {% if match.current_set == 1 %}selected{% endif %}>1</option>
             <option value="2" {% if match.current_set == 2 %}selected{% endif %}>2</option>
             <option value="3" {% if match.current_set == 3 %}selected{% endif %}>3</option>
@@ -61,39 +104,18 @@
         </div>
       </div>
 
-      <!-- GAME actual -->
-      <div class="game">
-        <div class="left">
-          <div class="teamName" id="nameA">{{ match.team_a }}</div>
-          <div class="pills">
-            <span class="pill" id="ga">0</span>
-            <button class="btn inc" onclick="point('a')">+ A</button>
-            <button class="btn dec" onclick="undoPoint('a')">− A</button>
-            <!-- Botón chico de guardar/cargar -->
-            <button class="btn save" style="margin-left:8px;padding:4px 8px;font-size:.75rem" onclick="save()">Cargar vivo</button>
-          </div>
-        </div>
-        <div class="center muted">Game actual</div>
-        <div class="right" style="text-align:right">
-          <div class="teamName" id="nameB">{{ match.team_b }}</div>
-          <div class="pills" style="justify-content:flex-end">
-            <!-- Botón chico de guardar/cargar -->
-            <button class="btn save" style="margin-right:8px;padding:4px 8px;font-size:.75rem" onclick="save()">Cargar vivo</button>
-            <button class="btn dec" onclick="undoPoint('b')">− B</button>
-            <button class="btn inc" onclick="point('b')">+ B</button>
-            <span class="pill" id="gb">0</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tabla SETS -->
+      <!-- Tabla SETS con apellidos en encabezado -->
       <div class="sets">
         <table>
           <thead>
             <tr>
               <th>SET</th>
-              <th style="color:#12210a;background:var(--green)">Equipo A</th>
-              <th style="background:var(--teamB)">Equipo B</th>
+              <th id="headA" style="background:var(--teamA);;">
+                {{ match.team_a|default:"Equipo A" }}
+              </th>
+              <th id="headB" style="background:var(--teamB);">
+                {{ match.team_b|default:"Equipo B" }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -131,13 +153,9 @@
         <div class="muted" style="margin-top:8px">Se normalizan a 400×400 px para verse parejas.</div>
       </div>
 
-      <div class="cta">
-        <button class="btn save" onclick="save()">Guardar / Cargar a vivo</button>
-        <a class="link" href="/ver/{{ match.code }}/" target="_blank">Abrir Viewer</a>
-      </div>
-      <div class="muted" style="margin-top:8px">
-        Consejo: mantené esta pestaña abierta. El viewer se actualiza en vivo.
-      </div>
+      <!-- spans ocultos para compatibilidad si hicieras tracking en otro lado -->
+      <span id="teamA_display" style="display:none;"></span>
+      <span id="teamB_display" style="display:none;"></span>
     </div>
   </div>
 
@@ -163,11 +181,55 @@
   let tbOn = false, tbA = 0, tbB = 0;
   let tbType = null;            // "set" o "super"
   const sponsors = [];
+  let matchFinished = false;
+  let matchWinner   = null;
 
   const ga  = document.getElementById('ga');
   const gb  = document.getElementById('gb');
   const tbd = document.getElementById('tb');
   const tbTitle = document.getElementById('tbTitle');
+  const mainPanel = document.getElementById('step2');
+
+  /* ===== Paso 1 → Paso 2 ===== */
+  function goToStep2() {
+    const a1_last = document.getElementById('a1_last').value.trim();
+    const a2_last = document.getElementById('a2_last').value.trim();
+    const b1_last = document.getElementById('b1_last').value.trim();
+    const b2_last = document.getElementById('b2_last').value.trim();
+
+    // SOLO apellidos obligatorios
+    if (!a1_last || !a2_last || !b1_last || !b2_last) {
+      alert("Completá todos los apellidos para continuar.");
+      return;
+    }
+
+    const teamA = `${a1_last.toUpperCase()} / ${a2_last.toUpperCase()}`;
+    const teamB = `${b1_last.toUpperCase()} / ${b2_last.toUpperCase()}`;
+
+    // setear team_a / team_b que usa toda la lógica
+    const teamAInput = document.getElementById('team_a');
+    const teamBInput = document.getElementById('team_b');
+    if (teamAInput) teamAInput.value = teamA;
+    if (teamBInput) teamBInput.value = teamB;
+
+    // encabezados de la tabla
+    const headA = document.getElementById('headA');
+    const headB = document.getElementById('headB');
+    if (headA) headA.textContent = teamA;
+    if (headB) headB.textContent = teamB;
+
+    // spans ocultos por si los necesitás en otra parte
+    const teamADisplay = document.getElementById('teamA_display');
+    const teamBDisplay = document.getElementById('teamB_display');
+    if (teamADisplay) teamADisplay.textContent = teamA;
+    if (teamBDisplay) teamBDisplay.textContent = teamB;
+
+    // cambiar de paso
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+
+    save();
+  }
 
   // Ocultar tercer set en modalidad 2 sets + super TB
   if (mode === "2_sets_super_tb") {
@@ -205,7 +267,7 @@
   }
   refreshPills();
 
-  function paintSets() {
+    function paintSets() {
     document.getElementById('s1a').textContent = sets[0].a;
     document.getElementById('s1b').textContent = sets[0].b;
     document.getElementById('s2a').textContent = sets[1].a;
@@ -213,20 +275,23 @@
     document.getElementById('s3a').textContent = sets[2].a;
     document.getElementById('s3b').textContent = sets[2].b;
 
-    // resaltar sets ganados
+    // resaltar sets ganados (incluye 7–6 / 6–7)
     [1,2,3].forEach(i => {
       const s = sets[i-1];
       const cellA = document.getElementById('s'+i+'a');
       const cellB = document.getElementById('s'+i+'b');
       if (!cellA || !cellB) return;
+
       cellA.classList.remove('winA','winB');
       cellB.classList.remove('winA','winB');
-      if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2) {
+
+      if (isSetWon(s.a, s.b)) {
         if (s.a > s.b) cellA.classList.add('winA');
         else cellB.classList.add('winB');
       }
     });
-  }
+    }
+
   paintSets();
 
   function resetGame() {
@@ -259,6 +324,8 @@
   /* ===== GAME normal ===== */
   function point(side) {
     if (tbOn) return;
+    if (matchFinished) return;
+
     const s = sets[currentSet-1];
 
     // si el set ya está ganado, no sumar más games
@@ -275,6 +342,8 @@
 
   function undoPoint(side) {
     if (tbOn) return;
+    if (matchFinished) return;
+
     if (side === 'a') idxA = Math.max(0, idxA-1);
     else idxB = Math.max(0, idxB-1);
     refreshPills();
@@ -296,16 +365,70 @@
   }
 
   /* ===== Set ganado + avance / super tie-break ===== */
-  function checkSetWinner() {
-    const s = sets[currentSet-1];
+    function checkSetWinner() {
+    const s = sets[currentSet - 1];
     const a = s.a, b = s.b;
 
-    if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) {
+    // Usamos isSetWon → incluye 7–6 / 6–7
+    if (isSetWon(a, b)) {
       // set cerrado
       hideTb();
       resetGame();
       paintSets();
 
+      // contar sets ganados
+      let setsA = 0, setsB = 0;
+      [0, 1, 2].forEach(i => {
+        const set = sets[i];
+        if (!set) return;
+        if (isSetWon(set.a, set.b)) {
+          if (set.a > set.b) setsA++;
+          else setsB++;
+        }
+      });
+
+      // si alguien gana 2 sets → partido terminado
+      if (setsA === 2 || setsB === 2) {
+        const teamA = document.getElementById('team_a').value || 'Equipo A';
+        const teamB = document.getElementById('team_b').value || 'Equipo B';
+
+        const ganador = (setsA > setsB) ? teamA : teamB;
+        const perdedor = (setsA > setsB) ? teamB : teamA;
+
+        matchFinished = true;
+        matchWinner   = ganador;
+
+        alert(`¡Partido finalizado! Ganador: ${ganador} — Derrotado: ${perdedor}`);
+
+        document.title = `Partido finalizado — Ganador: ${ganador}`;
+
+        document.querySelectorAll(".banner-final").forEach(el => el.remove());
+
+        const banner = document.createElement('div');
+        banner.className = 'banner-final';
+        banner.textContent = `Partido finalizado — Ganador: ${ganador}`;
+        banner.style = `
+          background: #ff8b1a;
+          color: #12210a;
+          font-weight: 800;
+          text-align: center;
+          padding: 10px;
+          font-size: 1.2rem;
+          margin-top: 16px;
+          border-radius: 8px;
+        `;
+        if (mainPanel) {
+          mainPanel.prepend(banner);
+        }
+
+        // Desactivar botones luego del partido
+        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+
+        save();
+        return;
+      }
+
+      // avanzar al siguiente set solo si no terminó el partido
       if (mode === '3_sets') {
         if (currentSet < 3) {
           currentSet++;
@@ -313,16 +436,15 @@
           markCurrentRow();
         }
       } else if (mode === '2_sets_super_tb') {
-        // no existe set 3, pero hay super tie-break si quedan 1–1 en sets
-        document.getElementById('current_set').value = String(currentSet);
-        markCurrentRow();
         checkSuperTiebreakActivation();
       }
       save();
     } else {
+      // set todavía en juego
       save();
     }
   }
+
 
   function checkSuperTiebreakActivation() {
     if (mode !== '2_sets_super_tb') return;
@@ -330,8 +452,9 @@
     let setsA = 0, setsB = 0;
     [0,1].forEach(i => {
       const s = sets[i];
-      if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2) {
-        if (s.a > s.b) setsA++; else setsB++;
+      if (isSetWon(s.a, s.b)) {
+        if (s.a > s.b) setsA++;
+        else setsB++;
       }
     });
 
@@ -346,19 +469,23 @@
   /* ===== TB (clásico) / SUPER TB ===== */
   function tbPoint(side) {
     if (!tbOn) return;
+    if (matchFinished) return;
+
     if (side === 'a') tbA++; else tbB++;
     refreshPills();
 
     const target = (tbType === 'super') ? 10 : 7;
     if ((tbA >= target || tbB >= target) && Math.abs(tbA - tbB) >= 2) {
       const winnerSide = (tbA > tbB) ? 'a' : 'b';
+      const teamA = document.getElementById('team_a').value || 'Equipo A';
+      const teamB = document.getElementById('team_b').value || 'Equipo B';
 
       if (tbType === 'super') {
         // Super tie-break define el partido (no suma games)
-        const ganador = (winnerSide === 'a')
-          ? (document.getElementById('team_a').value || 'Equipo A')
-          : (document.getElementById('team_b').value || 'Equipo B');
+        const ganador = (winnerSide === 'a') ? teamA : teamB;
         alert("¡Ganador del super tie-break: " + ganador + "!");
+        matchFinished = true;
+        matchWinner   = ganador;
         hideTb();
         resetGame();
         save();
@@ -379,113 +506,147 @@
 
   function tbUndo(side) {
     if (!tbOn) return;
+    if (matchFinished) return;
+
     if (side === 'a') tbA = Math.max(0, tbA-1);
     else tbB = Math.max(0, tbB-1);
     refreshPills();
     save();
   }
 
-  /* ===== Sponsors ===== */
-  async function fileToSquareDataURL(file, size=400) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const reader = new FileReader();
-      reader.onload = e => {
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = size; canvas.height = size;
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#fff';
-          ctx.fillRect(0,0,size,size);
-          const ratio = Math.min(size/img.width, size/img.height);
-          const w = img.width * ratio;
-          const h = img.height * ratio;
-          const x = (size - w) / 2;
-          const y = (size - h) / 2;
-          ctx.imageSmoothingQuality = 'high';
-          ctx.drawImage(img, x, y, w, h);
-          resolve(canvas.toDataURL('image/png'));
-        };
-        img.onerror = reject;
-        img.src = e.target.result;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+    /* ===== Sponsors ===== */
+
+  // Sube un solo sponsor al backend y devuelve la URL
+  async function uploadOneSponsor(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const resp = await fetch("/api/upload-sponsor/", {
+      method: "POST",
+      body: formData,
     });
+
+    if (!resp.ok) {
+      console.error("Error subiendo sponsor", await resp.text());
+      throw new Error("Error subiendo sponsor");
+    }
+
+    const data = await resp.json();
+    return data.url;  // ej: "/media/sponsors/xxxxx.png"
   }
 
   async function addSponsors() {
     const input = document.getElementById('sponsorFiles');
     if (!input?.files?.length) return;
+
     const preview = document.getElementById('sponsorsPreview');
 
-    for (const f of input.files) {
-      const dataUrl = await fileToSquareDataURL(f, 400);
-      sponsors.push(dataUrl);
+    // Recorremos TODOS los archivos seleccionados (pueden ser 30)
+    for (const file of input.files) {
+      try {
+        const url = await uploadOneSponsor(file);
 
-      const tile = document.createElement('div');
-      tile.className = 'pb2-s-thumb';
-      const img = document.createElement('img');
-      img.src = dataUrl;
-      img.alt = 'sponsor';
-      tile.appendChild(img);
-      preview.appendChild(tile);
+        // Guardamos la URL en el array que viaja al viewer
+        sponsors.push(url);
+
+        // Preview en el panel de control
+        const tile = document.createElement('div');
+        tile.className = 'pb2-s-thumb';
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = 'sponsor';
+        tile.appendChild(img);
+        preview.appendChild(tile);
+      } catch (e) {
+        alert("Hubo un problema subiendo uno de los sponsors");
+        console.error(e);
+      }
     }
-    input.value = '';
+
+    // Limpiar input
+    input.value = "";
+    // Guardar estado (manda sponsors por fetch a /api/{code}/update/)
     save();
   }
+
 
   /* ===== Envío al backend / WebSocket ===== */
+    /* ===== Envío al backend / WebSocket ===== */
   async function save() {
-  let gameMode = "regular";
-  if (tbOn) gameMode = (tbType === "super") ? "super_tb" : "tiebreak";
+    let gameMode = "regular";
+    if (tbOn) gameMode = (tbType === "super") ? "super_tb" : "tiebreak";
 
-  // Determinar valor real del punto mostrado
-  let pointA = tbOn ? tbA : pointsScale[idxA];
-  let pointB = tbOn ? tbB : pointsScale[idxB];
+    // Determinar valor real del punto mostrado
+    let pointA = tbOn ? tbA : pointsScale[idxA];
+    let pointB = tbOn ? tbB : pointsScale[idxB];
 
-  // En caso de "AD" o "40" más allá de índice 3, forzar texto correcto
-  if (!tbOn && (pointsA > 3 || pointsB > 3)) {
-    const diff = pointsA - pointsB;
-    if (diff === 0) { pointA = 40; pointB = 40; }
-    else if (diff === 1) { pointA = "AD"; pointB = 40; }
-    else if (diff === -1) { pointA = 40; pointB = "AD"; }
+    // Objeto current_game (necesario para el viewer)
+    const current_game = {
+        mode: gameMode,
+        a: pointA, // Puntos de tenis o tie-break/super-tb
+        b: pointB,
+    };
+
+    // === NOMBRES DE EQUIPOS Y APELLIDOS ===
+    const teamAInput = document.getElementById('team_a');
+    const teamBInput = document.getElementById('team_b');
+
+    const a1LastInput = document.getElementById('a1_last');
+    const a2LastInput = document.getElementById('a2_last');
+    const b1LastInput = document.getElementById('b1_last');
+    const b2LastInput = document.getElementById('b2_last');
+
+    const payload = {
+        // nombres de equipo (cadena "APELLIDO1 / APELLIDO2")
+        team_a: teamAInput ? teamAInput.value : null,
+        team_b: teamBInput ? teamBInput.value : null,
+
+        // apellidos individuales (por si el backend los quiere usar)
+        a1_last: a1LastInput ? a1LastInput.value.trim() : null,
+        a2_last: a2LastInput ? a2LastInput.value.trim() : null,
+        b1_last: b1LastInput ? b1LastInput.value.trim() : null,
+        b2_last: b2LastInput ? b2LastInput.value.trim() : null,
+
+        // set actual
+        current_set: currentSet,
+
+        // sets y game actual
+        sets: sets,
+        current_game: current_game,
+
+        // estado del partido
+        finished: matchFinished,
+        winner: matchWinner,
+
+        // sponsors y toggle de puntos
+        sponsors: sponsors,
+        showPoints: document.getElementById('showPoints').checked
+    };
+
+    try {
+      await fetch(`/api/${code}/update/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      console.error("Error al guardar", e);
+    }
   }
 
-  const payload = {
-    team_a: document.getElementById('team_a').value || 'Equipo A',
-    team_b: document.getElementById('team_b').value || 'Equipo B',
-    current_set: currentSet,
-    sets: sets,
-    current_game: {
-      mode: gameMode,
-      a: pointA,
-      b: pointB,
-    },
-    sponsors: sponsors,
-  };
-
-  try {
-    await fetch(`/api/${code}/update/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-  } catch (e) {
-    console.error("Error al guardar", e);
+  function isSetWon(a, b) {
+  // Set ganado por diferencia de 2 (6-0, 6-4, 7-5, 8-6, etc.)
+  if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) {
+    return true;
   }
+  // Set ganado por tie-break: 7-6 o 6-7
+  if ((a === 7 && b === 6) || (a === 6 && b === 7)) {
+    return true;
+  }
+  return false;
 }
 
-
-  // Sincronizar nombres
-  document.getElementById('team_a').addEventListener('input', e => {
-    document.getElementById('nameA').textContent = e.target.value || 'Equipo A';
-    save();
-  });
-  document.getElementById('team_b').addEventListener('input', e => {
-    document.getElementById('nameB').textContent = e.target.value || 'Equipo B';
-    save();
-  });
+  
 </script>
 </body>
 </html>
