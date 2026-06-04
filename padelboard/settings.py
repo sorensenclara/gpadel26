@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import os
 
@@ -6,7 +5,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'dev-secret-change-me'
 DEBUG = True
+
 ALLOWED_HOSTS = ["*"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://gpadel26.onrender.com",
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -51,9 +55,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'padelboard.wsgi.application'
 ASGI_APPLICATION = 'padelboard.asgi.application'
 
-# Channels - in-memory layer for dev (use Redis in production)
+# Channels
 CHANNEL_LAYERS = {
-    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
 
 DATABASES = {
@@ -67,6 +73,7 @@ AUTH_PASSWORD_VALIDATORS = []
 
 LANGUAGE_CODE = 'es-ar'
 TIME_ZONE = 'America/Argentina/Buenos_Aires'
+
 USE_I18N = True
 USE_TZ = True
 
@@ -74,8 +81,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = []
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
