@@ -884,7 +884,7 @@ td.winB,
 }
 
 .pb2-carousel-moving {
-  animation: pb2SponsorScroll 60s linear infinite;
+  animation: pb2SponsorScroll 120s linear infinite;
 }
 
 @keyframes pb2SponsorScroll {
