@@ -163,6 +163,10 @@
   /* ===== Config ===== */
   const mode  = "{{ match.mode }}";  // "3_sets" o "2_sets_super_tb"
   const code  = "{{ match.code }}";
+
+  const savedTeamA = "{{ match.team_a|escapejs }}";
+  const savedTeamB = "{{ match.team_b|escapejs }}";
+
   const pointsScale = [0, 15, 30, 40];
 
   /* ===== Estado ===== */
@@ -266,6 +270,29 @@
     }
   }
   refreshPills();
+
+    // Si el partido ya tiene nombres cargados, saltar directamente al marcador
+  if (
+    savedTeamA &&
+    savedTeamB &&
+    savedTeamA !== "Equipo A" &&
+    savedTeamB !== "Equipo B"
+  ) {
+    const teamAInput = document.getElementById("team_a");
+    const teamBInput = document.getElementById("team_b");
+
+    if (teamAInput) teamAInput.value = savedTeamA;
+    if (teamBInput) teamBInput.value = savedTeamB;
+
+    const headA = document.getElementById("headA");
+    const headB = document.getElementById("headB");
+
+    if (headA) headA.textContent = savedTeamA;
+    if (headB) headB.textContent = savedTeamB;
+
+    document.getElementById("step1").classList.remove("active");
+    document.getElementById("step2").classList.add("active");
+  }
 
     function paintSets() {
     document.getElementById('s1a').textContent = sets[0].a;
