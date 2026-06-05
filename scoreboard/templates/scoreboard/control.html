@@ -184,7 +184,7 @@
   let idxA = 0, idxB = 0;       // índice en [0,15,30,40] para el game actual
   let tbOn = false, tbA = 0, tbB = 0;
   let tbType = null;            // "set" o "super"
-  const sponsors = [];
+  let sponsors = {{ match.sponsors|default:"[]"|safe }};
   let matchFinished = false;
   let matchWinner   = null;
 
