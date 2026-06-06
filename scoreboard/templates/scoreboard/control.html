@@ -66,6 +66,17 @@
         <div class="set-header-left">
           <div class="set-header-title">SET ACTUAL</div>
 
+          <div id="tbBanner"
+              style="display:none;
+                      margin-bottom:12px;
+                      padding:14px;
+                      text-align:center;
+                      font-size:32px;
+                      font-weight:900;
+                      color:#ff8b1a;
+                      letter-spacing:2px;">
+          </div>
+
           <div class="scorebar">
             <!-- Lado A: 30 / +A / -A -->
             <div class="score-side">
@@ -126,22 +137,6 @@
         </table>
       </div>
 
-      <!-- TIEBREAK / SUPER -->
-      <div id="tb" class="tb" style="display:none;">
-        <div class="muted" id="tbTitle">
-          Tiebreak (gana a 7 con diferencia de 2)
-        </div>
-        <div class="row">
-          <span class="pill" id="tba">0</span>
-          <button class="btn inc" onclick="tbPoint('a')">+ A</button>
-          <button class="btn dec" onclick="tbUndo('a')">− A</button>
-          <span style="width:24px"></span>
-          <button class="btn dec" onclick="tbUndo('b')">− B</button>
-          <button class="btn inc" onclick="tbPoint('b')">+ B</button>
-          <span class="pill" id="tbb">0</span>
-        </div>
-      </div>
-
       <!-- AUSPCIANTES -->
       <div class="panel" style="margin-top:16px;">
         <h3 class="section-title" style="margin:0 0 8px 0;">Auspiciantes</h3>
@@ -161,8 +156,8 @@
 
 <script>
   /* ===== Config ===== */
-  const mode  = "{{ match.mode }}";  // "3_sets" o "2_sets_super_tb"
-  const code  = "{{ match.code }}";
+  const mode = "{{ match.mode }}";
+  const code = "{{ match.code }}";
 
   const savedTeamA = "{{ match.team_a|escapejs }}";
   const savedTeamB = "{{ match.team_b|escapejs }}";
@@ -173,26 +168,55 @@
   let currentSet = parseInt(document.getElementById('current_set').value) || 1;
 
   const sets = [
-    { a: parseInt(document.getElementById('s1a').textContent) || 0,
-      b: parseInt(document.getElementById('s1b').textContent) || 0 },
-    { a: parseInt(document.getElementById('s2a').textContent) || 0,
-      b: parseInt(document.getElementById('s2b').textContent) || 0 },
-    { a: parseInt(document.getElementById('s3a').textContent) || 0,
-      b: parseInt(document.getElementById('s3b').textContent) || 0 },
+    {
+      a: parseInt(document.getElementById('s1a').textContent) || 0,
+      b: parseInt(document.getElementById('s1b').textContent) || 0
+    },
+    {
+      a: parseInt(document.getElementById('s2a').textContent) || 0,
+      b: parseInt(document.getElementById('s2b').textContent) || 0
+    },
+    {
+      a: parseInt(document.getElementById('s3a').textContent) || 0,
+      b: parseInt(document.getElementById('s3b').textContent) || 0
+    },
   ];
 
-  let idxA = 0, idxB = 0;       // índice en [0,15,30,40] para el game actual
-  let tbOn = false, tbA = 0, tbB = 0;
-  let tbType = null;            // "set" o "super"
+  let idxA = 0;
+  let idxB = 0;
+
+  let tbOn = false;
+  let tbA = 0;
+  let tbB = 0;
+  let tbType = null;
+
   let sponsors = {{ match.sponsors|default:"[]"|safe }};
   let matchFinished = false;
-  let matchWinner   = null;
+  let matchWinner = null;
 
-  const ga  = document.getElementById('ga');
-  const gb  = document.getElementById('gb');
-  const tbd = document.getElementById('tb');
-  const tbTitle = document.getElementById('tbTitle');
+  const ga = document.getElementById('ga');
+  const gb = document.getElementById('gb');
   const mainPanel = document.getElementById('step2');
+
+  /* ===== Crear banner de tie-break arriba si no existe ===== */
+  const setHeaderTitle = document.querySelector('.set-header-title');
+
+  if (setHeaderTitle && !document.getElementById('tbBanner')) {
+    const banner = document.createElement('div');
+    banner.id = 'tbBanner';
+    banner.style.display = 'none';
+    banner.style.margin = '0 0 16px 0';
+    banner.style.padding = '18px 14px';
+    banner.style.textAlign = 'center';
+    banner.style.fontSize = '38px';
+    banner.style.fontWeight = '900';
+    banner.style.color = '#ff8b1a';
+    banner.style.letterSpacing = '2px';
+    banner.style.background = 'rgba(255,139,26,.12)';
+    banner.style.border = '2px solid #ff8b1a';
+    banner.style.borderRadius = '16px';
+    setHeaderTitle.insertAdjacentElement('afterend', banner);
+  }
 
   /* ===== Paso 1 → Paso 2 ===== */
   function goToStep2() {
@@ -201,7 +225,6 @@
     const b1_last = document.getElementById('b1_last').value.trim();
     const b2_last = document.getElementById('b2_last').value.trim();
 
-    // SOLO apellidos obligatorios
     if (!a1_last || !a2_last || !b1_last || !b2_last) {
       alert("Completá todos los apellidos para continuar.");
       return;
@@ -210,35 +233,32 @@
     const teamA = `${a1_last.toUpperCase()} / ${a2_last.toUpperCase()}`;
     const teamB = `${b1_last.toUpperCase()} / ${b2_last.toUpperCase()}`;
 
-    // setear team_a / team_b que usa toda la lógica
-    const teamAInput = document.getElementById('team_a');
-    const teamBInput = document.getElementById('team_b');
-    if (teamAInput) teamAInput.value = teamA;
-    if (teamBInput) teamBInput.value = teamB;
+    document.getElementById('team_a').value = teamA;
+    document.getElementById('team_b').value = teamB;
 
-    // encabezados de la tabla
     const headA = document.getElementById('headA');
     const headB = document.getElementById('headB');
+
     if (headA) headA.textContent = teamA;
     if (headB) headB.textContent = teamB;
 
-    // spans ocultos por si los necesitás en otra parte
     const teamADisplay = document.getElementById('teamA_display');
     const teamBDisplay = document.getElementById('teamB_display');
+
     if (teamADisplay) teamADisplay.textContent = teamA;
     if (teamBDisplay) teamBDisplay.textContent = teamB;
 
-    // cambiar de paso
     document.getElementById('step1').classList.remove('active');
     document.getElementById('step2').classList.add('active');
 
     save();
   }
 
-  // Ocultar tercer set en modalidad 2 sets + super TB
+  /* ===== Ocultar tercer set en modalidad 2 sets + super TB ===== */
   if (mode === "2_sets_super_tb") {
     const row3 = document.getElementById('row3');
     if (row3) row3.style.display = 'none';
+
     const opt3 = document.querySelector('#current_set option[value="3"]');
     if (opt3) opt3.style.display = 'none';
   }
@@ -252,12 +272,13 @@
   });
 
   function markCurrentRow() {
-    [1,2,3].forEach(i => {
-      const r = document.getElementById('row'+i);
+    [1, 2, 3].forEach(i => {
+      const r = document.getElementById('row' + i);
       if (!r) return;
       r.classList.toggle('current', i === currentSet);
     });
   }
+
   markCurrentRow();
 
   function refreshPills() {
@@ -269,20 +290,18 @@
       gb.textContent = tbB;
     }
   }
+
   refreshPills();
 
-    // Si el partido ya tiene nombres cargados, saltar directamente al marcador
+  /* ===== Si ya tiene nombres, salta directo al marcador ===== */
   if (
     savedTeamA &&
     savedTeamB &&
     savedTeamA !== "Equipo A" &&
     savedTeamB !== "Equipo B"
   ) {
-    const teamAInput = document.getElementById("team_a");
-    const teamBInput = document.getElementById("team_b");
-
-    if (teamAInput) teamAInput.value = savedTeamA;
-    if (teamBInput) teamBInput.value = savedTeamB;
+    document.getElementById("team_a").value = savedTeamA;
+    document.getElementById("team_b").value = savedTeamB;
 
     const headA = document.getElementById("headA");
     const headB = document.getElementById("headB");
@@ -294,7 +313,7 @@
     document.getElementById("step2").classList.add("active");
   }
 
-    function paintSets() {
+  function paintSets() {
     document.getElementById('s1a').textContent = sets[0].a;
     document.getElementById('s1b').textContent = sets[0].b;
     document.getElementById('s2a').textContent = sets[1].a;
@@ -302,22 +321,22 @@
     document.getElementById('s3a').textContent = sets[2].a;
     document.getElementById('s3b').textContent = sets[2].b;
 
-    // resaltar sets ganados (incluye 7–6 / 6–7)
-    [1,2,3].forEach(i => {
-      const s = sets[i-1];
-      const cellA = document.getElementById('s'+i+'a');
-      const cellB = document.getElementById('s'+i+'b');
+    [1, 2, 3].forEach(i => {
+      const s = sets[i - 1];
+      const cellA = document.getElementById('s' + i + 'a');
+      const cellB = document.getElementById('s' + i + 'b');
+
       if (!cellA || !cellB) return;
 
-      cellA.classList.remove('winA','winB');
-      cellB.classList.remove('winA','winB');
+      cellA.classList.remove('winA', 'winB');
+      cellB.classList.remove('winA', 'winB');
 
       if (isSetWon(s.a, s.b)) {
         if (s.a > s.b) cellA.classList.add('winA');
         else cellB.classList.add('winB');
       }
     });
-    }
+  }
 
   paintSets();
 
@@ -329,33 +348,60 @@
 
   function showTb(type) {
     tbOn = true;
-    tbType = type;    // "set" o "super"
-    tbA = tbB = 0;
-    tbd.style.display = 'block';
-    if (tbType === 'super') {
-      tbTitle.textContent = 'Super tie-break (a 10 puntos, ganar por 2)';
-    } else {
-      tbTitle.textContent = 'Tiebreak (a 7 puntos, ganar por 2)';
+    tbType = type;
+    tbA = 0;
+    tbB = 0;
+
+    const banner = document.getElementById('tbBanner');
+
+    if (banner) {
+      if (tbType === 'super') {
+        banner.innerHTML = 'SUPER TIE-BREAK<br><small style="font-size:16px;">A 10 puntos · ganar por 2</small>';
+      } else {
+        banner.innerHTML = 'TIE-BREAK<br><small style="font-size:16px;">A 7 puntos · ganar por 2</small>';
+      }
+
+      banner.style.display = 'block';
     }
+
+    const centerText = document.querySelector('.score-center .muted');
+    if (centerText) centerText.textContent = 'TIE-BREAK ACTIVO';
+
     refreshPills();
+    save();
   }
 
   function hideTb() {
     tbOn = false;
     tbType = null;
-    tbA = tbB = 0;
-    tbd.style.display = 'none';
+    tbA = 0;
+    tbB = 0;
+
+    const banner = document.getElementById('tbBanner');
+    if (banner) banner.style.display = 'none';
+
+    const centerText = document.querySelector('.score-center .muted');
+    if (centerText) centerText.textContent = 'Game actual';
+
     refreshPills();
   }
 
-  /* ===== GAME normal ===== */
+  /* ===== GAME normal / TIE-BREAK usando los mismos botones superiores ===== */
   function point(side) {
-    if (tbOn) return;
     if (matchFinished) return;
 
-    const s = sets[currentSet-1];
+    if (tbOn) {
+      tbPoint(side);
+      return;
+    }
 
-    // si el set ya está ganado, no sumar más games
+    const s = sets[currentSet - 1];
+
+    if (s.a === 6 && s.b === 6) {
+      showTb('set');
+      return;
+    }
+
     if ((s.a >= 6 || s.b >= 6) && Math.abs(s.a - s.b) >= 2) return;
 
     if (side === 'a') {
@@ -363,26 +409,32 @@
     } else {
       idxB < 3 ? idxB++ : winGame('b');
     }
+
     refreshPills();
     save();
   }
 
   function undoPoint(side) {
-    if (tbOn) return;
     if (matchFinished) return;
 
-    if (side === 'a') idxA = Math.max(0, idxA-1);
-    else idxB = Math.max(0, idxB-1);
+    if (tbOn) {
+      tbUndo(side);
+      return;
+    }
+
+    if (side === 'a') idxA = Math.max(0, idxA - 1);
+    else idxB = Math.max(0, idxB - 1);
+
     refreshPills();
     save();
   }
 
   function winGame(winner) {
-    const s = sets[currentSet-1];
+    const s = sets[currentSet - 1];
     s[winner] += 1;
+
     resetGame();
 
-    // Si llegamos a 6–6 → tiebreak clásico
     if (s.a === 6 && s.b === 6) {
       showTb('set');
     }
@@ -391,39 +443,38 @@
     checkSetWinner();
   }
 
-  /* ===== Set ganado + avance / super tie-break ===== */
-    function checkSetWinner() {
+  function checkSetWinner() {
     const s = sets[currentSet - 1];
-    const a = s.a, b = s.b;
+    const a = s.a;
+    const b = s.b;
 
-    // Usamos isSetWon → incluye 7–6 / 6–7
     if (isSetWon(a, b)) {
-      // set cerrado
       hideTb();
       resetGame();
       paintSets();
 
-      // contar sets ganados
-      let setsA = 0, setsB = 0;
+      let setsA = 0;
+      let setsB = 0;
+
       [0, 1, 2].forEach(i => {
         const set = sets[i];
         if (!set) return;
+
         if (isSetWon(set.a, set.b)) {
           if (set.a > set.b) setsA++;
           else setsB++;
         }
       });
 
-      // si alguien gana 2 sets → partido terminado
       if (setsA === 2 || setsB === 2) {
         const teamA = document.getElementById('team_a').value || 'Equipo A';
         const teamB = document.getElementById('team_b').value || 'Equipo B';
 
-        const ganador = (setsA > setsB) ? teamA : teamB;
-        const perdedor = (setsA > setsB) ? teamB : teamA;
+        const ganador = setsA > setsB ? teamA : teamB;
+        const perdedor = setsA > setsB ? teamB : teamA;
 
         matchFinished = true;
-        matchWinner   = ganador;
+        matchWinner = ganador;
 
         alert(`¡Partido finalizado! Ganador: ${ganador} — Derrotado: ${perdedor}`);
 
@@ -444,18 +495,15 @@
           margin-top: 16px;
           border-radius: 8px;
         `;
-        if (mainPanel) {
-          mainPanel.prepend(banner);
-        }
 
-        // Desactivar botones luego del partido
+        if (mainPanel) mainPanel.prepend(banner);
+
         document.querySelectorAll("button").forEach(btn => btn.disabled = true);
 
         save();
         return;
       }
 
-      // avanzar al siguiente set solo si no terminó el partido
       if (mode === '3_sets') {
         if (currentSet < 3) {
           currentSet++;
@@ -465,27 +513,28 @@
       } else if (mode === '2_sets_super_tb') {
         checkSuperTiebreakActivation();
       }
+
       save();
     } else {
-      // set todavía en juego
       save();
     }
   }
 
-
   function checkSuperTiebreakActivation() {
     if (mode !== '2_sets_super_tb') return;
 
-    let setsA = 0, setsB = 0;
-    [0,1].forEach(i => {
+    let setsA = 0;
+    let setsB = 0;
+
+    [0, 1].forEach(i => {
       const s = sets[i];
+
       if (isSetWon(s.a, s.b)) {
         if (s.a > s.b) setsA++;
         else setsB++;
       }
     });
 
-    // Si quedan 1–1 ⇒ super tie-break
     if (setsA === 1 && setsB === 1) {
       showTb('super');
     } else {
@@ -493,34 +542,39 @@
     }
   }
 
-  /* ===== TB (clásico) / SUPER TB ===== */
+  /* ===== TIE-BREAK / SUPER TIE-BREAK ===== */
   function tbPoint(side) {
     if (!tbOn) return;
     if (matchFinished) return;
 
-    if (side === 'a') tbA++; else tbB++;
+    if (side === 'a') tbA++;
+    else tbB++;
+
     refreshPills();
 
-    const target = (tbType === 'super') ? 10 : 7;
+    const target = tbType === 'super' ? 10 : 7;
+
     if ((tbA >= target || tbB >= target) && Math.abs(tbA - tbB) >= 2) {
-      const winnerSide = (tbA > tbB) ? 'a' : 'b';
+      const winnerSide = tbA > tbB ? 'a' : 'b';
       const teamA = document.getElementById('team_a').value || 'Equipo A';
       const teamB = document.getElementById('team_b').value || 'Equipo B';
 
       if (tbType === 'super') {
-        // Super tie-break define el partido (no suma games)
-        const ganador = (winnerSide === 'a') ? teamA : teamB;
-        alert("¡Ganador del super tie-break: " + ganador + "!");
+        const ganador = winnerSide === 'a' ? teamA : teamB;
+
         matchFinished = true;
-        matchWinner   = ganador;
+        matchWinner = ganador;
+
+        alert("¡Ganador del super tie-break: " + ganador + "!");
+
         hideTb();
         resetGame();
         save();
         return;
       }
 
-      // Tiebreak de set: del 6–6 pasamos a 7–6
-      sets[currentSet-1][winnerSide] += 1;
+      sets[currentSet - 1][winnerSide] += 1;
+
       hideTb();
       resetGame();
       paintSets();
@@ -535,15 +589,14 @@
     if (!tbOn) return;
     if (matchFinished) return;
 
-    if (side === 'a') tbA = Math.max(0, tbA-1);
-    else tbB = Math.max(0, tbB-1);
+    if (side === 'a') tbA = Math.max(0, tbA - 1);
+    else tbB = Math.max(0, tbB - 1);
+
     refreshPills();
     save();
   }
 
-    /* ===== Sponsors ===== */
-
-  // Sube un solo sponsor al backend y devuelve la URL
+  /* ===== Sponsors ===== */
   async function uploadOneSponsor(file) {
     const formData = new FormData();
     formData.append("file", file);
@@ -559,7 +612,7 @@
     }
 
     const data = await resp.json();
-    return data.url;  // ej: "/media/sponsors/xxxxx.png"
+    return data.url;
   }
 
   async function addSponsors() {
@@ -568,20 +621,19 @@
 
     const preview = document.getElementById('sponsorsPreview');
 
-    // Recorremos TODOS los archivos seleccionados (pueden ser 30)
     for (const file of input.files) {
       try {
         const url = await uploadOneSponsor(file);
 
-        // Guardamos la URL en el array que viaja al viewer
         sponsors.push(url);
 
-        // Preview en el panel de control
         const tile = document.createElement('div');
         tile.className = 'pb2-s-thumb';
+
         const img = document.createElement('img');
         img.src = url;
         img.alt = 'sponsor';
+
         tile.appendChild(img);
         preview.appendChild(tile);
       } catch (e) {
@@ -590,31 +642,27 @@
       }
     }
 
-    // Limpiar input
     input.value = "";
-    // Guardar estado (manda sponsors por fetch a /api/{code}/update/)
     save();
   }
 
-
-  /* ===== Envío al backend / WebSocket ===== */
-    /* ===== Envío al backend / WebSocket ===== */
+  /* ===== Guardar / WebSocket ===== */
   async function save() {
     let gameMode = "regular";
-    if (tbOn) gameMode = (tbType === "super") ? "super_tb" : "tiebreak";
 
-    // Determinar valor real del punto mostrado
-    let pointA = tbOn ? tbA : pointsScale[idxA];
-    let pointB = tbOn ? tbB : pointsScale[idxB];
+    if (tbOn) {
+      gameMode = tbType === "super" ? "super_tb" : "tiebreak";
+    }
 
-    // Objeto current_game (necesario para el viewer)
+    const pointA = tbOn ? tbA : pointsScale[idxA];
+    const pointB = tbOn ? tbB : pointsScale[idxB];
+
     const current_game = {
-        mode: gameMode,
-        a: pointA, // Puntos de tenis o tie-break/super-tb
-        b: pointB,
+      mode: gameMode,
+      a: pointA,
+      b: pointB,
     };
 
-    // === NOMBRES DE EQUIPOS Y APELLIDOS ===
     const teamAInput = document.getElementById('team_a');
     const teamBInput = document.getElementById('team_b');
 
@@ -623,31 +671,26 @@
     const b1LastInput = document.getElementById('b1_last');
     const b2LastInput = document.getElementById('b2_last');
 
+    const showPointsInput = document.getElementById('showPoints');
+
     const payload = {
-        // nombres de equipo (cadena "APELLIDO1 / APELLIDO2")
-        team_a: teamAInput ? teamAInput.value : null,
-        team_b: teamBInput ? teamBInput.value : null,
+      team_a: teamAInput ? teamAInput.value : null,
+      team_b: teamBInput ? teamBInput.value : null,
 
-        // apellidos individuales (por si el backend los quiere usar)
-        a1_last: a1LastInput ? a1LastInput.value.trim() : null,
-        a2_last: a2LastInput ? a2LastInput.value.trim() : null,
-        b1_last: b1LastInput ? b1LastInput.value.trim() : null,
-        b2_last: b2LastInput ? b2LastInput.value.trim() : null,
+      a1_last: a1LastInput ? a1LastInput.value.trim() : null,
+      a2_last: a2LastInput ? a2LastInput.value.trim() : null,
+      b1_last: b1LastInput ? b1LastInput.value.trim() : null,
+      b2_last: b2LastInput ? b2LastInput.value.trim() : null,
 
-        // set actual
-        current_set: currentSet,
+      current_set: currentSet,
+      sets: sets,
+      current_game: current_game,
 
-        // sets y game actual
-        sets: sets,
-        current_game: current_game,
+      finished: matchFinished,
+      winner: matchWinner,
 
-        // estado del partido
-        finished: matchFinished,
-        winner: matchWinner,
-
-        // sponsors y toggle de puntos
-        sponsors: sponsors,
-        showPoints: document.getElementById('showPoints').checked
+      sponsors: sponsors,
+      showPoints: showPointsInput ? showPointsInput.checked : true
     };
 
     try {
@@ -662,18 +705,10 @@
   }
 
   function isSetWon(a, b) {
-  // Set ganado por diferencia de 2 (6-0, 6-4, 7-5, 8-6, etc.)
-  if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) {
-    return true;
+    if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) return true;
+    if ((a === 7 && b === 6) || (a === 6 && b === 7)) return true;
+    return false;
   }
-  // Set ganado por tie-break: 7-6 o 6-7
-  if ((a === 7 && b === 6) || (a === 6 && b === 7)) {
-    return true;
-  }
-  return false;
-}
-
-  
 </script>
 </body>
 </html>

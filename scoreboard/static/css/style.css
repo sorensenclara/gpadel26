@@ -963,3 +963,61 @@ td.winB,
     height: 40px;
   }
 }
+
+/* ============================================================
+   VIEWER — SETS RESPONSIVE PARA TV / STREAMING
+============================================================ */
+
+.viewer-page .sets {
+  margin-top: clamp(10px, 1.4vh, 22px);
+}
+
+.viewer-page .sets table {
+  height: auto;
+}
+
+.viewer-page .sets tbody tr {
+  height: clamp(78px, 11vh, 140px);
+}
+
+.viewer-page .sets tbody td {
+  padding: clamp(10px, 2vh, 24px) 10px;
+  font-size: clamp(48px, 7vw, 112px);
+  font-weight: 900;
+  line-height: .95;
+  letter-spacing: .02em;
+}
+
+/* Pantallas muy anchas: que no quede exagerado */
+@media (min-width: 1600px) {
+  .viewer-page .sets tbody tr {
+    height: clamp(90px, 10vh, 150px);
+  }
+
+  .viewer-page .sets tbody td {
+    font-size: clamp(70px, 6vw, 128px);
+  }
+}
+
+/* Notebooks / pantallas medianas */
+@media (max-width: 1100px) {
+  .viewer-page .sets tbody tr {
+    height: clamp(70px, 10vh, 110px);
+  }
+
+  .viewer-page .sets tbody td {
+    font-size: clamp(44px, 8vw, 82px);
+  }
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+  .viewer-page .sets tbody tr {
+    height: 68px;
+  }
+
+  .viewer-page .sets tbody td {
+    font-size: clamp(38px, 13vw, 58px);
+    padding: 8px 6px;
+  }
+}
