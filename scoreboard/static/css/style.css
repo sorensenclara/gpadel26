@@ -35,7 +35,7 @@
   --danger: #ef4444;
   --shadow: 0 10px 30px rgba(0,0,0,.28);
 
-  --sponsors-height: 110px;
+  --sponsors-height: 80px;
 }
 
 /* ============================================================
@@ -1112,5 +1112,45 @@ td.winB,
 
   .viewer-page .sets {
     margin-bottom: 24px;
+  }
+}
+
+@media (max-height: 900px) {
+
+  .brand img.logo {
+    height: 70px;
+  }
+
+  .edition img {
+    height: 55px;
+  }
+
+  .topbar {
+    margin-bottom: 6px;
+  }
+
+  .modeBanner-text {
+    font-size: clamp(1.8rem, 2.8vw, 3rem);
+    margin: 0;
+  }
+
+  .team {
+    min-height: 95px;
+  }
+
+  .team .score {
+    font-size: clamp(55px, 6vw, 100px);
+  }
+
+  .viewer-page .sets tbody tr {
+    height: 55px;
+  }
+
+  .viewer-page .sets tbody td {
+    font-size: clamp(42px, 5vw, 80px);
+  }
+
+  :root {
+    --sponsors-height: 85px;
   }
 }
