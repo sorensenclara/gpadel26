@@ -617,6 +617,7 @@ a.link:hover {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  padding-left: 32px;
 }
 
 .team .score {
