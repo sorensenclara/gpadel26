@@ -28,7 +28,7 @@
   --teamB-hover: var(--secondary-hover);
   --teamB-score: color-mix(in srgb, var(--secondary) 54%, transparent);
 
-  --bg: #0a1e3a;
+  --bg: #133a0a;
   --muted: #cbd5e1;
   --white: #fff;
   --panel: rgba(0,0,0,.25);
@@ -100,9 +100,12 @@ p {
 
 .viewer-page .wrap-table {
   flex: 1;
+  width: min(96vw, 1800px);
+  max-width: 1800px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: clamp(8px, 1.4vh, 18px);
 }
 
 /* ============================================================
@@ -565,13 +568,13 @@ a.link:hover {
 ============================================================ */
 .modeBanner-text {
   text-align: center;
-  margin: 8px 0 4px;
-  font-weight: 800;
-  font-size: 1.9rem;
+  margin: 0;
+  font-weight: 900;
+  font-size: clamp(1.6rem, 3.1vw, 3rem);
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--primary);
-  padding-bottom: 16px;
+  line-height: 1;
 }
 
 .board {
@@ -589,7 +592,7 @@ a.link:hover {
   justify-content: space-between;
   padding: 0 5px;
   box-shadow: var(--shadow);
-  min-height: 110px;
+  min-height: clamp(110px, 16vh, 170px);
   width: 100%;
   flex: 1;
   text-align: center;
@@ -617,12 +620,12 @@ a.link:hover {
 }
 
 .team .score {
-  font-weight: 800;
-  font-size: clamp(36px, 6vw, 72px);
-  line-height: 1;
-  padding: 6px 18px;
+  font-weight: 900;
+  font-size: clamp(58px, 8vw, 118px);
+  line-height: .9;
+  padding: 8px 22px;
   border-radius: 12px;
-  min-width: 88px;
+  min-width: clamp(90px, 11vw, 150px);
   text-align: center;
 }
 
@@ -713,6 +716,55 @@ td.winB,
   text-align: center;
 }
 
+/* Viewer: sets grandes y legibles en TV/streaming.
+   Se usa sólo en .viewer-page para no romper el panel de control. */
+.viewer-page .sets {
+  margin-top: 0;
+}
+
+.viewer-page .sets tbody td {
+  padding: clamp(8px, 1.5vh, 18px) 10px;
+  font-weight: 900;
+  line-height: .9;
+  letter-spacing: .02em;
+}
+
+.viewer-page .legend {
+  margin-top: 0;
+  font-size: clamp(12px, 1.4vw, 20px);
+  font-weight: 800;
+}
+
+.viewer-page .wrap-table {
+  justify-content: flex-start;
+  gap: clamp(6px, 1vh, 12px);
+}
+
+.modeBanner-text {
+  font-size: clamp(1.6rem, 3vw, 3rem);
+}
+
+.team {
+  min-height: clamp(90px, 13vh, 145px);
+}
+
+.team .score {
+  font-size: clamp(54px, 7vw, 105px);
+}
+
+.viewer-page .sets tbody tr {
+  height: clamp(58px, 8vh, 105px);
+}
+
+.viewer-page .sets tbody td {
+  font-size: clamp(46px, 7vh, 92px);
+  padding: clamp(4px, 1vh, 10px) 8px;
+  line-height: .85;
+}
+
+.viewer-page .sets {
+  margin-top: 4px;
+}
 /* ============================================================
    13. ESTADOS / ANIMACIONES
 ============================================================ */
@@ -932,6 +984,19 @@ td.winB,
     font-size: 48px;
   }
 
+  .viewer-page .team {
+    min-height: 96px;
+  }
+
+  .viewer-page .sets tbody tr {
+    height: 78px;
+  }
+
+  .viewer-page .sets tbody td {
+    font-size: clamp(48px, 9vh, 74px);
+    padding: 8px 6px;
+  }
+
   .players-grid {
     grid-template-columns: 1fr;
   }
@@ -962,62 +1027,50 @@ td.winB,
     width: 80px;
     height: 40px;
   }
+
+  .viewer-page .sets tbody tr {
+    height: 64px;
+  }
+
+  .viewer-page .sets tbody td {
+    font-size: clamp(38px, 12vw, 58px);
+    padding: 6px;
+  }
 }
 
-/* ============================================================
-   VIEWER — SETS RESPONSIVE PARA TV / STREAMING
-============================================================ */
 
-.viewer-page .sets {
-  margin-top: clamp(10px, 1.4vh, 22px);
+.viewer-page .wrap {
+  width: min(94vw, 1600px);
+  max-width: 1600px;
+  margin: clamp(10px, 2vh, 24px) auto;
+  padding: clamp(12px, 2vw, 24px);
 }
 
-.viewer-page .sets table {
-  height: auto;
+.viewer-page .wrap-table {
+  width: min(94vw, 1800px);
+  max-width: 1800px;
+}
+
+.viewer-page .board {
+  width: 100%;
+}
+
+.viewer-page .team {
+  min-height: clamp(100px, 15vh, 190px);
+}
+
+.viewer-page .team .name {
+  font-size: clamp(22px, 2.3vw, 48px);
+}
+
+.viewer-page .team .score {
+  font-size: clamp(60px, 8vw, 150px);
 }
 
 .viewer-page .sets tbody tr {
-  height: clamp(78px, 11vh, 140px);
+  height: clamp(70px, 9vh, 135px);
 }
 
 .viewer-page .sets tbody td {
-  padding: clamp(10px, 2vh, 24px) 10px;
-  font-size: clamp(48px, 7vw, 112px);
-  font-weight: 900;
-  line-height: .95;
-  letter-spacing: .02em;
-}
-
-/* Pantallas muy anchas: que no quede exagerado */
-@media (min-width: 1600px) {
-  .viewer-page .sets tbody tr {
-    height: clamp(90px, 10vh, 150px);
-  }
-
-  .viewer-page .sets tbody td {
-    font-size: clamp(70px, 6vw, 128px);
-  }
-}
-
-/* Notebooks / pantallas medianas */
-@media (max-width: 1100px) {
-  .viewer-page .sets tbody tr {
-    height: clamp(70px, 10vh, 110px);
-  }
-
-  .viewer-page .sets tbody td {
-    font-size: clamp(44px, 8vw, 82px);
-  }
-}
-
-/* Celulares */
-@media (max-width: 600px) {
-  .viewer-page .sets tbody tr {
-    height: 68px;
-  }
-
-  .viewer-page .sets tbody td {
-    font-size: clamp(38px, 13vw, 58px);
-    padding: 8px 6px;
-  }
+  font-size: clamp(54px, 8vh, 120px);
 }
