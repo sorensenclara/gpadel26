@@ -1074,3 +1074,43 @@ td.winB,
 .viewer-page .sets tbody td {
   font-size: clamp(54px, 8vh, 120px);
 }
+
+@media (max-width: 860px) {
+  :root {
+    --sponsors-height: 86px;
+  }
+
+  .viewer-page {
+    padding-bottom: calc(var(--sponsors-height) + 24px);
+  }
+
+  .pb2-sponsors-section {
+    height: var(--sponsors-height);
+    padding: 8px 0;
+  }
+
+  .pb2-s-thumb {
+    width: 92px;
+    height: calc(var(--sponsors-height) - 16px);
+  }
+
+  .viewer-page .wrap {
+    width: calc(100vw - 24px);
+    margin: 12px auto 14px;
+    padding: 12px;
+  }
+
+  .viewer-page .topbar {
+    margin-bottom: 4px;
+  }
+
+  .viewer-page .wrap-table {
+    width: calc(100vw - 24px);
+    gap: 8px;
+    padding-bottom: 16px;
+  }
+
+  .viewer-page .sets {
+    margin-bottom: 24px;
+  }
+}
