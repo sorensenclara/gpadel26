@@ -704,6 +704,28 @@
     }
   }
 
+  function renderSponsorsPreview() {
+  const preview = document.getElementById('sponsorsPreview');
+  if (!preview) return;
+
+  preview.innerHTML = '';
+
+  sponsors.forEach(url => {
+    const tile = document.createElement('div');
+    tile.className = 'pb2-s-thumb';
+
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = 'sponsor';
+
+    tile.appendChild(img);
+    preview.appendChild(tile);
+  });
+}
+
+renderSponsorsPreview();
+
+
   function isSetWon(a, b) {
     if ((a >= 6 || b >= 6) && Math.abs(a - b) >= 2) return true;
     if ((a === 7 && b === 6) || (a === 6 && b === 7)) return true;
