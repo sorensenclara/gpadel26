@@ -1,0 +1,175 @@
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{% block title %}GPADEL | Gestión de ligas, jugadores y canchas de pádel{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}GPADEL es una plataforma web para la gestión de jugadores, ligas, torneos, canchas y marcadores de pádel.{% endblock %}">
+
+  <!-- Tipografía -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+
+  <!-- Estilos propios -->
+  <link rel="stylesheet" href="{% static 'sitio/css/style.css' %}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}gp-layout{% endblock %}">
+
+  {% block header %}
+  <header class="gp-header">
+    <div class="gp-container gp-header-inner">
+      <a href="{% if gp_perfil_actual == 'organizador' %}{% url 'sitio:canchas_ligas' %}{% elif gp_perfil_actual == 'jugador' %}{% url 'sitio:jugadores' %}{% else %}{% url 'sitio:inicio' %}{% endif %}" class="gp-logo-link">
+        <img src="{% static 'sitio/img/gpadel-logo.svg' %}" alt="GPADEL - Plataforma de gestión de pádel" class="gp-logo-img" width="180" height="48" decoding="async">
+      </a>
+
+      <!-- Navegación desktop -->
+      <nav class="gp-nav">
+        <a href="{% url 'sitio:reservar_cancha' %}" class="{% block nav_reservar_class %}gp-nav-link{% endblock %}">Reservar Cancha</a>
+        <a href="{% url 'scoreboard:index' %}" class="{% block nav_marcador_class %}gp-nav-link{% endblock %}">Marcador Gpadel</a>
+        <a href="{% url 'sitio:torneos' %}" class="{% block nav_torneos_class %}gp-nav-link{% endblock %}">Torneos</a>
+        <a href="{% url 'sitio:ayuda' %}" class="{% block nav_ayuda_class %}gp-nav-link{% endblock %}">Ayuda</a>
+        <a href="{% url 'sitio:contacto' %}" class="{% block nav_contacto_class %}gp-nav-link{% endblock %}">Contacto</a>
+      </nav>
+      <div class="gp-header-actions">
+        {% if gp_ambos_perfiles %}
+          {% if gp_perfil_actual == 'organizador' %}
+          <a href="{% url 'accounts:cambiar_perfil' 'jugador' %}" class="gp-header-cta" title="Cambiar a Jugador">
+            <i class="fa-solid fa-right-left"></i> Cambiar a Jugador
+          </a>
+          {% else %}
+          <a href="{% url 'accounts:cambiar_perfil' 'organizador' %}" class="gp-header-cta" title="Cambiar a Canchas/Ligas">
+            <i class="fa-solid fa-right-left"></i> Cambiar a Canchas/Ligas
+          </a>
+          {% endif %}
+        {% endif %}
+
+        {% if gp_tiene_organizador %}
+        <a href="{% url 'torneos:mis_torneos' %}" class="gp-header-cta">Mis torneos</a>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <a href="{% url 'accounts:mi_cuenta' %}" class="gp-header-cta" style="background:transparent; border:1px solid rgba(15,23,42,.12);">
+          {{ user.organizador.nombre_publico|default:user.jugador.nombre|default:user.username }}
+        </a>
+        <a href="{% url 'sitio:logout' %}" class="gp-header-icon gp-header-icon--login" aria-label="Cerrar sesión" title="Cerrar sesión">
+          <span class="sign"><i class="fa-solid fa-right-from-bracket"></i></span>
+          <span class="text">Salir</span>
+        </a>
+        {% else %}
+        <a href="{% url 'sitio:login' %}" class="gp-header-icon gp-header-icon--login" aria-label="Ingresar">
+          <span class="sign"><i class="fa-solid fa-right-to-bracket"></i></span>
+          <span class="text">Ingresar</span>
+        </a>
+        {% endif %}
+
+        <button class="gp-header-burger" id="gpMenuToggle" aria-label="Abrir menú" aria-expanded="false">
+          <i class="fa-solid fa-bars"></i>
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <nav class="gp-nav-mobile" id="gpMobileNav">
+      <a href="{% url 'sitio:reservar_cancha' %}">Reservar Cancha</a>
+      <a href="{% url 'scoreboard:index' %}">Marcador Gpadel</a>
+      <a href="{% url 'sitio:torneos' %}">Torneos</a>
+      <a href="{% url 'sitio:ayuda' %}">Ayuda</a>
+      <a href="{% url 'sitio:contacto' %}">Contacto</a>
+
+      <div class="gp-nav-mobile-divider"></div>
+
+      {% if user.is_authenticated %}
+      <a href="{% url 'accounts:mi_cuenta' %}" class="gp-nav-mobile-switch">
+        <i class="fa-solid fa-id-card"></i>
+        Mi cuenta
+      </a>
+      {% endif %}
+
+      {% if gp_ambos_perfiles %}
+        {% if gp_perfil_actual == 'organizador' %}
+        <a href="{% url 'accounts:cambiar_perfil' 'jugador' %}" class="gp-nav-mobile-switch">
+          <i class="fa-solid fa-right-left"></i>
+          Cambiar a Jugador
+        </a>
+        {% else %}
+        <a href="{% url 'accounts:cambiar_perfil' 'organizador' %}" class="gp-nav-mobile-switch">
+          <i class="fa-solid fa-right-left"></i>
+          Cambiar a Canchas/Ligas
+        </a>
+        {% endif %}
+      {% elif gp_tiene_organizador %}
+      <a href="{% url 'torneos:mis_torneos' %}" class="gp-nav-mobile-switch">
+        <i class="fa-solid fa-trophy"></i>
+        Mis torneos
+      </a>
+      {% endif %}
+    </nav>
+  </header>
+  {% endblock %}
+
+  {% block content %}{% endblock %}
+
+  {% block footer %}
+  <footer class="gp-footer bg-black text-white pt-5 pb-4" role="contentinfo">
+    <div class="container">
+
+      <div class="row text-center mb-4">
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
+          <a href="https://wa.me/5492494521418" target="_blank" rel="noopener noreferrer" aria-label="Contactar a GPADEL por WhatsApp" class="gp-footer-link d-flex flex-column align-items-center text-white text-decoration-none">
+            <i class="fa-brands fa-whatsapp gp-footer-icon mb-2" aria-hidden="true"></i>
+            <span class="gp-footer-text">+54 9 249 4521418</span>
+          </a>
+        </div>
+
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
+          <a href="mailto:info@gpadel.com.ar" aria-label="Enviar un correo a info@gpadel.com.ar" class="gp-footer-link d-flex flex-column align-items-center text-white text-decoration-none">
+            <i class="fa-regular fa-envelope gp-footer-icon mb-2" aria-hidden="true"></i>
+            <span class="gp-footer-text">info@gpadel.com.ar</span>
+          </a>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <a href="https://www.google.com/maps?q=Alem+1015,+Tandil" target="_blank" rel="noopener noreferrer" aria-label="Ver ubicación de GPADEL en Google Maps" class="gp-footer-link d-flex flex-column align-items-center text-white text-decoration-none">
+            <i class="fa-solid fa-map-location-dot gp-footer-icon mb-2" aria-hidden="true"></i>
+            <span class="gp-footer-text text-center">Alem 1015 – Tandil<br>Buenos Aires – Argentina</span>
+          </a>
+        </div>
+      </div>
+
+      <nav class="d-flex justify-content-center gap-4 mb-3" aria-label="Redes sociales de GPADEL">
+        <a href="https://facebook.com/geneoscoop" target="_blank" rel="noopener noreferrer" aria-label="Facebook de GPADEL" class="text-white"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a>
+        <a href="https://instagram.com/geneos.coop" target="_blank" rel="noopener noreferrer" aria-label="Instagram de GPADEL" class="text-white"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
+        <a href="https://twitter.com/GeneosCoop" target="_blank" rel="noopener noreferrer" aria-label="Twitter de GPADEL" class="text-white"><i class="fa-brands fa-x-twitter" aria-hidden="true"></i></a>
+        <a href="https://www.linkedin.com/company/geneoscoop/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de GPADEL" class="text-white"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
+      </nav>
+
+      <div class="text-center small opacity-75">
+        DISEÑADO POR COOPERATIVA GENEOS LTDA.
+      </div>
+
+    </div>
+  </footer>
+  {% endblock %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_scripts_pre %}{% endblock %}
+  <script src="{% static 'sitio/js/main.js' %}"></script>
+  {% include "sitio/_login_modal.html" %}
+
+  {% block extra_scripts %}{% endblock %}
+  <script src="{% static 'sitio/js/gp-auth.js' %}"></script>
+</body>
+</html>

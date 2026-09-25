@@ -1,0 +1,411 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}{{ torneo.nombre }} | GPADEL{% endblock %}
+{% block meta_description %}{{ torneo.nombre }} — {{ torneo.ciudad }}. Inscribite desde GPADEL.{% endblock %}
+
+{% block body_class %}gp-layout gp-page-torneos{% endblock %}
+{% block nav_torneos_class %}gp-nav-link gp-nav-link--active{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ---------- Hero del torneo ---------- */
+  .gp-tdet-hero {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(120deg, var(--gp-blue-dark), var(--gp-blue) 130%);
+    color: #fff;
+    padding: 36px 0 42px;
+  }
+  .gp-tdet-hero-img {
+    position: absolute;
+    top: -20px; right: -10px;
+    width: 340px; max-width: 42%;
+    opacity: .9;
+    pointer-events: none;
+  }
+  .gp-tdet-hero-tag {
+    position: absolute;
+    top: 22px; right: 6%;
+    font-family: cursive;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: #fff;
+    opacity: .85;
+    transform: rotate(-4deg);
+    text-align: right;
+    line-height: 1.3;
+  }
+  .gp-tdet-eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .8rem; opacity: .8; font-weight: 700; }
+  .gp-tdet-title { font-size: 2.4rem; font-weight: 800; margin: 6px 0 14px; max-width: 60%; }
+  .gp-tdet-title .accent { color: var(--gp-green); }
+  .gp-tdet-meta { display:flex; flex-wrap:wrap; gap: 18px 28px; font-size: .92rem; opacity:.95; margin-bottom: 16px; }
+  .gp-tdet-meta span { display:flex; align-items:center; gap: 7px; }
+  .gp-tdet-pills { display:flex; flex-wrap:wrap; gap: 8px; }
+  .gp-tdet-pill { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 5px 14px; font-size: .78rem; font-weight: 700; }
+
+  /* ---------- Layout dos columnas ---------- */
+  .gp-tdet-layout { display:grid; grid-template-columns: 1.7fr 1fr; gap: 24px; align-items:start; padding: 28px 0 50px; }
+  @media (max-width: 900px) { .gp-tdet-layout { grid-template-columns: 1fr; } }
+
+  /* ---------- Pasos numerados ---------- */
+  .gp-tdet-card { background:#fff; border-radius:16px; padding:24px 26px; box-shadow:0 8px 24px rgba(15,23,42,.06); margin-bottom:18px; }
+  .gp-tdet-step-head { display:flex; align-items:flex-start; gap:14px; margin-bottom:16px; }
+  .gp-tdet-step-num {
+    flex: 0 0 auto; width:34px; height:34px; border-radius:50%;
+    background: var(--gp-blue); color:#fff; font-weight:800;
+    display:flex; align-items:center; justify-content:center; font-size:.95rem;
+  }
+  .gp-tdet-step-head h2 { font-size:1.15rem; margin:0 0 3px; color:#0f172a; }
+  .gp-tdet-step-head p { margin:0; color:#64748b; font-size:.85rem; }
+
+  .gp-tdet-field { margin: 10px 0; }
+  .gp-tdet-field label { display:block; font-size:.8rem; font-weight:700; color:#475569; margin-bottom:6px; }
+  .gp-tdet-field input[type="text"],
+  .gp-tdet-field select { width:100%; border-radius:10px; border:1px solid #d1d5db; padding:10px 12px; font-size:.9rem; }
+  .gp-tdet-row2 { display:grid; grid-template-columns:1fr 1fr; gap: 0 16px; }
+  @media (max-width:560px) { .gp-tdet-row2 { grid-template-columns:1fr; } }
+  .gp-tdet-check-inline { display:flex; align-items:center; gap:8px; font-size:.85rem; color:#475569; margin-top: 26px; }
+  .gp-tdet-check-inline input { width:16px; height:16px; }
+
+  .gp-tdet-jugador-panel { background:#f8fafc; border-radius:14px; padding:18px 20px; margin: 14px 0; }
+  .gp-tdet-jugador-panel h3 { display:flex; align-items:center; justify-content:space-between; font-size:1rem; color: var(--gp-blue-dark); margin:0 0 8px; }
+  .gp-tdet-jugador-panel h3 i { color: var(--gp-blue); opacity:.6; }
+  .gp-tdet-check-row { display:flex; align-items:center; gap:8px; margin: 8px 0; font-size:.85rem; color:#475569; }
+
+  .gp-tdet-error { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:6px 10px; font-size:.78rem; margin: 4px 0; }
+
+  /* ---------- Método de pago (tarjetas) ---------- */
+  .gp-tdet-pago-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; }
+  @media (max-width:640px) { .gp-tdet-pago-grid { grid-template-columns:1fr; } }
+  .gp-tdet-pago-card {
+    border:2px solid #e2e8f0; border-radius:12px; padding:16px 10px; text-align:center;
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px;
+    font-size:.85rem; font-weight:700; color:#475569; transition: border-color .15s, background .15s;
+  }
+  .gp-tdet-pago-card i { font-size:1.5rem; color:#94a3b8; }
+  .gp-tdet-pago-card input { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  .gp-tdet-pago-card.is-selected { border-color: var(--gp-blue); background: rgba(0,91,165,.05); color: var(--gp-blue-dark); }
+  .gp-tdet-pago-card.is-selected i { color: var(--gp-blue); }
+
+  .gp-tdet-actions { display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
+  .gp-tdet-back { color:#64748b; font-weight:700; font-size:.9rem; text-decoration:none; display:flex; align-items:center; gap:6px; }
+
+  /* ---------- Sidebar ---------- */
+  .gp-tdet-side-list { list-style:none; margin:0 0 14px; padding:0; display:flex; flex-direction:column; gap:10px; font-size:.88rem; color:#334155; }
+  .gp-tdet-side-list li { display:flex; align-items:flex-start; gap:10px; }
+  .gp-tdet-side-list i { color: var(--gp-blue); width:16px; text-align:center; margin-top:2px; }
+  .gp-tdet-divider { border:none; border-top:1px solid #e2e8f0; margin: 14px 0; }
+  .gp-tdet-callout { background: var(--gp-green-light); border-radius:12px; padding:14px 16px; display:flex; gap:10px; margin: 14px 0; }
+  .gp-tdet-callout i { color: var(--gp-green-dark); font-size:1.2rem; margin-top:2px; }
+  .gp-tdet-callout strong { display:block; color:#14532d; font-size:.9rem; }
+  .gp-tdet-callout span { font-size:.82rem; color:#166534; }
+  .gp-tdet-info { background:#eff6ff; border-radius:12px; padding:14px 16px; margin: 14px 0; }
+  .gp-tdet-info strong { display:flex; align-items:center; gap:8px; color: var(--gp-blue-dark); font-size:.9rem; margin-bottom:6px; }
+  .gp-tdet-info ul { margin:0; padding-left:18px; font-size:.82rem; color:#334155; }
+  .gp-tdet-mini { display:flex; align-items:center; gap:12px; padding: 12px 4px; }
+  .gp-tdet-mini i { font-size:1.3rem; color: var(--gp-blue); }
+  .gp-tdet-mini strong { display:block; font-size:.88rem; color:#0f172a; }
+  .gp-tdet-mini span { font-size:.78rem; color:#64748b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="gp-main">
+
+  <!-- HERO -->
+  <section class="gp-tdet-hero">
+    <img class="gp-tdet-hero-img" src="{% static 'sitio/img/img-pelota-gpadel.png' %}" alt="">
+    <div class="gp-tdet-hero-tag">Más pádel,<br>misma pasión</div>
+    <div class="gp-container">
+      <p class="gp-tdet-eyebrow">Torneo</p>
+      <h1 class="gp-tdet-title">{{ torneo.nombre }}</h1>
+      <div class="gp-tdet-meta">
+        <span><i class="fa-regular fa-calendar"></i> {{ torneo.fecha_inicio|date:'d/m/Y' }}{% if torneo.fecha_fin != torneo.fecha_inicio %} al {{ torneo.fecha_fin|date:'d/m/Y' }}{% endif %}</span>
+        <span><i class="fa-solid fa-location-dot"></i> {{ torneo.ciudad|default:"A confirmar" }}</span>
+        <span><i class="fa-solid fa-trophy"></i> Inscripciones hasta el {{ torneo.fecha_limite_inscripcion|date:'d/m/Y' }}</span>
+      </div>
+      <div class="gp-tdet-pills">
+        {% for c in torneo.categorias.all %}<span class="gp-tdet-pill">{{ c.nombre }}</span>{% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <div class="gp-container">
+    <div class="gp-tdet-layout">
+
+      <!-- COLUMNA FORM -->
+      <div>
+        {% if cerrado %}
+          <div class="gp-tdet-card">
+            <p style="margin:0;">La inscripción para este torneo ya cerró ({{ torneo.fecha_limite_inscripcion|date:'d/m/Y' }}).</p>
+          </div>
+        {% else %}
+
+        {% if form.non_field_errors %}
+          <div class="gp-tdet-card">
+            {% for error in form.non_field_errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" id="gpInscForm">
+          {% csrf_token %}
+
+          <!-- PASO 1: Categoría -->
+          <div class="gp-tdet-card">
+            <div class="gp-tdet-step-head">
+              <span class="gp-tdet-step-num">1</span>
+              <div>
+                <h2>Categoría</h2>
+                <p>Seleccioná la categoría en la que vas a participar.</p>
+              </div>
+            </div>
+
+            <div class="gp-tdet-row2" style="align-items:end;">
+              <div class="gp-tdet-field">
+                <label for="{{ form.categoria.id_for_label }}">Categoría declarada</label>
+                {{ form.categoria }}
+                {% for error in form.categoria.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+              </div>
+              <div class="gp-tdet-check-inline">
+                <input type="checkbox" id="gpToggleCatReal">
+                <label for="gpToggleCatReal">Mi categoría real es diferente a la declarada</label>
+              </div>
+            </div>
+
+            <div class="gp-tdet-field" id="gpCatRealField" style="display:none;">
+              <label for="{{ form.categoria_real.id_for_label }}">Categoría real</label>
+              {{ form.categoria_real }}
+            </div>
+          </div>
+
+          <!-- PASO 2: Jugadores -->
+          <div class="gp-tdet-card">
+            <div class="gp-tdet-step-head">
+              <span class="gp-tdet-step-num">2</span>
+              <div>
+                <h2>Jugadores</h2>
+                <p>Completá los datos de ambos integrantes de la pareja.</p>
+              </div>
+            </div>
+
+            <div class="gp-tdet-jugador-panel">
+              <h3>Jugador 1 <i class="fa-regular fa-circle-user"></i></h3>
+              <div class="gp-tdet-field">
+                <label for="{{ form.nombre_1.id_for_label }}">Apellido y nombre</label>
+                {{ form.nombre_1 }}
+                {% for error in form.nombre_1.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+              </div>
+              <div class="gp-tdet-row2">
+                <div class="gp-tdet-field">
+                  <label for="{{ form.dni_1.id_for_label }}">DNI</label>
+                  {{ form.dni_1 }}
+                </div>
+                <div class="gp-tdet-field">
+                  <label for="{{ form.localidad_1.id_for_label }}">Localidad</label>
+                  {{ form.localidad_1 }}
+                </div>
+              </div>
+              <div class="gp-tdet-check-row">
+                {{ form.socio_1 }}
+                <label for="{{ form.socio_1.id_for_label }}">Es socio del club</label>
+              </div>
+              <div class="gp-tdet-row2">
+                <div class="gp-tdet-field">
+                  <label for="{{ form.club_socio_1.id_for_label }}">Club del que es socio (opcional)</label>
+                  {{ form.club_socio_1 }}
+                </div>
+                <div class="gp-tdet-field">
+                  <label for="{{ form.carnet_socio_1.id_for_label }}">N° de carnet (opcional)</label>
+                  {{ form.carnet_socio_1 }}
+                </div>
+              </div>
+            </div>
+
+            <div class="gp-tdet-jugador-panel">
+              <h3>Jugador 2 <i class="fa-regular fa-circle-user"></i></h3>
+              <div class="gp-tdet-field">
+                <label for="{{ form.nombre_2.id_for_label }}">Apellido y nombre</label>
+                {{ form.nombre_2 }}
+              </div>
+              <div class="gp-tdet-row2">
+                <div class="gp-tdet-field">
+                  <label for="{{ form.dni_2.id_for_label }}">DNI</label>
+                  {{ form.dni_2 }}
+                </div>
+                <div class="gp-tdet-field">
+                  <label for="{{ form.localidad_2.id_for_label }}">Localidad</label>
+                  {{ form.localidad_2 }}
+                </div>
+              </div>
+              <div class="gp-tdet-check-row">
+                {{ form.socio_2 }}
+                <label for="{{ form.socio_2.id_for_label }}">Es socio del club</label>
+              </div>
+              <div class="gp-tdet-row2">
+                <div class="gp-tdet-field">
+                  <label for="{{ form.club_socio_2.id_for_label }}">Club del que es socio (opcional)</label>
+                  {{ form.club_socio_2 }}
+                </div>
+                <div class="gp-tdet-field">
+                  <label for="{{ form.carnet_socio_2.id_for_label }}">N° de carnet (opcional)</label>
+                  {{ form.carnet_socio_2 }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PASO 3: Disponibilidad y contacto -->
+          <div class="gp-tdet-card">
+            <div class="gp-tdet-step-head">
+              <span class="gp-tdet-step-num">3</span>
+              <div>
+                <h2>Disponibilidad y contacto</h2>
+                <p>Indicá tus días y horarios disponibles y un teléfono de contacto de la pareja.</p>
+              </div>
+            </div>
+            <div class="gp-tdet-row2">
+              <div class="gp-tdet-field">
+                <label for="{{ form.telefono.id_for_label }}"><i class="fa-solid fa-phone"></i> Teléfono de la pareja</label>
+                {{ form.telefono }}
+              </div>
+              <div class="gp-tdet-field">
+                <label for="{{ form.disponibilidad.id_for_label }}"><i class="fa-regular fa-calendar"></i> Días y horarios disponibles (opcional)</label>
+                {{ form.disponibilidad }}
+              </div>
+            </div>
+          </div>
+
+          <!-- PASO 4: Método de pago -->
+          <div class="gp-tdet-card">
+            <div class="gp-tdet-step-head">
+              <span class="gp-tdet-step-num">4</span>
+              <div>
+                <h2>Método de pago</h2>
+                <p>Seleccioná cómo vas a abonar la inscripción.</p>
+              </div>
+            </div>
+
+            <div class="gp-tdet-pago-grid" id="gpPagoOptions">
+              <label class="gp-tdet-pago-card" data-value="mercadopago">
+                {{ form.metodo_pago.0.tag }}
+                <i class="fa-solid fa-handshake"></i>
+                Mercado Pago
+              </label>
+              <label class="gp-tdet-pago-card" data-value="transferencia">
+                {{ form.metodo_pago.1.tag }}
+                <i class="fa-solid fa-building-columns"></i>
+                Transferencia
+              </label>
+              <label class="gp-tdet-pago-card" data-value="efectivo">
+                {{ form.metodo_pago.2.tag }}
+                <i class="fa-solid fa-money-bill-wave"></i>
+                Efectivo (en la cancha)
+              </label>
+            </div>
+          </div>
+
+          <div class="gp-tdet-actions">
+            <a href="{% url 'sitio:torneos' %}" class="gp-tdet-back"><i class="fa-solid fa-arrow-left"></i> Volver</a>
+            <button type="submit" class="gp-btn gp-btn--primary">Confirmar inscripción <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+
+      <!-- COLUMNA SIDEBAR -->
+      <div>
+        <div class="gp-tdet-card">
+          <h2 style="margin-top:0; font-size:1.1rem;">Resumen del torneo</h2>
+          <ul class="gp-tdet-side-list">
+            <li><i class="fa-regular fa-calendar"></i> {{ torneo.fecha_inicio|date:'d/m/Y' }}{% if torneo.fecha_fin != torneo.fecha_inicio %} al {{ torneo.fecha_fin|date:'d/m/Y' }}{% endif %}</li>
+            <li><i class="fa-solid fa-location-dot"></i> {{ torneo.ciudad|default:"A confirmar" }}</li>
+            <li><i class="fa-solid fa-trophy"></i> ${{ torneo.precio_inscripcion }} por jugador</li>
+            <li><i class="fa-solid fa-users"></i> <strong>Formato:</strong>&nbsp;{{ torneo.get_formato_display }}</li>
+            <li><i class="fa-regular fa-hourglass-half"></i> Cierre de inscripción: {{ torneo.fecha_limite_inscripcion|date:'d/m/Y' }}</li>
+          </ul>
+
+          <hr class="gp-tdet-divider">
+
+          <p style="font-weight:700; font-size:.85rem; color:#334155; margin-bottom:8px;">Categorías</p>
+          <div class="gp-tdet-pills" style="flex-wrap:wrap;">
+            {% for c in torneo.categorias.all %}
+              <span class="gp-tdet-pill" style="background:#eff6ff; border-color:#bfdbfe; color:var(--gp-blue-dark);">{{ c.nombre }}</span>
+            {% endfor %}
+          </div>
+
+          <div class="gp-tdet-callout">
+            <i class="fa-solid fa-circle-check"></i>
+            <div>
+              <strong>¡Dale, que se juega!</strong>
+              <span>Sumate a este torneo y viví la pasión del pádel.</span>
+            </div>
+          </div>
+
+          <div class="gp-tdet-info">
+            <strong><i class="fa-solid fa-circle-info"></i> Importante</strong>
+            <ul>
+              <li>Verificá que los datos sean correctos antes de confirmar.</li>
+              <li>La inscripción se considera válida una vez efectuado el pago.</li>
+              <li>Ante cualquier duda comunicate con nosotros.</li>
+            </ul>
+          </div>
+
+          <div class="gp-tdet-mini">
+            <i class="fa-solid fa-people-group"></i>
+            <div><strong>Juego limpio</strong><span>Deporte y buena onda siempre.</span></div>
+          </div>
+          <div class="gp-tdet-mini">
+            <i class="fa-solid fa-trophy"></i>
+            <div><strong>Más que un torneo</strong><span>Una comunidad que sigue creciendo.</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  (function () {
+    var toggle = document.getElementById('gpToggleCatReal');
+    var field = document.getElementById('gpCatRealField');
+    if (toggle) {
+      toggle.addEventListener('change', function () {
+        field.style.display = toggle.checked ? 'block' : 'none';
+      });
+    }
+
+    var pagoCards = document.querySelectorAll('#gpPagoOptions .gp-tdet-pago-card');
+    function actualizarPago() {
+      var seleccionado = document.querySelector('#gpPagoOptions input[type="radio"]:checked');
+      pagoCards.forEach(function (card) {
+        card.classList.toggle('is-selected', seleccionado && card.dataset.value === seleccionado.value);
+      });
+    }
+    pagoCards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        card.querySelector('input[type="radio"]').checked = true;
+        actualizarPago();
+      });
+    });
+    actualizarPago();
+  })();
+</script>
+
+<script>
+  (function () {
+    var inscForm = document.getElementById('gpInscForm');
+    if (!inscForm) return;
+    var yaLogueado = {{ user.is_authenticated|yesno:'true,false' }};
+    if (yaLogueado) return;  // el servidor ya lo procesa normal
+
+    inscForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      gpAuth.requireAuth(false, function () {
+        inscForm.submit();  // form.submit() no vuelve a disparar 'submit'
+      });
+    });
+  })();
+</script>
+{% endblock %}

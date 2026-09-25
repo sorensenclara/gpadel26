@@ -1,0 +1,36 @@
+// =========================================================
+// GPADEL - SCSS
+// =========================================================
+
+// Entry point SCSS
+// Compila a css/style.css
+
+// Base
+@use "base/variables";
+@use "base/mixins";
+@use "base/reset";
+@use "base/containers";
+@use "base/helpers";
+
+// Layout
+@use "layout/header";
+@use "layout/footer";
+
+// Components
+@use "components/buttons";
+@use "components/search";
+@use "components/benefits";
+
+// Pages
+@use "pages/home";
+@use "pages/ayuda-jugadores";
+@use "pages/results";
+@use "pages/score";
+@use "pages/contact";
+@use "pages/entrada";
+@use "pages/login";
+@use "pages/torneos";
+@use "pages/construction";
+
+// Responsive
+@use "responsive";

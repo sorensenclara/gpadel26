@@ -1,0 +1,31 @@
+/* ==============================
+   Benefits (icono + texto)
+   ============================== */
+
+.gp-benefit-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gp-green-light);
+  border: 1px solid var(--gp-green);
+  flex: 0 0 auto;
+}
+
+.gp-benefit-icon i {
+  font-size: 18px;
+  color: var(--gp-blue-dark);
+}
+
+.gp-benefit-title {
+  font-weight: 800;
+  color: var(--gp-blue-dark);
+}
+
+.gp-benefit-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--gp-muted);
+}

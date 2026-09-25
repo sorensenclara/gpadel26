@@ -1,0 +1,109 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Contacto GPADEL | Plataforma de gestión de pádel{% endblock %}
+{% block meta_description %}Contactá a GPADEL para consultas sobre gestión de pádel, ligas, canchas y jugadores. Estamos para ayudarte a organizar partidos y torneos.{% endblock %}
+
+{% block body_class %}gp-layout gp-page-contact{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block nav_contacto_class %}gp-nav-link--active{% endblock %}
+
+{% block content %}
+<!-- HERO CONTACTO (hero genérico para páginas) -->
+<section class="gp-pages-hero">
+  
+  <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+
+  <div class="gp-container">
+    <h1>Contacto</h1>
+  </div>
+
+</section>
+
+  <!-- BLOQUE PRINCIPAL: info + formulario -->
+  <section class="gp-contact-main">
+    <div class="gp-container-min gp-contact-inner">
+
+      <!-- INFO -->
+      <div class="gp-contact-info">
+        <h2>Estamos para ayudarte</h2>
+        <p>
+          Si tenés un club, sos jugador o simplemente querés saber más sobre GPADEL,
+          escribinos. Te acompañamos a gestionar mejor tus partidos y reservas.
+        </p>
+
+        <div class="gp-divider"></div> <!-- Linea divisoria -->
+
+        <ul class="gp-contact-list">
+          <!-- Aca pongo el mail de gpadel (no anda aun) -->
+          <li>
+            <a href="mailto:info@gpadel.com.ar" target="_blank" rel="noopener">
+              <i class="fa-regular fa-envelope gp-footer-icon"></i>
+              <span>info@gpadel.com.ar</span>
+            </a>
+          </li>
+
+          <!-- WHATSAPP de GENEOS como referencia-->
+          <li>
+            <a href="https://wa.me/5492494521418" target="_blank" rel="noopener">
+              <i class="fa-brands fa-whatsapp gp-footer-icon"></i>
+              <span>+54 9 249 4521418</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="gp-divider"></div> <!-- Linea divisoria -->
+      </div>
+
+      <!-- FORMULARIO -->
+      <div class="gp-contact-form-wrapper">
+        <form action="#" method="post">
+          <div class="gp-form-group">
+            <label for="nombre"></label>
+            <input type="text" id="nombre" name="nombre" placeholder="Nombre y Apellido">
+          </div>
+
+          <div class="gp-form-group">
+            <label for="telefono"></label>
+            <input type="text" id="telefono" name="telefono" placeholder="Teléfono"> 
+          </div>
+
+          <div class="gp-form-group">
+            <label for="mensaje"></label>
+            <textarea id="mensaje" name="mensaje" placeholder="Contanos qué necesitás..."></textarea>
+          </div>
+
+          <button type="submit" class="gp-btn gp-btn--primary gp-contact-submit">
+            Enviar
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAPA GOOGLE (hasta acá, como en Geneos) -->
+  <section class="gp-section--light">
+
+    <div class="gp-contact-map">
+      <!-- Reemplazá el src por tu iframe real de Google Maps si querés otra ubicación -->
+      <iframe
+        loading="lazy"
+        allowfullscreen
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3280.332802128891!2d-59.139!3d-37.736!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x958dcd4a0f000001%3A0x0000000000000000!2sAlem%201015%2C%20Tandil!5e0!3m2!1ses-419!2sar!4v1700000000000">
+      </iframe>
+    </div>
+  </section>
+
+<!-- FOOTER (Bootstrap + agrego accesibilidad con arial-lavel en iconos) -->
+{% endblock %}
+
+{% block extra_scripts_pre %}
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+{% endblock %}

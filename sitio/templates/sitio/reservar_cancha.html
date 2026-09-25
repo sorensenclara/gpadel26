@@ -1,0 +1,61 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Reservar cancha de pádel online | GPADEL{% endblock %}
+{% block meta_description %}Reservá tu cancha de pádel online con GPADEL. Buscá por ciudad y encontrá canchas disponibles en segundos.{% endblock %}
+
+{% block nav_reservar_class %}gp-nav-link gp-nav-link--active{% endblock %}
+
+{% block extra_head %}
+<style>
+  .gp-rc-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 16px 60px; }
+  .gp-rc-search { display:flex; gap:12px; flex-wrap:wrap; background:#fff; border-radius:14px; padding:16px 18px; box-shadow:0 6px 18px rgba(15,23,42,.05); margin-bottom:24px; }
+  .gp-rc-search input { border:1px solid #d1d5db; border-radius:999px; padding:10px 16px; font-size:.9rem; }
+  .gp-rc-search input[name="ciudad"] { flex:1 1 220px; }
+  .gp-rc-search button { background: var(--gp-green); border:none; border-radius:999px; padding:10px 24px; font-weight:800; font-size:.85rem; cursor:pointer; }
+
+  .gp-rc-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:18px; }
+  .gp-rc-card { background:#fff; border-radius:14px; box-shadow:0 6px 18px rgba(15,23,42,.05); padding:20px; }
+  .gp-rc-card h3 { margin:0 0 6px; font-size:1.05rem; }
+  .gp-rc-card .gp-rc-ciudad { color:#64748b; font-size:.85rem; display:flex; align-items:center; gap:6px; margin-bottom:10px; }
+  .gp-rc-card .gp-rc-meta { display:flex; gap:14px; font-size:.83rem; color:#334155; margin-bottom:14px; }
+  .gp-rc-empty { background:#fff; border-radius:16px; padding:40px; text-align:center; color:#64748b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="gp-main">
+  <section class="gp-pages-hero">
+    <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+    <div class="gp-container">
+      <h1>Reservar Cancha</h1>
+    </div>
+  </section>
+
+  <div class="gp-rc-wrap">
+    <form method="get" class="gp-rc-search">
+      <input type="text" name="ciudad" value="{{ ciudad }}" placeholder="Ciudad">
+      <input type="date" name="fecha" value="{{ fecha|date:'Y-m-d' }}">
+      <button type="submit">Buscar</button>
+    </form>
+
+    <div class="gp-rc-grid">
+      {% for cancha in canchas %}
+      <div class="gp-rc-card">
+        <h3>{{ cancha.nombre }}</h3>
+        <div class="gp-rc-ciudad"><i class="fa-solid fa-location-dot"></i> {{ cancha.ciudad }}</div>
+        <div class="gp-rc-meta">
+          <span><i class="fa-solid fa-{% if cancha.techada %}house{% else %}sun{% endif %}"></i> {% if cancha.techada %}Techada{% else %}Al aire libre{% endif %}</span>
+          <span><i class="fa-solid fa-tag"></i> ${{ cancha.precio_hora }}/hora</span>
+        </div>
+        <a href="{% url 'sitio:cancha_detalle' cancha.id %}?fecha={{ fecha|date:'Y-m-d' }}" class="gp-btn gp-btn--primary" style="width:100%; text-align:center;">Ver horarios</a>
+      </div>
+      {% empty %}
+      <div class="gp-rc-empty" style="grid-column:1/-1;">
+        {% if ciudad %}No encontramos canchas en "{{ ciudad }}".{% else %}Todavía no hay canchas cargadas.{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+{% endblock %}

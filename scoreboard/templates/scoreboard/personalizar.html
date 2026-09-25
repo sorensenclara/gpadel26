@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personalizá tu marcador</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+  body { font-family: "Titillium Web", sans-serif; }
+
+  .box-mode { max-width: 480px; text-align: left; }
+  .box-mode > img,
+  .box-mode > h1,
+  .box-mode > p { text-align: center; }
+
+  .gp-wizard-progress {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 18px 0 4px;
+  }
+  .gp-wizard-progress .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,.25);
+    transition: background .2s ease, transform .2s ease;
+  }
+  .gp-wizard-progress .dot.is-active {
+    background: var(--white, #fff);
+    transform: scale(1.3);
+  }
+
+  .wizard-step h2 {
+    font-size: .95rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    opacity: .85;
+    margin: 20px 0 14px;
+  }
+
+  .gp-choice-cards { display: flex; flex-direction: column; gap: 10px; }
+  .gp-choice-card {
+    display: block;
+    border: 2px solid rgba(255,255,255,.25);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .gp-choice-card input[type="radio"] {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .gp-choice-title { display: block; font-weight: 700; font-size: .95rem; }
+  .gp-choice-desc { display: block; font-size: .8rem; opacity: .75; margin-top: 3px; font-weight: 400; }
+  .gp-choice-card.is-selected {
+    border-color: #fff;
+    background: rgba(255,255,255,.08);
+  }
+
+  .gp-field { margin: 14px 0; }
+  .gp-field label { display: block; margin-bottom: 6px; font-size: .85rem; opacity: .9; }
+  .gp-field input[type="text"],
+  .gp-field input[type="file"] {
+    width: 100%; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.08);
+    color: #fff; font-family: inherit; font-size: .9rem;
+  }
+  .gp-field input[type="text"]::placeholder { color: rgba(255,255,255,.5); }
+  .gp-field input[type="color"] { width: 60px; height: 38px; border: none; background: none; vertical-align: middle; }
+
+  .gp-tipografia-options { display: flex; gap: 16px; margin-top: 6px; }
+  .gp-tipografia-options label { display: flex; align-items: center; gap: 6px; font-size: .85rem; font-weight: 400; margin-bottom: 0; }
+
+  .wizard-actions {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 24px;
+  }
+  .wizard-actions .btn-primary { min-width: 150px; background: var(--score-cta, #005ba5); }
+  .wizard-actions .btn-primary:hover { background: #0072cc; }
+  .btn-secondary {
+    background: transparent; border: 1px solid rgba(255,255,255,.4);
+    color: #fff; padding: 12px 20px; border-radius: 32px; cursor: pointer;
+    font-weight: 600; font-size: .9rem;
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.08); }
+</style>
+</head>
+<body>
+  <div class="box-mode">
+    <img src="{% static 'sitio/img/gpadel-logo.svg' %}" alt="GPADEL" style="height:52px; margin-bottom:16px; display:block; margin-left:auto; margin-right:auto;">
+    <h1 style="font-size:1.3rem; margin:0;">Personalizá tu marcador</h1>
+    <p style="opacity:.8; font-size:.85rem;"><strong>Código:</strong> {{ match.code }}</p>
+
+    <div class="gp-wizard-progress" id="gpDots">
+      <span class="dot is-active" data-dot="1"></span>
+      <span class="dot" data-dot="2"></span>
+      <span class="dot" data-dot="3"></span>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="gpWizardForm">
+      {% csrf_token %}
+
+      <!-- PASO 1 -->
+      <section class="wizard-step" data-step="1">
+        <h2>Paso 1 — Tipo de marcador</h2>
+        <div class="gp-choice-cards" id="gpTipoOptions">
+          <label class="gp-choice-card is-selected" data-value="no">
+            <input type="radio" name="personalizado" value="no" checked>
+            <span class="gp-choice-title">No personalizado</span>
+            <span class="gp-choice-desc">Diseño GPADEL: azul, logo GPADEL</span>
+          </label>
+          <label class="gp-choice-card" data-value="si">
+            <input type="radio" name="personalizado" value="si">
+            <span class="gp-choice-title">Personalizado</span>
+            <span class="gp-choice-desc">Tu logo y colores</span>
+          </label>
+        </div>
+        <div class="wizard-actions">
+          <span></span>
+          <button type="button" class="btn-primary" data-next>Siguiente</button>
+        </div>
+      </section>
+
+      <!-- PASO 2 -->
+      <section class="wizard-step" data-step="2" hidden>
+        <h2>Paso 2 — Nombre del creador</h2>
+        <div class="gp-field">
+          <label for="gpNombreCreador">Club / Liga / Cancha (opcional)</label>
+          <input type="text" id="gpNombreCreador" name="nombre_creador" placeholder="Ej: Liga de Pádel San Cayetano">
+        </div>
+        <div class="wizard-actions">
+          <button type="button" class="btn-secondary" data-prev>Atrás</button>
+          <button type="button" class="btn-primary" id="gpStep2Next" data-next>Siguiente</button>
+        </div>
+      </section>
+
+      <!-- PASO 3 (solo si personalizado = sí) -->
+      <section class="wizard-step" data-step="3" hidden>
+        <h2>Paso 3 — Identidad visual</h2>
+        <div class="gp-field">
+          <label for="gpLogo">Logo (PNG/JPG)</label>
+          <input type="file" id="gpLogo" name="logo" accept="image/png,image/jpeg">
+        </div>
+        <div class="gp-field">
+          <label for="gpColor">Color principal</label>
+          <input type="color" id="gpColor" name="color_principal" value="#005ba5">
+        </div>
+        <div class="gp-field">
+          <label>Tipografía</label>
+          <div class="gp-tipografia-options">
+            <label><input type="radio" name="tipografia" value="sans" checked> Sin serif</label>
+            <label><input type="radio" name="tipografia" value="serif"> Con serif</label>
+          </div>
+        </div>
+        <div class="wizard-actions">
+          <button type="button" class="btn-secondary" data-prev>Atrás</button>
+          <button type="submit" class="btn-primary">Ir al marcador</button>
+        </div>
+      </section>
+
+    </form>
+  </div>
+
+  <script>
+    (function () {
+      var steps = Array.prototype.slice.call(document.querySelectorAll('.wizard-step'));
+      var dots = Array.prototype.slice.call(document.querySelectorAll('#gpDots .dot'));
+      var tipoCards = Array.prototype.slice.call(document.querySelectorAll('#gpTipoOptions .gp-choice-card'));
+      var step2NextBtn = document.getElementById('gpStep2Next');
+      var current = 1;
+
+      function esPersonalizado() {
+        var sel = document.querySelector('input[name="personalizado"]:checked');
+        return sel ? sel.value === 'si' : false;
+      }
+
+      function totalSteps() {
+        return esPersonalizado() ? 3 : 2;
+      }
+
+      function actualizarDots() {
+        var total = totalSteps();
+        dots.forEach(function (dot) {
+          var n = parseInt(dot.dataset.dot, 10);
+          dot.style.display = n <= total ? 'inline-block' : 'none';
+          dot.classList.toggle('is-active', n === current);
+        });
+      }
+
+      function actualizarStep2Boton() {
+        if (esPersonalizado()) {
+          step2NextBtn.textContent = 'Siguiente';
+          step2NextBtn.type = 'button';
+        } else {
+          step2NextBtn.textContent = 'Ir al marcador';
+          step2NextBtn.type = 'submit';
+        }
+      }
+
+      function mostrarPaso(n) {
+        current = n;
+        steps.forEach(function (s) {
+          s.hidden = (parseInt(s.dataset.step, 10) !== n);
+        });
+        actualizarDots();
+      }
+
+      document.querySelectorAll('[data-next]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (current === 1) { mostrarPaso(2); return; }
+          if (current === 2 && esPersonalizado()) { mostrarPaso(3); return; }
+        });
+      });
+      document.querySelectorAll('[data-prev]').forEach(function (btn) {
+        btn.addEventListener('click', function () { mostrarPaso(current - 1); });
+      });
+
+      tipoCards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          card.querySelector('input[type="radio"]').checked = true;
+          tipoCards.forEach(function (c) { c.classList.toggle('is-selected', c === card); });
+          actualizarStep2Boton();
+          actualizarDots();
+        });
+      });
+
+      actualizarStep2Boton();
+      mostrarPaso(1);
+    })();
+  </script>
+</body>
+</html>

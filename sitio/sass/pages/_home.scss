@@ -1,0 +1,117 @@
+/* ===============================
+HOME: HERO + SECCIONES
+=============================== */
+.gp-hero{
+  position: relative;
+  overflow: hidden;
+  background: var(--gp-blue-dark); 
+  color: var(--gp-white);
+}
+
+.gp-hero-bg{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* Contenido por encima del fondo */
+.gp-hero-inner{
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.gp-hero-text h1{
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 16px;
+}
+
+.gp-hero-text p{
+  margin: 0 0 24px;
+  max-width: 420px;
+  color: var(--gp-white);
+  font-size: .95rem;
+}
+
+.gp-hero-cta{
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.gp-section{ padding:60px 0; background:var(--gp-white); }
+.gp-section--light{ background:var(--gp-bg); }
+.gp-section-title{
+  text-align:center;
+  font-weight:700;
+  margin:0 0 40px;
+  font-size:2.5rem;
+  color:var(--gp-blue-dark);
+}
+
+/* Pasos */
+.gp-steps{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:24px;
+}
+.gp-step{ position:relative; z-index:1; text-align:center; }
+.gp-step-card{
+  background:var(--gp-white);
+  border-radius:16px;
+  padding:18px 16px 20px;
+  box-shadow:var(--gp-shadow-card);
+}
+.gp-step-icon{ font-size:1.5rem; margin-bottom:6px; }
+.gp-step-card h3{ margin:0 0 6px; font-weight:700; font-size:.95rem; }
+.gp-step-card p{ margin:0; font-size:.8rem; color:var(--gp-muted); }
+.gp-step-icon img{ width:120px; height:120px; }
+
+/* Testimonios */
+.gp-testimonial-wrapper{ display:flex; align-items:center; gap:18px; }
+.gp-testimonial-arrow{
+  border:none;
+  background:var(--gp-white);
+  width:32px;
+  height:32px;
+  border-radius:999px;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(15,23,42,.12);
+  font-size:1.1rem;
+}
+.gp-testimonial{
+  background:var(--gp-white);
+  border-radius:var(--gp-radius-lg);
+  padding:26px 26px 22px;
+  box-shadow:var(--gp-shadow-soft);
+}
+.gp-testimonial-text{ margin:0 0 20px; font-size:.9rem; color:#374151; }
+.gp-testimonial-footer{ display:flex; align-items:center; justify-content:space-between; }
+.gp-testimonial-user{ display:flex; align-items:center; gap:10px; }
+.gp-avatar{ width:36px; height:36px; border-radius:50%; background:var(--gp-white-dark); }
+.gp-testimonial-name{ font-size:.85rem; font-weight:600; }
+.gp-testimonial-cat{ font-size:.75rem; color:var(--gp-muted); }
+.gp-testimonial-stars{ letter-spacing:2px; color:var(--gp-green); }
+
+/* Banda CTA */
+.gp-cta-band{ padding:40px 0 50px; background:var(--gp-white); }
+.gp-cta-inner{
+  background:#0b3f70;
+  border-radius:var(--gp-radius-pill);
+  padding:22px 32px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:var(--gp-white);
+}
+.gp-cta-inner h3{ margin:0 0 4px; }
+.gp-cta-inner p{ margin:0; font-size:.8rem; color:#d1d5db; }

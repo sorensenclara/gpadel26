@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: padelboard2026
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "daphne padelboard.asgi:application -b 0.0.0.0 -p $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9

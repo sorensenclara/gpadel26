@@ -1,0 +1,221 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Panel de Organizador | GPADEL{% endblock %}
+{% block body_class %}gp-layout{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  /* --- Texto del hero: "Hola," en blanco, nombre en verde (color base del h1) --- */
+  .gp-dash-hola { color: #fff; }
+
+  /* --- Cards: blancas, sin borde, sombra muy sutil, esquinas grandes --- */
+  .gp-dash-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin: 36px 0 28px;
+  }
+  @media (max-width: 900px) {
+    .gp-dash-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .gp-dash-grid { grid-template-columns: 1fr; }
+  }
+
+  .gp-dash-card {
+    background: #fff;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(20, 45, 75, 0.06);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .gp-dash-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: #eaf2fb; /* azul muy claro */
+    color: var(--gp-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+  }
+  .gp-dash-card--soon .gp-dash-icon { background: #f1f5f9; color: #94a3b8; }
+
+  .gp-dash-card .gp-dash-num { font-size: 1.9rem; font-weight: 800; color: var(--gp-blue-dark); line-height: 1; }
+  .gp-dash-card h3 { margin: 0; font-size: 1.08rem; }
+  .gp-dash-card p { margin: 0; color: #64748b; font-size: .87rem; line-height: 1.45; flex-grow: 1; }
+
+  .gp-dash-card .gp-btn { margin-top: 4px; }
+
+  /* Botón deshabilitado (Turnero) — claramente inactivo, sin verde */
+  .gp-dash-btn-soon {
+    display: block;
+    text-align: center;
+    margin-top: 4px;
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    color: #94a3b8;
+    font-weight: 700;
+    font-size: .85rem;
+    cursor: default;
+  }
+
+  /* --- Bloque "Tus últimos torneos" --- */
+  .gp-dash-recientes {
+    background: #fff;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(20, 45, 75, 0.06);
+    padding: 28px 32px;
+  }
+  .gp-dash-recientes-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+  .gp-dash-recientes-head-left { display: flex; gap: 16px; align-items: flex-start; }
+  .gp-dash-recientes-head h2 { margin: 0 0 4px; font-size: 1.1rem; }
+  .gp-dash-recientes-head p { margin: 0; color: #64748b; font-size: .85rem; }
+
+  .gp-dash-btn-outline {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #fff; border: 1.5px solid var(--gp-blue); color: var(--gp-blue);
+    border-radius: 999px; padding: 10px 20px; font-weight: 700; font-size: .85rem;
+    text-decoration: none; white-space: nowrap;
+  }
+  .gp-dash-btn-outline:hover { background: #eff6ff; }
+
+  .gp-dash-table-wrap { overflow-x: auto; }
+  .gp-dash-recientes table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  .gp-dash-recientes thead th {
+    text-align: left; padding: 12px 10px; background: #f8fafc; color: #64748b;
+    font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em;
+  }
+  .gp-dash-recientes thead th:first-child { border-radius: 10px 0 0 10px; }
+  .gp-dash-recientes thead th:last-child { border-radius: 0 10px 10px 0; }
+  .gp-dash-recientes tbody td { padding: 14px 10px; border-bottom: 1px solid #f1f5f9; }
+  .gp-dash-recientes tbody tr:last-child td { border-bottom: none; }
+
+  .gp-dash-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--gp-green-light); color: #14532d;
+    border-radius: 999px; padding: 4px 14px; font-size: .8rem; font-weight: 600;
+  }
+  .gp-dash-pill-dot { width: 7px; height: 7px; border-radius: 50%; background: #16a34a; }
+  .gp-dash-pill--muted { background: #f1f5f9; color: #64748b; }
+  .gp-dash-pill--muted .gp-dash-pill-dot { background: #94a3b8; }
+
+  .gp-dash-acciones { display: flex; align-items: center; gap: 14px; }
+  .gp-dash-acciones a { color: var(--gp-blue); font-weight: 700; text-decoration: none; }
+  .gp-dash-acciones a:hover { text-decoration: underline; }
+  .gp-dash-more { color: #94a3b8; font-size: 1.1rem; line-height: 1; }
+
+  .gp-dash-empty { color: #94a3b8; font-size: .9rem; }
+  .gp-dash-empty a { color: var(--gp-blue); font-weight: 700; }
+
+  @media (max-width: 640px) {
+    .gp-dash-card .gp-btn,
+    .gp-dash-btn-soon { width: 100%; }
+    .gp-dash-recientes { padding: 22px 18px; }
+    .gp-dash-recientes-head { flex-direction: column; }
+    .gp-dash-btn-outline { width: 100%; justify-content: center; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="gp-main">
+  <section class="gp-pages-hero">
+    <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+    <div class="gp-container">
+      <h5>Panel de organizador</h5>
+      <h1><span class="gp-dash-hola">Hola,</span> {{ organizador.nombre_publico }}</h1>
+    </div>
+  </section>
+
+  <section class="gp-torneos">
+    <div class="gp-container">
+
+      <div class="gp-dash-grid">
+        <div class="gp-dash-card">
+          <span class="gp-dash-icon"><i class="bi bi-trophy"></i></span>
+          <span class="gp-dash-num">{{ torneos_count }}</span>
+          <h3>Torneos</h3>
+          <p>Creá y gestioná tus torneos: categorías, inscriptos y cruces.</p>
+          <a class="gp-btn gp-btn--primary" href="{% url 'torneos:mis_torneos' %}">Ver mis torneos →</a>
+        </div>
+
+        <div class="gp-dash-card">
+          <span class="gp-dash-icon"><i class="bi bi-display"></i></span>
+          <span class="gp-dash-num">{{ partidos_count }}</span>
+          <h3>Marcador</h3>
+          <p>Creá un marcador personalizado con tu logo y colores para tus partidos.</p>
+          <form action="{% url 'scoreboard:new_match' %}" method="get">
+            <button type="submit" class="gp-btn gp-btn--primary" style="width:100%;">Crear marcador →</button>
+          </form>
+        </div>
+
+        <div class="gp-dash-card gp-dash-card--soon">
+          <span class="gp-dash-icon"><i class="bi bi-calendar-check"></i></span>
+          <h3>Turnero de canchas</h3>
+          <p>Gestioná tus canchas y turnos disponibles.<br>Próximamente.</p>
+          <span class="gp-dash-btn-soon">Próximamente</span>
+        </div>
+      </div>
+
+      <div class="gp-dash-recientes">
+        <div class="gp-dash-recientes-head">
+          <div class="gp-dash-recientes-head-left">
+            <span class="gp-dash-icon" style="margin-bottom:0;"><i class="bi bi-list-check"></i></span>
+            <div>
+              <h2>Tus últimos torneos</h2>
+              <p>Aquí podés ver y gestionar tus torneos creados.</p>
+            </div>
+          </div>
+          <a href="{% url 'torneos:crear_torneo' %}" class="gp-dash-btn-outline"><i class="bi bi-plus-lg"></i> Crear nuevo torneo</a>
+        </div>
+
+        {% if torneos %}
+        <div class="gp-dash-table-wrap">
+        <table>
+          <thead>
+            <tr><th>Nombre</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+            {% for t in torneos %}
+            <tr>
+              <td>{{ t.nombre }}</td>
+              <td>{{ t.fecha_inicio|date:'d/m/Y' }}</td>
+              <td>
+                {% if t.estado_visual == 'borrador' %}
+                  <span class="gp-dash-pill gp-dash-pill--muted"><span class="gp-dash-pill-dot"></span>{{ t.estado_visual_label }}</span>
+                {% else %}
+                  <span class="gp-dash-pill"><span class="gp-dash-pill-dot"></span>{{ t.estado_visual_label }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="gp-dash-acciones">
+                  <a href="{% url 'torneos:organizador_detalle' t.codigo %}">Gestionar</a>
+                  <span class="gp-dash-more">⋮</span>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="gp-dash-empty">Todavía no creaste ningún torneo. <a href="{% url 'torneos:crear_torneo' %}">Creá el primero</a>.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Mis torneos | GPADEL{% endblock %}
+{% block body_class %}gp-layout{% endblock %}
+
+{% block extra_head %}
+<style>
+  .gp-mt-wrap { max-width: 1080px; margin: 0 auto; padding: 36px 16px 60px; }
+
+  .gp-mt-message { background: var(--gp-green-light); color:#166534; border-radius:12px; padding:14px 18px; margin-bottom:28px; font-size:.9rem; }
+
+  .gp-mt-toolbar { display:flex; gap:16px; align-items:center; flex-wrap:nowrap; margin-bottom:28px; }
+  .gp-mt-crear { background: var(--gp-green); color:#0f172a; border:none; border-radius:999px; padding:12px 22px; font-weight:800; font-size:.9rem; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; white-space:nowrap; flex:0 0 auto; }
+  .gp-mt-crear:hover { filter:brightness(.95); }
+  .gp-mt-search { flex:1 1 auto; min-width:140px; position:relative; }
+  .gp-mt-search i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; }
+  .gp-mt-search input { width:100%; border:1px solid #d1d5db; border-radius:999px; padding:11px 16px 11px 38px; font-size:.9rem; }
+  .gp-mt-orden { display:flex; align-items:center; gap:10px; font-size:.85rem; color:#475569; white-space:nowrap; flex:0 0 auto; }
+  .gp-mt-orden select { border:1px solid #d1d5db; border-radius:999px; padding:9px 14px; font-size:.85rem; font-weight:600; color:#0f172a; }
+
+  @media (max-width: 640px) {
+    .gp-mt-toolbar { flex-wrap:wrap; row-gap:14px; }
+    .gp-mt-crear, .gp-mt-search { flex-basis:100%; }
+  }
+
+  .gp-mt-tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px; }
+  .gp-mt-tab { border:1px solid #cbd5e1; background:#fff; color:#334155; border-radius:999px; padding:9px 18px; font-size:.85rem; font-weight:700; text-decoration:none; }
+  .gp-mt-tab.is-active { background: var(--gp-blue-dark); border-color: var(--gp-blue-dark); color:#fff; }
+
+  .gp-mt-card { background:#fff; border-radius:16px; box-shadow:0 6px 18px rgba(15,23,42,.06); padding:18px 22px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
+  .gp-mt-card-main { flex:1 1 320px; min-width:0; }
+  .gp-mt-estado { display:inline-block; padding:3px 12px; border-radius:999px; font-size:.7rem; font-weight:800; letter-spacing:.02em; text-transform:uppercase; margin-bottom:8px; }
+  .gp-mt-estado--inscripcion_abierta { background:#dcfce7; color:#166534; }
+  .gp-mt-estado--en_juego { background:#dbeafe; color:#1e40af; }
+  .gp-mt-estado--borrador { background:#e2e8f0; color:#475569; }
+  .gp-mt-estado--finalizado { background:#0f172a; color:#fff; }
+  .gp-mt-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:currentColor; margin-right:6px; vertical-align:middle; }
+  .gp-mt-card h3 { margin:0 0 4px; font-size:1.15rem; }
+  .gp-mt-ubicacion { display:flex; align-items:center; gap:6px; color:#64748b; font-size:.85rem; }
+
+  .gp-mt-meta { display:flex; gap:32px; flex-wrap:wrap; }
+  .gp-mt-meta-item { display:flex; gap:8px; align-items:flex-start; font-size:.85rem; color:#334155; }
+  .gp-mt-meta-item i { color: var(--gp-blue); margin-top:3px; }
+  .gp-mt-meta-item .gp-mt-sub { display:block; font-size:.76rem; color:#94a3b8; margin-top:2px; }
+
+  .gp-mt-actions { display:flex; gap:10px; flex-wrap:wrap; }
+  .gp-mt-btn { border-radius:999px; padding:10px 18px; font-weight:800; font-size:.82rem; text-decoration:none; text-align:center; border:1.5px solid transparent; cursor:pointer; }
+  .gp-mt-btn--green { background: var(--gp-green); color:#0f172a; }
+  .gp-mt-btn--outline-blue { background:#fff; border-color: var(--gp-blue); color: var(--gp-blue); }
+  .gp-mt-btn--outline-red { background:#fff; border-color:#ef4444; color:#dc2626; }
+
+  .gp-mt-empty { background:#fff; border-radius:16px; padding:40px; text-align:center; color:#64748b; }
+
+  .gp-mt-empty-hero { background:#fff; border-radius:16px; padding:50px 30px 36px; text-align:center; box-shadow:0 6px 18px rgba(15,23,42,.05); }
+  .gp-mt-empty-icon { width:110px; height:110px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; font-size:2.6rem; color: var(--gp-blue-dark); }
+  .gp-mt-empty-hero h2 { margin:0 0 10px; font-size:1.4rem; color:#0f172a; }
+  .gp-mt-empty-hero p { max-width:440px; margin:0 auto 24px; color:#64748b; font-size:.92rem; }
+  .gp-mt-empty-steps { display:flex; justify-content:center; gap:40px; flex-wrap:wrap; margin-top:32px; padding-top:28px; border-top:1px solid #e2e8f0; }
+  .gp-mt-empty-step { display:flex; align-items:center; gap:10px; text-align:left; }
+  .gp-mt-empty-step-icon { width:38px; height:38px; border-radius:50%; background:#eff6ff; color: var(--gp-blue); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .gp-mt-empty-step strong { display:block; font-size:.88rem; color:#0f172a; }
+  .gp-mt-empty-step span { font-size:.8rem; color:#94a3b8; }
+
+  .gp-mt-ayuda { background:#f1f5f9; border-radius:16px; padding:24px; text-align:center; margin-top:10px; }
+  .gp-mt-ayuda strong { display:block; font-size:1rem; color:#0f172a; margin-bottom:4px; }
+  .gp-mt-ayuda span { display:block; font-size:.85rem; color:#64748b; margin-bottom:14px; }
+  .gp-mt-ayuda-btn { display:inline-flex; align-items:center; gap:8px; background:#25D366; color:#fff; border-radius:999px; padding:10px 20px; font-weight:700; font-size:.85rem; text-decoration:none; }
+  .gp-mt-ayuda-btn:hover { filter:brightness(.95); }
+
+  @media (max-width: 720px) {
+    .gp-mt-toolbar { flex-direction:column; align-items:stretch; }
+    .gp-mt-crear { text-align:center; justify-content:center; }
+    .gp-mt-card { flex-direction:column; align-items:stretch; }
+    .gp-mt-actions { width:100%; }
+    .gp-mt-actions form, .gp-mt-actions a, .gp-mt-actions button { flex:1 1 0; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="gp-main">
+  <section class="gp-pages-hero">
+    <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+    <div class="gp-container">
+      <h5>Organizador</h5>
+      <h1>Mis torneos</h1>
+      <p>Gestioná, editá y hacé seguimiento de todos tus torneos.</p>
+    </div>
+  </section>
+
+  <div class="gp-mt-wrap">
+
+    {% if messages %}
+      {% for message in messages %}<div class="gp-mt-message">{{ message }}</div>{% endfor %}
+    {% endif %}
+
+    <div class="gp-mt-toolbar">
+      <a href="{% url 'torneos:crear_torneo' %}" class="gp-mt-crear"><i class="fa-solid fa-plus"></i> Crear torneo</a>
+
+      <form method="get" class="gp-mt-search">
+        <input type="hidden" name="estado" value="{{ estado_filtro }}">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" name="q" value="{{ busqueda }}" placeholder="Buscar torneos..." onchange="this.form.submit()">
+      </form>
+
+      <form method="get" class="gp-mt-orden">
+        <input type="hidden" name="estado" value="{{ estado_filtro }}">
+        <input type="hidden" name="q" value="{{ busqueda }}">
+        <label for="gpOrden">Ordenar por</label>
+        <select name="orden" id="gpOrden" onchange="this.form.submit()">
+          <option value="recientes" {% if orden == 'recientes' %}selected{% endif %}>Más recientes</option>
+          <option value="proximos" {% if orden == 'proximos' %}selected{% endif %}>Próximos primero</option>
+          <option value="nombre" {% if orden == 'nombre' %}selected{% endif %}>Nombre (A-Z)</option>
+        </select>
+      </form>
+    </div>
+
+    <div class="gp-mt-tabs">
+      <a href="?estado=todos&q={{ busqueda }}&orden={{ orden }}" class="gp-mt-tab {% if estado_filtro == 'todos' %}is-active{% endif %}">Todos ({{ conteos.todos }})</a>
+      <a href="?estado=publicado&q={{ busqueda }}&orden={{ orden }}" class="gp-mt-tab {% if estado_filtro == 'publicado' %}is-active{% endif %}">Publicados ({{ conteos.publicado }})</a>
+      <a href="?estado=borrador&q={{ busqueda }}&orden={{ orden }}" class="gp-mt-tab {% if estado_filtro == 'borrador' %}is-active{% endif %}">Borradores ({{ conteos.borrador }})</a>
+      <a href="?estado=finalizado&q={{ busqueda }}&orden={{ orden }}" class="gp-mt-tab {% if estado_filtro == 'finalizado' %}is-active{% endif %}">Finalizados ({{ conteos.finalizado }})</a>
+    </div>
+
+    {% for torneo in torneos %}
+    <div class="gp-mt-card">
+      <div class="gp-mt-card-main">
+        <span class="gp-mt-estado gp-mt-estado--{{ torneo.estado_visual }}"><span class="gp-mt-dot"></span>{{ torneo.estado_visual_label }}</span>
+        <h3>{{ torneo.nombre }}</h3>
+        <div class="gp-mt-ubicacion"><i class="fa-solid fa-location-dot"></i> {{ torneo.ciudad|default:"A confirmar" }}</div>
+      </div>
+
+      <div class="gp-mt-meta">
+        <div class="gp-mt-meta-item">
+          <i class="fa-regular fa-calendar"></i>
+          <div>
+            {{ torneo.fecha_inicio|date:'d' }} al {{ torneo.fecha_fin|date:'d M Y' }}
+            <span class="gp-mt-sub">Cierre de inscripción: {{ torneo.fecha_limite_inscripcion|date:'d/m/Y' }}</span>
+          </div>
+        </div>
+        <div class="gp-mt-meta-item">
+          <i class="fa-solid fa-table-cells"></i>
+          <div>{{ torneo.categorias_count }}<span class="gp-mt-sub">categorías</span></div>
+        </div>
+        <div class="gp-mt-meta-item">
+          <i class="fa-solid fa-users"></i>
+          <div>{{ torneo.parejas_inscriptas_count }}<span class="gp-mt-sub">parejas inscriptas</span></div>
+        </div>
+      </div>
+
+      <div class="gp-mt-actions">
+        {% if torneo.estado_visual == 'borrador' %}
+          <form method="post" action="{% url 'torneos:cambiar_estado' torneo.codigo %}">
+            {% csrf_token %}
+            <button type="submit" name="accion" value="publicar" class="gp-mt-btn gp-mt-btn--green" style="width:100%;">Publicar</button>
+          </form>
+          <form method="post" action="{% url 'torneos:eliminar_torneo' torneo.codigo %}" onsubmit="return confirm('¿Eliminar el torneo {{ torneo.nombre|escapejs }}? Esto también borra sus categorías.');">
+            {% csrf_token %}
+            <button type="submit" class="gp-mt-btn gp-mt-btn--outline-red" style="width:100%;">Eliminar</button>
+          </form>
+        {% elif torneo.estado_visual == 'finalizado' %}
+          <a href="{% url 'torneos:organizador_detalle' torneo.codigo %}" class="gp-mt-btn gp-mt-btn--outline-blue">Ver resultados</a>
+        {% else %}
+          <a href="{% url 'torneos:organizador_detalle' torneo.codigo %}" class="gp-mt-btn gp-mt-btn--green">Gestionar</a>
+          <form method="post" action="{% url 'torneos:cambiar_estado' torneo.codigo %}" onsubmit="return confirm('¿Finalizar el torneo {{ torneo.nombre|escapejs }}?');">
+            {% csrf_token %}
+            <button type="submit" name="accion" value="cerrar" class="gp-mt-btn gp-mt-btn--outline-blue">Finalizar</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+      {% if busqueda or estado_filtro != 'todos' %}
+        <div class="gp-mt-empty">No encontramos torneos con esos filtros.</div>
+      {% else %}
+      <div class="gp-mt-empty-hero">
+        <div class="gp-mt-empty-icon"><i class="fa-solid fa-table-tennis-paddle-ball"></i></div>
+        <h2>Todavía no tenés torneos</h2>
+        <p>Creá tu primer torneo, configurá las categorías y publicalo para comenzar a recibir inscripciones.</p>
+        <a href="{% url 'torneos:crear_torneo' %}" class="gp-mt-crear"><i class="fa-solid fa-plus"></i> Crear torneo</a>
+
+        <div class="gp-mt-empty-steps">
+          <div class="gp-mt-empty-step">
+            <span class="gp-mt-empty-step-icon"><i class="fa-regular fa-calendar"></i></span>
+            <div><strong>Configurá</strong><span>fechas y sedes</span></div>
+          </div>
+          <div class="gp-mt-empty-step">
+            <span class="gp-mt-empty-step-icon"><i class="fa-solid fa-users"></i></span>
+            <div><strong>Definí</strong><span>las categorías</span></div>
+          </div>
+          <div class="gp-mt-empty-step">
+            <span class="gp-mt-empty-step-icon"><i class="fa-solid fa-bullhorn"></i></span>
+            <div><strong>Publicá</strong><span>y recibí inscripciones</span></div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    {% if torneos %}
+    <div class="gp-mt-ayuda">
+      <strong>¿Necesitás ayuda?</strong>
+      <span>Escribinos y te asesoramos.</span>
+      <a href="https://wa.me/5492494521418" target="_blank" rel="noopener" class="gp-mt-ayuda-btn">
+        <i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</main>
+{% endblock %}

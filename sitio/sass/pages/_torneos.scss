@@ -1,0 +1,216 @@
+/* ===============================
+TORNEOS + SPONSORS
+=============================== */
+.gp-torneos{ background:var(--gp-bg); padding:28px 0 70px; }
+body.gp-page-torneos .gp-torneos{ margin-top:20px; }
+
+.gp-filterbar{
+  max-width:1180px;
+  margin:-26px auto 26px;
+  padding:16px;
+  border-radius:var(--gp-radius-lg);
+  background:var(--gp-white);
+  border:2px solid var(--gp-green);
+  box-shadow:0 18px 40px rgba(181,234,29,.20);
+}
+body.gp-page-torneos .gp-filterbar{ margin:-26px auto 26px; }
+
+.gp-filter-label{
+  display:block;
+  font-size:.7rem;
+  font-weight:800;
+  text-transform:uppercase;
+  color:var(--gp-muted);
+  margin-bottom:6px;
+  letter-spacing:.05em;
+}
+.gp-filter-select{
+  width:100%;
+  border-radius:16px;
+  border:1px solid var(--gp-white-dark);
+  padding:10px 12px;
+  font-weight:600;
+  background:#fff;
+  outline:none;
+}
+.gp-filter-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  align-items:center;
+  height:100%;
+}
+.gp-btn--ghost{
+  background:transparent;
+  border:2px solid var(--gp-white-dark);
+  color:var(--gp-blue-text);
+}
+.gp-btn--ghost:hover{ background:var(--gp-bg); }
+
+.gp-torneos-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:16px;
+}
+.gp-torneos-head h2{
+  margin:0;
+  color:var(--gp-blue-dark);
+  font-weight:800;
+  font-size:1.45rem;
+}
+.gp-torneos-head p{ margin:0; color:var(--gp-muted); font-size:.95rem; }
+
+body.gp-page-torneos {
+  .gp-torneo-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    @media (max-width: 991.98px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 767.98px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .gp-torneo-card {
+    width: 100%;
+  }
+}
+
+.gp-torneo-card{
+  background:#fff;
+  border-radius:var(--gp-radius-md);
+  overflow:hidden;
+  box-shadow:var(--gp-shadow-card);
+  transition:transform .25s ease, box-shadow .25s ease;
+  border:1px solid rgba(15,23,42,.06);
+}
+.gp-torneo-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 18px 40px rgba(15,23,42,.14);
+}
+.gp-torneo-top{
+  padding:16px 16px 14px;
+  background:rgba(20,67,113,.06);
+  border-bottom:1px solid rgba(15,23,42,.06);
+}
+.gp-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:800;
+  font-size:.72rem;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  background:var(--gp-green-light);
+  color:var(--gp-blue-text);
+}
+.gp-torneo-title{
+  margin:10px 0 2px;
+  font-weight:800;
+  color:var(--gp-blue-dark);
+  font-size:1.05rem;
+  line-height:1.2;
+}
+.gp-torneo-sub{ margin:0; color:var(--gp-muted); font-size:.9rem; }
+.gp-torneo-body{ padding:14px 16px 16px; }
+
+.gp-torneo-meta{ display:grid; gap:8px; margin-bottom:14px; }
+.gp-meta-row{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  color:var(--gp-blue-text);
+  font-size:.92rem;
+}
+.gp-meta-row i{
+  margin-top:3px;
+  color:var(--gp-green-dark);
+  width:18px;
+  text-align:center;
+  flex:0 0 auto;
+}
+
+.gp-torneo-actions{
+  display:flex;
+  gap:10px;
+  justify-content:space-between;
+  align-items:center;
+}
+.gp-link-mini{
+  color:var(--gp-blue);
+  text-decoration:none;
+  font-weight:700;
+  font-size:.9rem;
+}
+.gp-link-mini:hover{ text-decoration:underline; }
+
+.gp-empty-state{
+  margin-top:24px;
+  background:#fff;
+  border-radius:var(--gp-radius-md);
+  padding:18px;
+  border:1px solid rgba(15,23,42,.06);
+  box-shadow:0 12px 30px rgba(15,23,42,.06);
+}
+.gp-empty-state h3{ margin:0 0 6px; font-weight:800; color:var(--gp-blue-dark); }
+.gp-empty-state p{ margin:0; color:var(--gp-muted); }
+
+/* Sponsors */
+.gp-sponsors{ background:#fff; text-align:center; }
+.gp-sponsors-kicker{
+  margin:0 0 10px;
+  font-weight:600;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  font-size:.95rem;
+  color:#8a8a8a;
+}
+.gp-sponsors-title{
+  margin:0 0 26px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+  line-height:1.05;
+  font-size:clamp(2rem,4vw,3.2rem);
+  color:#1f2a33;
+}
+.gp-sponsors-title-accent{ color:var(--gp-green-dark); }
+
+.gp-sponsors-logos{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  align-items:center;
+}
+.gp-sponsor{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:160px;
+  padding:20px;
+  border-radius:14px;
+  text-decoration:none;
+}
+.gp-sponsor img{
+  max-width:160px;
+  max-height:110px;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  filter:grayscale(100%);
+  opacity:.6;
+  transition:filter .25s ease, opacity .25s ease, transform .25s ease;
+}
+.gp-sponsor:hover img{
+  filter:grayscale(0%);
+  opacity:1;
+  transform:scale(1.08);
+}

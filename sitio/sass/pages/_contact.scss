@@ -1,0 +1,87 @@
+/* ===============================
+PÁGINA: CONTACTO
+=============================== */
+.gp-contact-main{ padding:40px 0 70px; }
+.gp-contact-inner{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);
+  gap:40px;
+  align-items:flex-start;
+}
+.gp-contact-info h2{
+  font-size:1.9rem;
+  font-weight:700;
+  margin:0 0 14px;
+  color:var(--gp-blue-dark);
+}
+.gp-contact-text{ margin:0 0 18px; color:var(--gp-blue-dark); font-size:.95rem; }
+
+.gp-contact-list{ list-style:none; padding:0; margin:0; }
+.gp-contact-list li{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:10px;
+  color:var(--gp-blue-text);
+  font-size:1.05rem;
+}
+.gp-contact-list li a{
+  text-decoration:none;
+  color:var(--gp-text);
+  transition:color .2s ease;
+}
+.gp-contact-list a:hover{ color:var(--gp-green); }
+.gp-contact-list i{
+  margin-top:4px;
+  margin-right:12px;
+  color:var(--gp-green);
+}
+
+.gp-divider{ width:100%; height:2px; background:var(--gp-green); margin:20px 0; }
+
+.gp-contact-form-wrapper{
+  background:var(--gp-white);
+  border-radius:var(--gp-radius-md);
+  padding:22px 22px 24px;
+  box-shadow:var(--gp-shadow-card);
+}
+.gp-contact-form-wrapper h2{
+  font-size:1.1rem;
+  margin:0 0 16px;
+  color:var(--gp-blue-dark);
+}
+.gp-form-group{ margin-bottom:14px; }
+.gp-form-group label{
+  display:block;
+  font-size:.8rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:4px;
+  color:var(--gp-muted);
+}
+.gp-form-group input,
+.gp-form-group textarea{
+  width:100%;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  padding:9px 11px;
+  font-family:inherit;
+  font-size:.9rem;
+  outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.gp-form-group textarea{ min-height:110px; resize:vertical; }
+.gp-form-group input:focus,
+.gp-form-group textarea:focus{
+  border-color:var(--gp-blue);
+  box-shadow:0 0 0 1px rgba(0,91,165,.15);
+}
+.gp-contact-map-title{
+  text-align:center;
+  margin:0 0 20px;
+  font-size:1.4rem;
+  color:var(--gp-blue-dark);
+}
+.gp-contact-map{ width:100%; height:380px; }
+.gp-contact-map iframe{ border:0; width:100%; height:100%; }

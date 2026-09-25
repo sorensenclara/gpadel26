@@ -1,0 +1,44 @@
+/* ===============================
+SITIO EN CONSTRUCCIÓN
+=============================== */
+
+body.page-construction {
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background: #000;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fondo visual (imagen) */
+body.page-construction > .gp-hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* Contenido por encima del fondo */
+body.page-construction main,
+body.page-construction footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Main ocupa el espacio entre top y footer */
+body.page-construction main {
+  flex: 1;
+}
+
+/* Centrado real del contenido */
+body.page-construction .gp-construction-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+}

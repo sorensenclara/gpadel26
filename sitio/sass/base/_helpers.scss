@@ -1,0 +1,11 @@
+/* ===============================
+HELPERS / UTILITIES
+=============================== */
+.gp-card{
+  background:var(--gp-white);
+  border-radius:var(--gp-radius-md);
+  box-shadow:var(--gp-shadow-card);
+}
+.gp-shadow-soft{ box-shadow:var(--gp-shadow-soft); }
+.gp-text-muted{ color:var(--gp-muted); }
+.gp-bg-light{ background:var(--gp-bg); }

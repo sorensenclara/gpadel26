@@ -1,0 +1,271 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}{{ torneo.nombre }} | Gestión | GPADEL{% endblock %}
+{% block body_class %}gp-layout{% endblock %}
+
+{% block extra_head %}
+<style>
+  .gp-od-wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 50px; }
+
+  .gp-od-banner {
+    background: var(--gp-green-light); border-radius: 14px; padding: 18px 22px;
+    display:flex; gap:20px; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap;
+  }
+  .gp-od-banner-check { flex:0 0 auto; width:38px; height:38px; border-radius:50%; background:#22c55e; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+  .gp-od-banner h2 { margin:0 0 4px; font-size:1.05rem; color:#14532d; }
+  .gp-od-banner p { margin:0; font-size:.85rem; color:#166534; }
+  .gp-od-banner-info { flex:1 1 240px; display:flex; gap:10px; align-items:flex-start; border-left:1px solid #bbf7d0; padding-left:20px; }
+  .gp-od-banner-info i { color: var(--gp-blue); margin-top:2px; }
+  .gp-od-banner-info span { font-size:.85rem; color:#334155; }
+  @media (max-width:640px) { .gp-od-banner-info { border-left:none; padding-left:0; } }
+
+  .gp-od-card { background:#fff; border-radius:16px; padding:22px 24px; box-shadow:0 8px 24px rgba(15,23,42,.06); margin-bottom:20px; }
+  .gp-od-head { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; }
+  .gp-od-head h1 { font-size:1.3rem; margin:0; display:inline; }
+  .gp-od-estado { display:inline-block; padding:3px 12px; border-radius:999px; font-size:.75rem; font-weight:700; margin-left:10px; vertical-align:middle; }
+  .gp-od-estado--borrador { background:#e2e8f0; color:#475569; }
+  .gp-od-estado--publicado { background:#dcfce7; color:#166534; }
+  .gp-od-estado--cerrado { background:#fee2e2; color:#991b1b; }
+  .gp-od-novisible { font-size:.85rem; color:#64748b; margin:8px 0 0; }
+  .gp-od-divider { border:none; border-top:1px solid #e2e8f0; margin: 18px 0; }
+  .gp-od-actions { display:flex; gap:10px; flex-wrap:wrap; }
+  .gp-btn--outline { background:#fff; border:1.5px solid #cbd5e1; color:#334155; border-radius:999px; padding:10px 18px; font-weight:700; font-size:.88rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px; }
+  .gp-btn--outline:hover { border-color:#94a3b8; }
+
+  .gp-od-meta { display:flex; gap:36px; flex-wrap:wrap; margin-top:18px; }
+  .gp-od-meta-item { display:flex; gap:10px; align-items:flex-start; }
+  .gp-od-meta-item i { color: var(--gp-blue); margin-top:3px; }
+  .gp-od-meta-item strong { display:block; font-size:.78rem; color:#94a3b8; font-weight:600; }
+  .gp-od-meta-item span { font-size:.92rem; color:#0f172a; font-weight:700; }
+
+  .gp-od-cat-section-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .gp-od-cat-section-head h2 { margin:0; font-size:1.2rem; }
+  .gp-od-add-cat { background: var(--gp-blue); color:#fff; border:none; border-radius:999px; padding:10px 18px; font-weight:700; font-size:.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+  .gp-od-add-cat:hover { background: var(--gp-blue-dark); }
+
+  .gp-od-cat-card { background:#fff; border-radius:14px; box-shadow:0 6px 18px rgba(15,23,42,.05); padding:16px 20px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-left:6px solid #cbd5e1; }
+  .gp-od-cat-card h3 { margin:0 0 6px; font-size:1.05rem; }
+  .gp-od-cat-meta { display:flex; gap:18px; flex-wrap:wrap; font-size:.85rem; color:#64748b; }
+  .gp-od-cat-meta span { display:flex; align-items:center; gap:6px; }
+  .gp-od-cat-actions { display:flex; gap:8px; }
+  .gp-od-cat-actions button, .gp-od-cat-actions a { border-radius:999px; padding:8px 14px; font-size:.82rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; border:1.5px solid #cbd5e1; background:#fff; color:#334155; text-decoration:none; }
+  .gp-od-cat-actions .gp-od-btn-eliminar { border-color:#fecaca; color:#991b1b; }
+  .gp-od-cat-actions .gp-od-btn-eliminar:hover { background:#fef2f2; }
+
+  .gp-od-info-box { background:#eff6ff; border-radius:14px; padding:18px 22px; display:flex; gap:14px; margin-top:20px; }
+  .gp-od-info-box i { color: var(--gp-blue); font-size:1.3rem; margin-top:2px; }
+  .gp-od-info-box strong { display:block; margin-bottom:4px; color: var(--gp-blue-dark); }
+  .gp-od-info-box p { margin:0; font-size:.88rem; color:#334155; }
+
+  /* Modal categoría */
+  .gp-od-modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:1000;
+    align-items:flex-start; justify-content:flex-end; padding: 40px;
+  }
+  .gp-od-modal-overlay.is-open { display:flex; }
+  .gp-od-modal { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:360px; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+  .gp-od-modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .gp-od-modal-head h3 { margin:0; font-size:1.05rem; }
+  .gp-od-modal-close { background:none; border:none; font-size:1.2rem; cursor:pointer; color:#94a3b8; }
+  .gp-od-modal .gp-wiz-field label { display:block; font-size:.8rem; font-weight:700; color:#334155; margin-bottom:6px; }
+  .gp-od-modal .gp-wiz-field select,
+  .gp-od-modal .gp-wiz-field input { width:100%; border-radius:10px; border:1px solid #d1d5db; padding:10px 12px; font-size:.9rem; margin-bottom:14px; }
+  .gp-od-modal-actions { display:flex; justify-content:space-between; gap:10px; margin-top:6px; }
+
+  table.gp-org-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:.85rem; }
+  table.gp-org-table th, table.gp-org-table td { text-align:left; padding:8px 10px; border-bottom:1px solid #e2e8f0; }
+  .gp-badge { padding:2px 10px; border-radius:999px; font-size:.75rem; font-weight:700; }
+  .gp-badge--pendiente { background:#fef9c3; color:#854d0e; }
+  .gp-badge--confirmada { background:#dcfce7; color:#166534; }
+  .gp-badge--rechazada { background:#fee2e2; color:#991b1b; }
+  .gp-org-btn-mini { font-size:.78rem; padding:4px 10px; border-radius:8px; border:1px solid var(--gp-blue); color:var(--gp-blue); background:none; cursor:pointer; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="gp-main">
+  <section class="gp-pages-hero">
+    <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+    <div class="gp-container">
+      <h5>Torneo</h5>
+      <h1>{{ torneo.nombre }}</h1>
+    </div>
+  </section>
+
+  <div class="gp-od-wrap">
+
+    {% if messages %}
+      {% for message in messages %}<p style="color:#166534;">{{ message }}</p>{% endfor %}
+    {% endif %}
+
+    {% if torneo.estado == 'borrador' %}
+    <div class="gp-od-banner">
+      <span class="gp-od-banner-check"><i class="fa-solid fa-check"></i></span>
+      <div>
+        <h2>¡Torneo creado correctamente!</h2>
+        <p>Está guardado como <strong>Borrador</strong>: no es visible para los jugadores ni puede recibir inscripciones hasta que lo publiques.</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="gp-od-card">
+      <div class="gp-od-head">
+        <div>
+          <span class="gp-od-estado gp-od-estado--{{ torneo.estado }}">{{ torneo.estado_badge_corto|upper }}</span>
+          <p class="gp-od-novisible">{{ torneo.estado_subtitulo }}</p>
+        </div>
+        <div class="gp-od-actions">
+          <a href="{% url 'torneos:editar_torneo' torneo.codigo %}" class="gp-btn--outline"><i class="fa-regular fa-pen-to-square"></i> Editar torneo</a>
+          <form method="post">
+            {% csrf_token %}
+            {% if torneo.estado == 'borrador' %}
+              <button type="submit" name="accion" value="publicar" class="gp-btn gp-btn--primary"><i class="fa-solid fa-globe"></i> Publicar torneo</button>
+            {% elif torneo.estado == 'publicado' %}
+              <button type="submit" name="accion" value="cerrar" class="gp-btn--outline" style="border-color:#fecaca; color:#991b1b;">Finalizar torneo</button>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+
+      <hr class="gp-od-divider">
+
+      <div class="gp-od-meta">
+        <div class="gp-od-meta-item">
+          <i class="fa-solid fa-location-dot"></i>
+          <div><strong>Ubicación</strong><span>{{ torneo.ciudad|default:"A confirmar" }}</span></div>
+        </div>
+        <div class="gp-od-meta-item">
+          <i class="fa-regular fa-calendar"></i>
+          <div><strong>Fecha del torneo</strong><span>{{ torneo.fecha_inicio|date:'d' }} al {{ torneo.fecha_fin|date:'d' }} de {{ torneo.fecha_fin|date:'F' }} de {{ torneo.fecha_fin|date:'Y' }}</span></div>
+        </div>
+        <div class="gp-od-meta-item">
+          <i class="fa-regular fa-clock"></i>
+          <div><strong>Cierre de inscripción</strong><span>{{ torneo.fecha_limite_inscripcion|date:'d' }} de {{ torneo.fecha_limite_inscripcion|date:'F' }} de {{ torneo.fecha_limite_inscripcion|date:'Y' }}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gp-od-cat-section-head">
+      <h2>Categorías</h2>
+      <button type="button" class="gp-od-add-cat" onclick="gpAbrirModalCategoria()"><i class="fa-solid fa-plus"></i> Agregar categoría</button>
+    </div>
+
+    {% for categoria in categorias %}
+    <div class="gp-od-cat-card" style="border-left-color: {{ categoria.color_css }};">
+      <div>
+        <h3>{{ categoria.nombre }}</h3>
+        <div class="gp-od-cat-meta">
+          <span><i class="fa-solid fa-users"></i> {{ categoria.inscriptos_count }} pareja{{ categoria.inscriptos_count|pluralize }} inscripta{{ categoria.inscriptos_count|pluralize }}</span>
+          <span><i class="fa-solid fa-user-group"></i> Mínimo para disputar la categoría: {{ categoria.cupo_minimo }} parejas</span>
+        </div>
+      </div>
+      <div class="gp-od-cat-actions">
+        <button type="button" onclick="gpAbrirModalCategoria({{ categoria.id }}, '{{ categoria.nombre|escapejs }}', {{ categoria.cupo_minimo }})">
+          <i class="fa-regular fa-pen-to-square"></i> Editar
+        </button>
+        <form method="post" action="{% url 'torneos:eliminar_categoria' torneo.codigo categoria.id %}" onsubmit="return confirm('¿Eliminar la categoría {{ categoria.nombre|escapejs }}? Esto también borra sus inscripciones.');" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="gp-od-btn-eliminar"><i class="fa-regular fa-trash-can"></i> Eliminar</button>
+        </form>
+      </div>
+    </div>
+
+    {% if categoria.inscripciones.all %}
+    <div class="gp-od-card" style="margin-top:-4px;">
+      <table class="gp-org-table">
+        <thead><tr><th>Pareja</th><th>Teléfono</th><th>Pago</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          {% for insc in categoria.inscripciones.all %}
+          <tr>
+            <td>{{ insc.nombre_1 }} / {{ insc.nombre_2 }}</td>
+            <td>{{ insc.telefono }}</td>
+            <td>{{ insc.get_metodo_pago_display }}</td>
+            <td><span class="gp-badge gp-badge--{{ insc.estado }}">{{ insc.get_estado_display }}</span></td>
+            <td>
+              {% if insc.estado == 'pendiente' %}
+              <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="confirmar_inscripcion">
+                <input type="hidden" name="inscripcion_id" value="{{ insc.id }}">
+                <button type="submit" class="gp-org-btn-mini">Confirmar</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <div class="gp-od-info-box">
+      <i class="fa-solid fa-circle-info"></i>
+      <div>
+        <strong>¿Listo para recibir inscripciones?</strong>
+        <p>Cuando hayas completado la configuración del torneo y sus categorías, publicalo para que los jugadores puedan verlo e inscribirse.</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Modal Agregar/Editar categoría -->
+<div class="gp-od-modal-overlay" id="gpModalCategoria">
+  <div class="gp-od-modal">
+    <div class="gp-od-modal-head">
+      <h3 id="gpModalCategoriaTitulo">Agregar categoría</h3>
+      <button type="button" class="gp-od-modal-close" onclick="gpCerrarModalCategoria()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form method="post" id="gpFormCategoria">
+      {% csrf_token %}
+      <div class="gp-wiz-field">
+        <label for="gpModalNombre">Nombre de la categoría</label>
+        <select name="nombre" id="gpModalNombre" required>
+          <option value="">---------</option>
+          {% for value, label in categoria_choices %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="gp-wiz-field">
+        <label for="gpModalCupo">Cantidad mínima de parejas</label>
+        <input type="number" name="cupo_minimo" id="gpModalCupo" value="3" min="1" required>
+        <p style="font-size:.75rem; color:#94a3b8; margin:-8px 0 0;">Esta cantidad determina cuántas parejas se necesitan como mínimo para disputar la categoría.</p>
+      </div>
+      <div class="gp-od-modal-actions">
+        <button type="button" class="gp-btn--outline" onclick="gpCerrarModalCategoria()">Cancelar</button>
+        <button type="submit" class="gp-btn gp-btn--primary">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function gpAbrirModalCategoria(id, nombre, cupo) {
+    var overlay = document.getElementById('gpModalCategoria');
+    var form = document.getElementById('gpFormCategoria');
+    var titulo = document.getElementById('gpModalCategoriaTitulo');
+    var selectNombre = document.getElementById('gpModalNombre');
+    var inputCupo = document.getElementById('gpModalCupo');
+
+    if (id) {
+      titulo.textContent = 'Editar categoría';
+      form.action = '{% url "torneos:editar_categoria" torneo.codigo 0 %}'.replace('/0/', '/' + id + '/');
+      selectNombre.value = nombre;
+      inputCupo.value = cupo;
+    } else {
+      titulo.textContent = 'Agregar categoría';
+      form.action = '{% url "torneos:agregar_categoria" torneo.codigo %}';
+      selectNombre.value = '';
+      inputCupo.value = 3;
+    }
+    overlay.classList.add('is-open');
+  }
+
+  function gpCerrarModalCategoria() {
+    document.getElementById('gpModalCategoria').classList.remove('is-open');
+  }
+</script>
+{% endblock %}

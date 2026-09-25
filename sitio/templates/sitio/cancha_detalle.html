@@ -1,0 +1,93 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}{{ cancha.nombre }} | Reservar cancha | GPADEL{% endblock %}
+{% block meta_description %}Reservá {{ cancha.nombre }} en {{ cancha.ciudad }} — horarios disponibles y reserva online con GPADEL.{% endblock %}
+
+{% block nav_reservar_class %}gp-nav-link gp-nav-link--active{% endblock %}
+
+{% block extra_head %}
+<style>
+  .gp-cd-wrap { max-width: 900px; margin: 0 auto; padding: 28px 16px 60px; }
+  .gp-cd-card { background:#fff; border-radius:16px; box-shadow:0 6px 18px rgba(15,23,42,.05); padding:28px; margin-bottom:20px; }
+  .gp-cd-card h1 { margin:0 0 6px; font-size:1.4rem; }
+  .gp-cd-meta { display:flex; gap:20px; flex-wrap:wrap; color:#64748b; font-size:.9rem; margin-bottom:6px; }
+
+  .gp-cd-fecha { display:flex; align-items:center; gap:10px; margin: 20px 0; }
+  .gp-cd-fecha input { border:1px solid #d1d5db; border-radius:999px; padding:9px 16px; font-size:.9rem; }
+
+  .gp-cd-turnos { display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap:10px; }
+  .gp-cd-turno-form button {
+    width:100%; border-radius:10px; padding:12px 8px; font-weight:700; font-size:.88rem;
+    border:1.5px solid var(--gp-blue); background:#fff; color: var(--gp-blue); cursor:pointer;
+  }
+  .gp-cd-turno-form button:hover { background:#eff6ff; }
+  .gp-cd-turno-form.gp-cd-ocupado button { border-color:#e2e8f0; color:#cbd5e1; cursor:not-allowed; background:#f8fafc; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="gp-main">
+  <div class="gp-cd-wrap">
+
+    {% if messages %}
+      {% for message in messages %}
+        <p style="color: {% if message.tags == 'error' %}#991b1b{% else %}#166534{% endif %}; font-weight:600;">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+
+    <div class="gp-cd-card">
+      <h1>{{ cancha.nombre }}</h1>
+      <div class="gp-cd-meta">
+        <span><i class="fa-solid fa-location-dot"></i> {{ cancha.ciudad }}{% if cancha.direccion %} — {{ cancha.direccion }}{% endif %}</span>
+        <span><i class="fa-solid fa-{% if cancha.techada %}house{% else %}sun{% endif %}"></i> {% if cancha.techada %}Techada{% else %}Al aire libre{% endif %}</span>
+        <span><i class="fa-solid fa-tag"></i> ${{ cancha.precio_hora }}/hora</span>
+      </div>
+
+      <form method="get" class="gp-cd-fecha">
+        <label for="gpFechaCancha">Elegí el día:</label>
+        <input type="date" name="fecha" id="gpFechaCancha" value="{{ fecha|date:'Y-m-d' }}" onchange="this.form.submit()">
+      </form>
+
+      <div class="gp-cd-turnos">
+        {% for turno in turnos %}
+        <form
+          method="post"
+          action="{% url 'sitio:reservar_turno' cancha.id %}"
+          class="gp-cd-turno-form {% if not turno.disponible %}gp-cd-ocupado{% endif %}"
+          data-requiere-login="1"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="fecha" value="{{ fecha|date:'Y-m-d' }}">
+          <input type="hidden" name="hora_inicio" value="{{ turno.hora_inicio|time:'H:i:s' }}">
+          <button type="submit" {% if not turno.disponible %}disabled{% endif %}>
+            {{ turno.hora_inicio|time:'H:i' }}
+          </button>
+        </form>
+        {% empty %}
+        <p style="color:#94a3b8;">No hay turnos configurados para este día.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  (function () {
+    var yaLogueado = {{ user.is_authenticated|yesno:'true,false' }};
+    if (yaLogueado) return;  // el servidor ya procesa el POST normal
+
+    document.querySelectorAll('form[data-requiere-login="1"]').forEach(function (form) {
+      form.addEventListener('submit', function (e) {
+        if (form.classList.contains('gp-cd-ocupado')) return;  // deshabilitado, nada que hacer
+        e.preventDefault();
+        gpAuth.requireAuth(false, function () {
+          form.submit();
+        });
+      });
+    });
+  })();
+</script>
+{% endblock %}

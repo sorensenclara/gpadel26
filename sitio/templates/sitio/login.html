@@ -1,0 +1,86 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Iniciar sesión | GPADEL{% endblock %}
+{% block meta_description %}Accedé a tu cuenta de GPADEL para gestionar tus reservas, partidos, torneos y marcador de pádel.{% endblock %}
+
+{% block body_class %}gp-page-login{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<!-- HERO LOGIN -->
+  <section class="gp-pages-hero gp-login-hero">
+    <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+
+    <div class="gp-container">
+      <h5>ACCESO A LA PLATAFORMA</h5>
+      <h1>Inicie Sesión</h1>
+    </div>
+  </section>
+
+  <!-- LOGIN -->
+  <main class="gp-main gp-login">
+    <div class="gp-container">
+      <div class="gp-login-wrap">
+
+        <div class="gp-login-card">
+          <h2 class="gp-login-title">Ingresar</h2>
+          <p class="gp-login-subtitle">
+            Accedé con tu usuario y contraseña.
+          </p>
+
+          {% if form.non_field_errors %}
+            <div class="gp-login-error" role="alert">
+              {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <form class="gp-login-form" method="post" action="{% url 'sitio:login' %}">
+            {% csrf_token %}
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+            <div class="gp-login-field">
+              <label for="gpUser">Usuario</label>
+              {{ form.username }}
+            </div>
+
+            <div class="gp-login-field">
+              <label for="gpPass">Contraseña</label>
+              {{ form.password }}
+            </div>
+
+            <button type="submit"
+              class="gp-btn gp-btn--primary gp-login-submit">
+              Iniciar sesión
+            </button>
+
+            <div class="gp-login-divider">
+              <span>o</span>
+            </div>
+
+            <a href="{% url 'google_login' %}" class="gp-login-google" style="text-decoration:none; color:#1f2937;">
+              <i class="fa-brands fa-google"></i>
+              Continuar con Google
+            </a>
+
+            <p class="gp-login-bottom">
+              ¿No tenés cuenta?
+              <a href="{% url 'sitio:registro' %}" class="gp-login-create">Crear cuenta</a>
+            </p>
+
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+
+<!-- FOOTER (Bootstrap + agrego accesibilidad con arial-lavel en iconos) -->
+{% endblock %}

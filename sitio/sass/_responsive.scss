@@ -1,0 +1,187 @@
+/* ===============================
+RESPONSIVE
+=============================== */
+
+/* <= 1400px */
+@media (max-width:1400px){
+  .gp-courts-grid{ grid-template-columns:repeat(4,1fr); }
+}
+
+/* <= 1024px */
+@media (max-width:1024px){
+  .gp-courts-grid{ grid-template-columns:repeat(3,1fr); }
+  .gp-torneo-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .gp-sponsors-logos{ grid-template-columns:repeat(3,1fr); }
+}
+
+/* <= 991.98px (Bootstrap lg) */
+@media (max-width:991.98px){
+  body.gp-page-how .gp-dashboard-image img{ max-height:220px; }
+  body.gp-page-how .gp-dashboard-content{
+    padding-top:28px;
+    padding-bottom:44px;
+    margin-left:0;
+    margin-right:0;
+  }
+}
+
+/* <= 960px */
+@media (max-width:960px){
+  .gp-hero-inner{ flex-direction:column; }
+  .gp-steps{ grid-template-columns:1fr; }
+  .gp-contact-inner{ grid-template-columns:1fr; }
+}
+
+/* <= 800px */
+@media (max-width:800px){
+  /* header */
+  .gp-logo-img{ height:32px; }
+  .gp-nav{ display:none; }
+  .gp-header-cta{ display:none; }
+  .gp-header-burger{ display:inline-flex; }
+
+  /* hero */
+  .gp-hero{ padding:80px 0 70px; }
+  .gp-hero-inner{ flex-direction:column; gap:18px; }
+  .gp-hero-text,
+  .gp-hero-copy{ text-align:center; }
+  .gp-hero-text h1,
+  .gp-hero-copy h1{
+    font-size:2.05rem;
+    line-height:1.15;
+    margin:0 0 14px;
+  }
+  .gp-hero-text p,
+  .gp-hero-copy p{
+    max-width:520px;
+    margin:0 auto 22px;
+    font-size:1rem;
+  }
+  .gp-hero-cta{
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:10px;
+  }
+  .gp-hero-image{ display:none; }
+
+  /* pasos */
+  .gp-step-icon img{ width:80px; height:80px; }
+
+  /* search */
+  .gp-search-compact{ display:flex; }
+  .gp-search-expand{ display:none; }
+  .gp-search-expand.is-open{
+    display:block;
+    background:var(--gp-white);
+    border-radius:var(--gp-radius-lg);
+    padding:10px 14px 14px;
+    box-shadow:0 22px 60px rgba(15,23,42,.20);
+    max-width:980px;
+    margin:0 auto 20px;
+  }
+  .gp-search-expand-head{ display:flex; }
+  .gp-search-expand-foot{ display:block; }
+  .gp-search-bar.gp-search-airbnb{
+    flex-direction:column;
+    border-radius:var(--gp-radius-lg);
+    gap:10px;
+    padding:10px;
+    margin:0;
+    box-shadow:none;
+    border:0;
+  }
+  .gp-search-item{
+    width:100%;
+    border:1px solid var(--gp-white-dark);
+    border-radius:18px;
+    padding:12px 14px;
+    background:var(--gp-white);
+  }
+  .gp-search-item:hover{ border-radius:18px; }
+  .gp-search-panel{
+    position:static;
+    width:100%;
+    box-shadow:none;
+    padding:12px 0 0;
+    border-radius:0;
+    background:transparent;
+  }
+  .gp-search-item.active .gp-search-panel{ display:block; }
+  .gp-search-item .gp-search-panel{ display:none; }
+  .gp-search-btn--desktop{ display:none; }
+
+  /* torneos */
+  .gp-filterbar{ margin:-18px 16px 18px; }
+  .gp-torneos-head{ flex-direction:column; align-items:flex-start; }
+}
+
+/* <= 768px */
+@media (max-width:768px){
+  .gp-entrada-options{ grid-template-columns:1fr; }
+
+  .gp-sponsor img{ height:64px; }
+}
+
+/* <= 640px */
+@media (max-width:640px){
+  .gp-courts-grid{ grid-template-columns:1fr; gap:14px; }
+  .gp-court-card:nth-child(n+5){ display:none; }
+
+  .gp-torneo-grid{ grid-template-columns:1fr; }
+  .gp-filter-actions{ justify-content:stretch; }
+  .gp-filter-actions .gp-btn{ width:100%; }
+
+  .gp-sponsors-logos{ grid-template-columns:repeat(2,1fr); }
+}
+
+/* <= 600px */
+@media (max-width:600px){
+  .gp-contact-map{ height:300px; }
+
+  .gp-login{ padding:26px 0 50px; }
+  .gp-login-card{
+    padding:22px 16px 18px;
+    border-radius:16px;
+  }
+
+  /* Ocultamos hero SOLO en login */
+  body.gp-page-login .gp-login-hero{ display:none; }
+
+  /* Score type: más aire y ancho consistente */
+  .gp-pages-hero{ padding:40px 0 60px; }
+  .gp-pages-hero .gp-hero-cta{ width:100%; margin-top:22px; }
+  .gp-pages-hero .gp-modalidad-opciones{ max-width:980px; margin:0 auto; }
+  .gp-pages-hero .gp-btn{ margin-top:14px; }
+}
+
+/* <= 500px */
+@media (max-width:500px){
+  .gp-step-icon img{ width:65px; height:65px; }
+}
+
+/* >= 801px */
+@media (min-width:801px){
+  .gp-nav-mobile{ display:none; }
+}
+
+/* >= 1024px */
+@media (min-width:1024px){
+  .gp-testimonial-wrapper{
+    max-width:960px;
+    margin:0 auto;
+    position:relative;
+    justify-content:center;
+  }
+  .gp-testimonial{
+    max-width:400px;
+    margin:0 auto;
+  }
+  .gp-testimonial-arrow{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+  }
+  .gp-testimonial-arrow:first-of-type{ left:-24px; }
+  .gp-testimonial-arrow:last-of-type{ right:-24px; }
+}

@@ -1,0 +1,223 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Completá tu perfil | GPADEL{% endblock %}
+{% block meta_description %}Un último paso para terminar de crear tu cuenta de GPADEL con Google.{% endblock %}
+
+{% block body_class %}gp-page-login{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+<style>
+  /* Mismas tarjetas de tipo de cuenta que en el registro normal */
+  .gp-role-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 4px; }
+  .gp-role-card {
+    flex: 1 1 100px; display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start; gap: 16px; min-height: 104px; padding: 20px 8px;
+    border: 2px solid #e2e8f0; border-radius: 14px; cursor: pointer; text-align: center;
+    font-weight: 700; font-size: 0.76rem; line-height: 1.25; text-transform: none;
+    letter-spacing: normal; color: #64748b; background: #fff; margin: 0;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .gp-role-card:hover { border-color: #c7d2e0; }
+  .gp-login-field .gp-role-card input[type="radio"] {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .gp-role-card i { font-size: 1.4rem; color: #a3b0c2; transition: color .15s ease; }
+  .gp-role-icon { display: block; line-height: 1; margin-bottom: 4px; }
+  .gp-role-label { display: block; width: 100%; margin-top: 4px; }
+  .gp-role-card.is-selected { border-color: var(--gp-blue, #005ba5); background: rgba(0,91,165,.06); color: var(--gp-blue, #005ba5); }
+  .gp-role-card.is-selected i { color: var(--gp-blue, #005ba5); }
+
+  .gp-checkbox-row { display: flex; align-items: center; gap: 10px; margin: 2px 0 14px; }
+  .gp-login-field .gp-checkbox-row input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 auto; accent-color: var(--gp-blue, #005ba5); }
+  .gp-login-field .gp-checkbox-row label { display: inline; text-transform: none; letter-spacing: normal; font-weight: 500; font-size: .9rem; color: #334155; margin: 0; }
+
+  .gp-google-chip {
+    display: flex; align-items: center; gap: 10px; background: #f1f5f9;
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; font-size: .85rem; color: #475569;
+  }
+  .gp-google-chip i { color: #ea4335; font-size: 1.1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+  <section class="gp-pages-hero gp-login-hero">
+    <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+    <div class="gp-container">
+      <h5>CASI LISTO</h5>
+      <h1>Completá tu perfil</h1>
+    </div>
+  </section>
+
+  <main class="gp-main gp-login">
+    <div class="gp-container">
+      <div class="gp-login-wrap">
+        <div class="gp-login-card">
+          <h2 class="gp-login-title">Un último paso</h2>
+
+          <div class="gp-google-chip">
+            <i class="fa-brands fa-google"></i>
+            Ingresando como {{ account.extra_data.email|default:form.email.value }}
+          </div>
+
+          {% if form.non_field_errors %}
+            <div class="gp-login-error" role="alert">
+              {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+
+          <form class="gp-login-form" method="post" action="{% url 'socialaccount_signup' %}">
+            {% csrf_token %}
+            {{ form.username }}
+            {{ form.email }}
+
+            <div class="gp-login-field-row" style="display:flex; gap:12px; flex-wrap:wrap;">
+              <div class="gp-login-field" style="flex:1; min-width:140px;">
+                <label for="id_nombre">Nombre</label>
+                {{ form.nombre }}
+                {% for error in form.nombre.errors %}<p class="gp-login-field-error">{{ error }}</p>{% endfor %}
+              </div>
+              <div class="gp-login-field" style="flex:1; min-width:140px;">
+                <label for="id_apellido">Apellido</label>
+                {{ form.apellido }}
+                {% for error in form.apellido.errors %}<p class="gp-login-field-error">{{ error }}</p>{% endfor %}
+              </div>
+            </div>
+
+            <div class="gp-login-field">
+              <label for="id_dni">DNI</label>
+              {{ form.dni }}
+              {% for error in form.dni.errors %}<p class="gp-login-field-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="gp-login-field">
+              <label>Tipo de cuenta</label>
+              <div class="gp-role-picker" id="gpRolOptions">
+                <label class="gp-role-card" data-role="jugador">
+                  {{ form.rol.0.tag }}
+                  <span class="gp-role-icon"><i class="fa-solid fa-person-running"></i></span>
+                  <span class="gp-role-label">Jugador</span>
+                </label>
+                <label class="gp-role-card" data-role="dueno_cancha">
+                  {{ form.rol.1.tag }}
+                  <span class="gp-role-icon"><i class="fa-solid fa-shop"></i></span>
+                  <span class="gp-role-label">Dueño de cancha</span>
+                </label>
+                <label class="gp-role-card" data-role="liga">
+                  {{ form.rol.2.tag }}
+                  <span class="gp-role-icon"><i class="fa-solid fa-trophy"></i></span>
+                  <span class="gp-role-label">Representante de Liga</span>
+                </label>
+              </div>
+              {% for error in form.rol.errors %}<p class="gp-login-field-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div id="gpSlotDuenoCancha" style="display:none;"></div>
+            <div id="gpSlotLiga" style="display:none;"></div>
+
+            <div class="gp-login-field" id="gpPanelNombreCancha" style="display:none;">
+              <label for="gpRegNombreCancha">Nombre de tu cancha</label>
+              {{ form.nombre_cancha }}
+              {% for error in form.nombre_cancha.errors %}<p class="gp-login-field-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="gp-login-field" id="gpPanelEsLiga" style="display:none;">
+              <div class="gp-checkbox-row">
+                {{ form.es_liga }}
+                <label for="gpRegEsLiga">Además soy Representante de Liga</label>
+              </div>
+            </div>
+
+            <div class="gp-login-field" id="gpPanelNombreLiga" style="display:none;">
+              <label for="gpRegNombreLiga">Nombre de tu Liga</label>
+              {{ form.nombre_liga }}
+              {% for error in form.nombre_liga.errors %}<p class="gp-login-field-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="gp-login-field" id="gpPanelTieneCancha" style="display:none;">
+              <div class="gp-checkbox-row">
+                {{ form.tiene_cancha }}
+                <label for="gpRegTieneCancha">Además gestiono una cancha propia</label>
+              </div>
+            </div>
+
+            <div class="gp-login-field">
+              <label for="gpRegCelular">Celular</label>
+              {{ form.celular }}
+              {% for error in form.celular.errors %}<p class="gp-login-field-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <button type="submit" class="gp-btn gp-btn--primary gp-login-submit">
+              Terminar de crear mi cuenta
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var cards = document.querySelectorAll('#gpRolOptions .gp-role-card');
+      var slotDuenoCancha = document.getElementById('gpSlotDuenoCancha');
+      var slotLiga = document.getElementById('gpSlotLiga');
+      var panelNombreCancha = document.getElementById('gpPanelNombreCancha');
+      var panelEsLiga = document.getElementById('gpPanelEsLiga');
+      var panelNombreLiga = document.getElementById('gpPanelNombreLiga');
+      var panelTieneCancha = document.getElementById('gpPanelTieneCancha');
+      var checkEsLiga = document.getElementById('gpRegEsLiga');
+      var checkTieneCancha = document.getElementById('gpRegTieneCancha');
+
+      function valorSeleccionado() {
+        var seleccionado = document.querySelector('#gpRolOptions input[type="radio"]:checked');
+        return seleccionado ? seleccionado.value : 'jugador';
+      }
+
+      function actualizar() {
+        var valor = valorSeleccionado();
+        cards.forEach(function (card) { card.classList.toggle('is-selected', card.dataset.role === valor); });
+
+        if (valor === 'dueno_cancha') {
+          slotDuenoCancha.appendChild(panelNombreCancha);
+          slotDuenoCancha.appendChild(panelEsLiga);
+          slotDuenoCancha.appendChild(panelNombreLiga);
+          slotDuenoCancha.style.display = 'block';
+          slotLiga.style.display = 'none';
+          panelNombreCancha.style.display = 'block';
+          panelEsLiga.style.display = 'block';
+          panelTieneCancha.style.display = 'none';
+          panelNombreLiga.style.display = checkEsLiga.checked ? 'block' : 'none';
+        } else if (valor === 'liga') {
+          slotLiga.appendChild(panelNombreLiga);
+          slotLiga.appendChild(panelTieneCancha);
+          slotLiga.appendChild(panelNombreCancha);
+          slotLiga.style.display = 'block';
+          slotDuenoCancha.style.display = 'none';
+          panelNombreLiga.style.display = 'block';
+          panelTieneCancha.style.display = 'block';
+          panelEsLiga.style.display = 'none';
+          panelNombreCancha.style.display = checkTieneCancha.checked ? 'block' : 'none';
+        } else {
+          slotDuenoCancha.style.display = 'none';
+          slotLiga.style.display = 'none';
+          panelNombreCancha.style.display = 'none';
+          panelEsLiga.style.display = 'none';
+          panelNombreLiga.style.display = 'none';
+          panelTieneCancha.style.display = 'none';
+        }
+      }
+
+      cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          card.querySelector('input[type="radio"]').checked = true;
+          actualizar();
+        });
+      });
+      checkEsLiga.addEventListener('change', actualizar);
+      checkTieneCancha.addEventListener('change', actualizar);
+      actualizar();
+    })();
+  </script>
+{% endblock %}

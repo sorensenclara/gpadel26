@@ -1,0 +1,201 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Jugadores de pádel | Reservas y marcador en GPADEL{% endblock %}
+{% block meta_description %}GPADEL es una plataforma para jugadores de pádel donde podés reservar canchas, organizar partidos y llevar el score en vivo desde un solo lugar.{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<main>
+
+<!-- SEARCH -->
+<section class="gp-search-bar-wrapper">
+  <div class="gp-container">
+
+    <button class="gp-search-compact" id="gpSearchOpen" type="button" aria-label="Reservar cancha">
+      <i class="fa-regular fa-calendar"></i>
+      <span>Reservar cancha</span>
+    </button>
+
+    <div class="gp-search-expand" id="gpSearchExpand" aria-hidden="true">
+
+      <div class="gp-search-expand-head">
+        <strong>Reservar cancha</strong>
+        <button class="gp-search-close" id="gpSearchClose" type="button" aria-label="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="gp-search-bar gp-search-airbnb">
+
+        <div class="gp-search-item" data-field="city">
+          <span class="gp-search-label">¿Dónde?</span>
+          <span class="gp-search-value" id="cityValue">Ciudad</span>
+
+          <div class="gp-search-panel" id="cityPanel">
+            <input type="text" placeholder="Ingresá una ciudad" class="gp-search-input" id="cityInput">
+            <ul class="gp-search-suggestions" id="citySuggestions"></ul>
+          </div>
+        </div>
+
+        <div class="gp-search-item" data-field="date">
+          <span class="gp-search-label">Fecha</span>
+          <span class="gp-search-value" id="dateValue">¿Qué día?</span>
+
+          <div class="gp-search-panel" id="datePanel">
+            <input type="date" id="dateInput" class="gp-search-input">
+          </div>
+        </div>
+
+        <div class="gp-search-item" data-field="time">
+          <span class="gp-search-label">Hora</span>
+
+          <div class="gp-time-row">
+            <input type="text" class="gp-time-input fp-time" placeholder="Hora inicio">
+            <span>–</span>
+            <input type="text" class="gp-time-input fp-time" placeholder="Hora fin">
+          </div>
+        </div>
+
+        <button class="gp-search-btn gp-search-btn--desktop" type="button" aria-label="Buscar">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+      </div>
+
+      <div class="gp-search-expand-foot">
+        <button class="gp-search-btn gp-search-btn--mobile" type="button">
+          <i class="fa-solid fa-magnifying-glass"></i> Buscar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HERO -->
+<section id="hero" class="gp-hero">
+  <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" fetchpriority="high" decoding="async">
+
+  <div class="gp-container gp-hero-inner">
+
+    <div class="gp-hero-text">
+      <h1>Reservá, jugá y llevá<br>el score a tus partidos</h1>
+      <p>Organizá tus partidos y turnos desde un solo lugar.</p>
+
+      <div class="gp-hero-cta">
+        <a href="{% url 'sitio:reservar_cancha' %}" class="gp-btn gp-btn--primary">
+          Reservar Cancha
+        </a>
+        <a href="{% url 'scoreboard:index' %}" class="gp-btn gp-btn--secondary">
+          Marcador Gpadel
+        </a>
+      </div>
+    </div>
+
+    <div class="gp-hero-image">
+      <img src="{% static 'sitio/img/img-pelota-gpadel.png' %}" alt="Pelota de pádel" loading="lazy" decoding="async">
+    </div>
+
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section id="como-funciona" class="gp-section">
+  <div class="gp-container">
+    <p class="gp-kicker">Toda la gestion del PADEL en un solo lugar</p>
+    <h2 class="gp-section-title">¿CÓMO FUNCIONA?</h2>
+
+    <div class="gp-steps">
+
+      <article class="gp-step">
+        <div class="gp-step-icon">
+          <img src="{% static 'sitio/img/icon-buscar.svg' %}" alt="">
+        </div>
+        <div class="gp-step-card">
+          <h3>Buscá la cancha</h3>
+          <p>Encontrá canchas cerca tuyo.</p>
+        </div>
+      </article>
+
+      <article class="gp-step">
+        <div class="gp-step-icon">
+          <img src="{% static 'sitio/img/icon-reservar.svg' %}" alt="">
+        </div>
+        <div class="gp-step-card">
+          <h3>Reservá</h3>
+          <p>Confirmá tu turno fácilmente.</p>
+        </div>
+      </article>
+
+      <article class="gp-step">
+        <div class="gp-step-icon">
+          <img src="{% static 'sitio/img/icon-cancha.svg' %}" alt="">
+        </div>
+        <div class="gp-step-card">
+          <h3>Llevá el score</h3>
+          <p>Controlá tu partido en vivo.</p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- AUSPICIANTES -->
+<section class="gp-section gp-sponsors" id="auspiciantes">
+  <div class="gp-container">
+
+    <p class="gp-sponsors-kicker">Nuestros auspiciantes</p>
+
+    <h2 class="gp-sponsors-title">
+      AUSPICIANTES & <span class="gp-sponsors-title-accent">PATROCINADORES</span>
+    </h2>
+
+    <div class="gp-sponsors-logos">
+      <a class="gp-sponsor" href="https://worldpadelcenter.com.ar/" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/1.avif' %}" alt="World Padel Center">
+      </a>
+      <a class="gp-sponsor" href="https://ultimatepadel.com.ar/" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/2.avif' %}" alt="Ultimate Padel">
+      </a>
+      <a class="gp-sponsor" href="https://www.instagram.com/padel_boxx/?hl=es" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/3.avif' %}" alt="Padel Boxx">
+      </a>
+      <a class="gp-sponsor" href="https://www.instagram.com/angastacopadel/" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/4.avif' %}" alt="Angastaco Padel">
+      </a>
+      <a class="gp-sponsor" href="https://www.instagram.com/piedra_libre_padel/?hl=es" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/5.avif' %}" alt="Piedra Libre Padel">
+      </a>
+      <a class="gp-sponsor" href="https://www.instagram.com/nucleopadel_/?hl=es" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/6.avif' %}" alt="Núcleo Padel">
+      </a>
+      <a class="gp-sponsor" href="https://www.instagram.com/nexussport.tandil/?hl=es" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/7.avif' %}" alt="Nexus Sport Tandil">
+      </a>
+      <a class="gp-sponsor" href="https://www.instagram.com/picodeportestandil/?hl=es" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/8.avif' %}" alt="Pico Deportes Tandil">
+      </a>
+      <a class="gp-sponsor" href="https://www.instagram.com/barlay.padel/?hl=es" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/9.avif' %}" alt="Barlay Padel">
+      </a>
+      <a class="gp-sponsor" href="https://www.instagram.com/padel.company/?hl=es" target="_blank" rel="noopener">
+        <img src="{% static 'sitio/img/auspiciantes/10.avif' %}" alt="Padel Company">
+      </a>
+    </div>
+
+  </div>
+</section>
+
+</main>
+{% endblock %}
+
+{% block extra_scripts_pre %}
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+{% endblock %}

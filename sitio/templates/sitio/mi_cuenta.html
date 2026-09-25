@@ -1,0 +1,137 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Mi cuenta | GPADEL{% endblock %}
+{% block body_class %}gp-layout{% endblock %}
+
+{% block extra_head %}
+<style>
+  .gp-mc-wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 60px; }
+  .gp-mc-card { background:#fff; border-radius:16px; padding:28px; box-shadow:0 8px 24px rgba(15,23,42,.06); margin-bottom:20px; }
+  .gp-mc-card h2 { margin:0 0 16px; font-size:1.1rem; }
+  .gp-mc-datos { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+  @media (max-width:560px) { .gp-mc-datos { grid-template-columns: 1fr; } }
+  .gp-mc-dato strong { display:block; font-size:.76rem; text-transform:uppercase; letter-spacing:.04em; color:#94a3b8; margin-bottom:3px; }
+  .gp-mc-dato span { font-size:.95rem; color:#0f172a; }
+
+  .gp-mc-perfiles { display:flex; flex-direction:column; gap:14px; }
+  .gp-mc-perfil-row { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px 16px; background:#f8fafc; border-radius:12px; flex-wrap:wrap; }
+  .gp-mc-perfil-row strong { display:block; font-size:.95rem; }
+  .gp-mc-perfil-row span { font-size:.82rem; color:#64748b; }
+  .gp-mc-badge-activo { background: var(--gp-green-light); color:#14532d; font-size:.76rem; font-weight:700; padding:4px 12px; border-radius:999px; }
+
+  .gp-mc-activar-form { margin-top:14px; padding-top:14px; border-top:1px solid #e2e8f0; }
+  .gp-mc-field { margin: 10px 0; }
+  .gp-mc-field label { display:block; font-size:.8rem; font-weight:700; color:#334155; margin-bottom:6px; }
+  .gp-mc-field input[type="text"] { width:100%; border-radius:10px; border:1px solid #d1d5db; padding:9px 12px; font-size:.9rem; }
+  .gp-mc-field-checkbox { display:flex; align-items:center; gap:8px; font-size:.88rem; color:#334155; margin:8px 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="gp-main">
+  <section class="gp-pages-hero">
+    <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+    <div class="gp-container">
+      <h5>Tu cuenta</h5>
+      <h1>Mi cuenta</h1>
+    </div>
+  </section>
+
+  <div class="gp-mc-wrap">
+
+    {% if messages %}
+      {% for message in messages %}<p style="color:#166534;">{{ message }}</p>{% endfor %}
+    {% endif %}
+
+    {% if identidad %}
+    <div class="gp-mc-card">
+      <h2>Tus datos</h2>
+      <div class="gp-mc-datos">
+        <div class="gp-mc-dato"><strong>Nombre</strong><span>{{ request.user.first_name }}</span></div>
+        <div class="gp-mc-dato"><strong>Apellido</strong><span>{{ request.user.last_name }}</span></div>
+        <div class="gp-mc-dato"><strong>DNI</strong><span>{{ identidad.dni }}</span></div>
+        <div class="gp-mc-dato"><strong>Usuario</strong><span>{{ request.user.username }}</span></div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="gp-mc-card">
+      <h2>Tus perfiles</h2>
+      <div class="gp-mc-perfiles">
+
+        <div>
+          <div class="gp-mc-perfil-row">
+            <div>
+              <strong>Jugador</strong>
+              <span>Marcador gratis con diseño GPADEL, torneos.</span>
+            </div>
+            {% if tiene_jugador %}
+              <span class="gp-mc-badge-activo"><i class="fa-solid fa-check"></i> Activo</span>
+            {% endif %}
+          </div>
+          {% if jugador_form %}
+          <form method="post" class="gp-mc-activar-form">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="activar_jugador">
+            <div class="gp-mc-field">
+              <label for="{{ jugador_form.celular.id_for_label }}">Celular</label>
+              {{ jugador_form.celular }}
+              {% for error in jugador_form.celular.errors %}<p style="color:#dc2626; font-size:.8rem;">{{ error }}</p>{% endfor %}
+            </div>
+            <button type="submit" class="gp-btn gp-btn--primary">+ Activar perfil de Jugador</button>
+          </form>
+          {% endif %}
+        </div>
+
+        <div>
+          <div class="gp-mc-perfil-row">
+            <div>
+              <strong>Organizador</strong>
+              <span>Torneos, canchas y marcador personalizado.</span>
+            </div>
+            {% if tiene_organizador %}
+              <span class="gp-mc-badge-activo"><i class="fa-solid fa-check"></i> Activo</span>
+            {% endif %}
+          </div>
+          {% if organizador_form %}
+          <form method="post" class="gp-mc-activar-form">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="activar_organizador">
+
+            <div class="gp-mc-field">
+              <label>Tipo de cuenta</label>
+              {% for radio in organizador_form.rol %}
+                <label style="display:block; font-weight:400; text-transform:none; margin:4px 0;">{{ radio.tag }} {{ radio.choice_label }}</label>
+              {% endfor %}
+            </div>
+            <div class="gp-mc-field">
+              <label for="{{ organizador_form.nombre_cancha.id_for_label }}">Nombre de tu cancha</label>
+              {{ organizador_form.nombre_cancha }}
+            </div>
+            <div class="gp-mc-field-checkbox">
+              {{ organizador_form.es_liga }} <label for="{{ organizador_form.es_liga.id_for_label }}">Además soy Representante de Liga</label>
+            </div>
+            <div class="gp-mc-field">
+              <label for="{{ organizador_form.nombre_liga.id_for_label }}">Nombre de tu Liga</label>
+              {{ organizador_form.nombre_liga }}
+            </div>
+            <div class="gp-mc-field-checkbox">
+              {{ organizador_form.tiene_cancha }} <label for="{{ organizador_form.tiene_cancha.id_for_label }}">Además gestiono una cancha propia</label>
+            </div>
+            <div class="gp-mc-field">
+              <label for="{{ organizador_form.celular.id_for_label }}">Celular</label>
+              {{ organizador_form.celular }}
+              {% for error in organizador_form.celular.errors %}<p style="color:#dc2626; font-size:.8rem;">{{ error }}</p>{% endfor %}
+            </div>
+            <button type="submit" class="gp-btn gp-btn--primary">+ Crear perfil de Organizador</button>
+          </form>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+{% endblock %}

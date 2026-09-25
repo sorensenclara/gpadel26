@@ -1,0 +1,74 @@
+// =========================================================
+// Variables (Sass) + Custom Properties (CSS) - GPADEL
+// =========================================================
+
+// Colors
+$gp-blue: #005ba5;
+$gp-blue-dark: #144371;
+$gp-blue-text: #111827;
+
+$gp-green: #b5ea1d;
+$gp-green-dark: #93c705;
+$gp-green-light: #e9f9af;
+
+$gp-bg: #f8fafc;
+$gp-white: #fff;
+$gp-white-dark: #e5e7eb;
+
+$gp-text: #000;
+$gp-text-dark: #0f172a;
+$gp-muted: #6b7280;
+
+// Radius
+$gp-radius-pill: 999px;
+$gp-radius-lg: 24px;
+$gp-radius-md: 18px;
+
+// Shadows
+$gp-shadow-soft: 0 18px 40px rgba(15, 23, 42, .15);
+$gp-shadow-card: 0 12px 30px rgba(15, 23, 42, .08);
+
+// Typography
+$gp-font: "Titillium Web", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+// Breakpoints
+$bp: (
+  xl: 1400px,
+  lg: 1024px,
+  bs-lg: 991.98px,
+  md: 960px,
+  m800: 800px,
+  sm: 768px,
+  xs: 640px,
+  xxs: 600px,
+  mini: 500px,
+  desktop-from: 801px,
+  lg-from: 1024px
+);
+
+:root {
+  --gp-blue: #{$gp-blue};
+  --gp-blue-dark: #{$gp-blue-dark};
+  --gp-blue-text: #{$gp-blue-text};
+
+  --gp-green: #{$gp-green};
+  --gp-green-dark: #{$gp-green-dark};
+  --gp-green-light: #{$gp-green-light};
+
+  --gp-bg: #{$gp-bg};
+  --gp-white: #{$gp-white};
+  --gp-white-dark: #{$gp-white-dark};
+
+  --gp-text: #{$gp-text};
+  --gp-text-dark: #{$gp-text-dark};
+  --gp-muted: #{$gp-muted};
+
+  --gp-radius-pill: #{$gp-radius-pill};
+  --gp-radius-lg: #{$gp-radius-lg};
+  --gp-radius-md: #{$gp-radius-md};
+
+  --gp-shadow-soft: #{$gp-shadow-soft};
+  --gp-shadow-card: #{$gp-shadow-card};
+
+  --gp-font: #{$gp-font};
+}

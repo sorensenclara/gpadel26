@@ -1,0 +1,52 @@
+// =========================================================
+// Mixins - GPADEL
+// =========================================================
+@use "sass:map";
+@use "variables" as *;
+
+@mixin mq($type, $key) {
+  $value: map.get($bp, $key);
+
+  @if $value == null {
+    @error "Breakpoint '#{$key}' no existe en $bp map.";
+  }
+
+  @if $type == max {
+    @media (max-width: #{$value}) { @content; }
+  } @else if $type == min {
+    @media (min-width: #{$value}) { @content; }
+  } @else {
+    @error "mq() solo acepta 'max' o 'min'.";
+  }
+}
+
+// Flex center
+@mixin flex-center($gap: null) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @if $gap != null { gap: $gap; }
+}
+
+// Button base
+@mixin gp-btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  border-radius: var(--gp-radius-pill);
+  font-size: .85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+// Card base
+@mixin gp-card {
+  background: var(--gp-white);
+  border-radius: var(--gp-radius-md);
+  box-shadow: var(--gp-shadow-card);
+}

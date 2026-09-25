@@ -1,0 +1,294 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Editar {{ torneo.nombre }} | GPADEL{% endblock %}
+{% block body_class %}gp-layout{% endblock %}
+
+{% block extra_head %}
+<style>
+  .gp-wiz-card { background:#fff; border-radius:16px; padding:28px; box-shadow:0 10px 30px rgba(15,23,42,.06); max-width: 720px; margin: 24px auto; }
+  .gp-wiz-step-head { display:flex; align-items:flex-start; gap:14px; margin-bottom:20px; }
+  .gp-wiz-step-icon {
+    flex:0 0 auto; width:44px; height:44px; border-radius:50%;
+    background:#eff6ff; color: var(--gp-blue); display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+  }
+  .gp-wiz-step-icon--cat { background: var(--gp-green-light); color: var(--gp-green-dark); }
+  .gp-wiz-step-head h2 { margin:0 0 3px; font-size:1.1rem; color:#0f172a; }
+  .gp-wiz-step-head p { margin:0; color:#64748b; font-size:.85rem; }
+
+  .gp-wiz-field { margin: 12px 0; }
+  .gp-wiz-field label { display:block; font-size:.82rem; font-weight:700; color:#334155; margin-bottom:6px; }
+  .gp-wiz-field label .req { color:#ef4444; }
+  .gp-wiz-field input[type="text"],
+  .gp-wiz-field input[type="date"],
+  .gp-wiz-field input[type="number"],
+  .gp-wiz-field select { width:100%; border-radius:10px; border:1px solid #d1d5db; padding:10px 12px; font-size:.9rem; }
+  .gp-wiz-row2 { display:grid; grid-template-columns:1fr 1fr; gap: 0 16px; }
+  @media (max-width:640px) { .gp-wiz-row2 { grid-template-columns:1fr; } }
+  .gp-wiz-error { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:8px 12px; font-size:.82rem; margin: 4px 0; }
+
+  .gp-formato-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin: 8px 0 4px; }
+  @media (max-width:640px) { .gp-formato-grid { grid-template-columns:1fr; } }
+  .gp-formato-card {
+    display:flex; align-items:flex-start; gap:12px; border:2px solid #e2e8f0; border-radius:12px;
+    padding:14px 16px; cursor:pointer; transition: border-color .15s, background .15s;
+  }
+  .gp-formato-card input[type="radio"] { margin-top:4px; }
+  .gp-formato-card i { font-size:1.3rem; color: var(--gp-blue); margin-top:2px; }
+  .gp-formato-card strong { display:block; font-size:.88rem; color:#0f172a; }
+  .gp-formato-card span { font-size:.78rem; color:#64748b; }
+  .gp-formato-card.is-selected { border-color: var(--gp-blue); background: rgba(0,91,165,.05); }
+
+  .gp-cat-row { display:grid; grid-template-columns: auto 2fr 1fr auto; gap:10px; align-items:center; margin-bottom:12px; }
+  .gp-cat-row .gp-wiz-field { margin:0; }
+  .gp-cat-drag { color:#cbd5e1; cursor:grab; font-size:1.1rem; }
+  .gp-cat-remove { background:none; border:none; color:#94a3b8; cursor:pointer; font-size:1.05rem; padding:8px; display:flex; align-items:center; }
+  .gp-cat-remove:hover { color:#ef4444; }
+  .gp-cat-remove input { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  #gpAddCategoria {
+    background:#fff; border:1.5px dashed var(--gp-blue); color: var(--gp-blue-dark); border-radius:999px;
+    padding:9px 18px; cursor:pointer; font-weight:700; font-size:.85rem; margin-top:6px;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  #gpAddCategoria:hover { background:#eff6ff; }
+
+  .gp-wiz-actions { max-width:720px; margin: 0 auto 40px; display:flex; justify-content:space-between; align-items:center; }
+  .gp-wiz-cancel { color:#475569; font-weight:700; font-size:.9rem; text-decoration:none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="gp-main">
+  <section class="gp-pages-hero">
+    <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+    <div class="gp-container">
+      <h5>Organizador</h5>
+      <h1>Editar torneo</h1>
+      <p>Corregí los datos o sumá categorías a "{{ torneo.nombre }}".</p>
+    </div>
+  </section>
+
+  <div class="gp-container">
+    <form method="post" id="gpTorneoForm">
+      {% csrf_token %}
+
+      <div class="gp-wiz-card">
+        <div class="gp-wiz-step-head">
+          <span class="gp-wiz-step-icon"><i class="fa-regular fa-file-lines"></i></span>
+          <div>
+            <h2>Formato y datos generales</h2>
+            <p>Completá la información básica de tu torneo.</p>
+          </div>
+        </div>
+
+        {% if torneo_form.non_field_errors %}
+          {% for error in torneo_form.non_field_errors %}<p class="gp-wiz-error">{{ error }}</p>{% endfor %}
+        {% endif %}
+
+        <div class="gp-wiz-field">
+          <label for="{{ torneo_form.nombre.id_for_label }}">Nombre del torneo <span class="req">*</span></label>
+          {{ torneo_form.nombre }}
+          {% for error in torneo_form.nombre.errors %}<p class="gp-wiz-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="gp-wiz-row2">
+          <div class="gp-wiz-field">
+            <label for="{{ torneo_form.sede.id_for_label }}">Sede / Club</label>
+            {{ torneo_form.sede }}
+          </div>
+          <div class="gp-wiz-field">
+            <label for="{{ torneo_form.ciudad.id_for_label }}">Ciudad</label>
+            {{ torneo_form.ciudad }}
+            {{ torneo_form.latitud }}
+            {{ torneo_form.longitud }}
+            <p style="font-size:.75rem; color:#94a3b8; margin:4px 0 0;">Escribí al menos 3 letras y elegí tu ciudad de la lista.</p>
+          </div>
+        </div>
+
+        <div class="gp-wiz-field">
+          <label>Formato <span class="req">*</span></label>
+          <div class="gp-formato-grid" id="gpFormatoOptions">
+            <label class="gp-formato-card" data-value="grupos_eliminacion">
+              {{ torneo_form.formato.0.tag }}
+              <i class="fa-solid fa-people-group"></i>
+              <span>
+                <strong>Fase de grupos (zonas) + eliminación directa</strong>
+                <span>Los participantes juegan una fase de grupos y luego eliminatorias.</span>
+              </span>
+            </label>
+            <label class="gp-formato-card" data-value="solo_eliminacion">
+              {{ torneo_form.formato.1.tag }}
+              <i class="fa-solid fa-trophy"></i>
+              <span>
+                <strong>Solo eliminación directa</strong>
+                <span>Formato clásico de eliminación.</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="gp-wiz-row2">
+          <div class="gp-wiz-field">
+            <label for="{{ torneo_form.fecha_inicio.id_for_label }}">Fecha de inicio <span class="req">*</span></label>
+            {{ torneo_form.fecha_inicio }}
+            {% for error in torneo_form.fecha_inicio.errors %}<p class="gp-wiz-error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="gp-wiz-field">
+            <label for="{{ torneo_form.fecha_fin.id_for_label }}">Fecha de fin <span class="req">*</span></label>
+            {{ torneo_form.fecha_fin }}
+            {% for error in torneo_form.fecha_fin.errors %}<p class="gp-wiz-error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+
+        <div class="gp-wiz-row2">
+          <div class="gp-wiz-field">
+            <label for="{{ torneo_form.fecha_limite_inscripcion.id_for_label }}">Fecha límite de inscripción <span class="req">*</span></label>
+            {{ torneo_form.fecha_limite_inscripcion }}
+            {% for error in torneo_form.fecha_limite_inscripcion.errors %}<p class="gp-wiz-error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="gp-wiz-field">
+            <label for="{{ torneo_form.precio_inscripcion.id_for_label }}">Precio de inscripción (por jugador) <span class="req">*</span></label>
+            <div style="position:relative;">
+              <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#64748b; font-weight:700;">$</span>
+              {{ torneo_form.precio_inscripcion }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gp-wiz-card">
+        <div class="gp-wiz-step-head">
+          <span class="gp-wiz-step-icon gp-wiz-step-icon--cat"><i class="fa-solid fa-tag"></i></span>
+          <div>
+            <h2>Categorías</h2>
+            <p>Sumá categorías nuevas o quitá las que no vas a usar.</p>
+          </div>
+        </div>
+
+        {{ categoria_formset.management_form }}
+        {% if categoria_formset.non_form_errors %}
+          {% for error in categoria_formset.non_form_errors %}<p class="gp-wiz-error">{{ error }}</p>{% endfor %}
+        {% endif %}
+
+        <div id="gpCategoriasList">
+          {% for cat_form in categoria_formset %}
+            <div class="gp-cat-row">
+              {{ cat_form.id }}
+              <i class="fa-solid fa-grip-vertical gp-cat-drag"></i>
+              <div class="gp-wiz-field">
+                {{ cat_form.nombre }}
+                {% for error in cat_form.nombre.errors %}<p class="gp-wiz-error">{{ error }}</p>{% endfor %}
+              </div>
+              <div class="gp-wiz-field">{{ cat_form.cupo_minimo }}</div>
+              {% if cat_form.instance.pk %}
+                <label class="gp-cat-remove" title="Quitar categoría">
+                  {{ cat_form.DELETE }}
+                  <i class="fa-solid fa-trash-can"></i>
+                </label>
+              {% else %}
+                <button type="button" class="gp-cat-remove" onclick="this.closest('.gp-cat-row').remove()">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <button type="button" id="gpAddCategoria"><i class="fa-solid fa-circle-plus"></i> Agregar categoría</button>
+
+        <template id="gpCategoriaEmptyRow">
+          <div class="gp-cat-row">
+            <i class="fa-solid fa-grip-vertical gp-cat-drag"></i>
+            <div class="gp-wiz-field">{{ categoria_formset.empty_form.nombre }}</div>
+            <div class="gp-wiz-field">{{ categoria_formset.empty_form.cupo_minimo }}</div>
+            <button type="button" class="gp-cat-remove" onclick="this.closest('.gp-cat-row').remove()">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </template>
+      </div>
+
+      <div class="gp-wiz-actions">
+        <a href="{% url 'torneos:organizador_detalle' torneo.codigo %}" class="gp-wiz-cancel">Cancelar</a>
+        <button type="submit" class="gp-btn gp-btn--primary">Guardar cambios <i class="fa-solid fa-check"></i></button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script src="{% static 'sitio/js/ciudad-autocomplete.js' %}"></script>
+<script>
+  gpCiudadAutocomplete({ inputId: 'gpCiudadInput', latInputId: 'gpLatInput', lonInputId: 'gpLonInput' });
+
+  (function () {
+    var fechaInicio = document.getElementById('{{ torneo_form.fecha_inicio.id_for_label }}');
+    var fechaFin = document.getElementById('{{ torneo_form.fecha_fin.id_for_label }}');
+    var fechaLimite = document.getElementById('{{ torneo_form.fecha_limite_inscripcion.id_for_label }}');
+
+    function actualizarLimites() {
+      if (!fechaInicio.value) return;
+      fechaFin.min = fechaInicio.value;
+      if (fechaFin.value && fechaFin.value < fechaInicio.value) {
+        fechaFin.value = fechaInicio.value;
+      }
+      fechaLimite.max = fechaInicio.value;
+      if (fechaLimite.value && fechaLimite.value > fechaInicio.value) {
+        fechaLimite.value = fechaInicio.value;
+      }
+    }
+
+    fechaInicio.addEventListener('change', actualizarLimites);
+    actualizarLimites();
+  })();
+
+  (function () {
+    var addBtn = document.getElementById('gpAddCategoria');
+    var list = document.getElementById('gpCategoriasList');
+    var totalInput = document.getElementById('id_cat-TOTAL_FORMS');
+    var template = document.getElementById('gpCategoriaEmptyRow');
+
+    function marcarRequeridos(row) {
+      var select = row.querySelector('select');
+      var numero = row.querySelector('input[type="number"]');
+      if (select) select.required = true;
+      if (numero) numero.required = true;
+    }
+
+    addBtn.addEventListener('click', function () {
+      var index = parseInt(totalInput.value, 10);
+      var html = template.innerHTML.replaceAll('__prefix__', index);
+      var wrapper = document.createElement('div');
+      wrapper.innerHTML = html.trim();
+      var nuevaFila = wrapper.firstElementChild;
+      list.appendChild(nuevaFila);
+      marcarRequeridos(nuevaFila);
+      totalInput.value = index + 1;
+    });
+
+    // Categorías existentes: tildar DELETE oculta la fila (no se borra del
+    // DOM, así Django sabe que hay que eliminar esa categoría de verdad).
+    list.querySelectorAll('input[type="checkbox"][name$="-DELETE"]').forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        cb.closest('.gp-cat-row').style.opacity = cb.checked ? '.35' : '1';
+      });
+    });
+
+    var formatoCards = document.querySelectorAll('#gpFormatoOptions .gp-formato-card');
+    function actualizarFormato() {
+      var sel = document.querySelector('#gpFormatoOptions input[type="radio"]:checked');
+      formatoCards.forEach(function (card) {
+        card.classList.toggle('is-selected', sel && card.dataset.value === sel.value);
+      });
+    }
+    formatoCards.forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.tagName !== 'INPUT') {
+          card.querySelector('input[type="radio"]').checked = true;
+        }
+        actualizarFormato();
+      });
+    });
+    actualizarFormato();
+  })();
+</script>
+{% endblock %}

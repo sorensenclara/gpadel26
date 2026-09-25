@@ -1,0 +1,105 @@
+/* ===============================
+LOGIN
+=============================== */
+.gp-login{ background:var(--gp-bg); padding:42px 0 70px; }
+.gp-login-wrap{
+  min-height:calc(100vh - 220px - 180px);
+  display:grid;
+  place-items:center;
+}
+.gp-login-card{
+  width:100%;
+  max-width:460px;
+  background:var(--gp-white);
+  border-radius:var(--gp-radius-md);
+  box-shadow:0 18px 40px rgba(15,23,42,.12);
+  padding:26px 22px 22px;
+  border:1px solid rgba(15,23,42,.06);
+}
+.gp-login-title{
+  margin:0 0 6px;
+  font-size:1.6rem;
+  font-weight:800;
+  color:var(--gp-blue-dark);
+  text-align:center;
+}
+.gp-login-subtitle{
+  margin:0 0 18px;
+  color:var(--gp-muted);
+  text-align:center;
+  font-size:.95rem;
+}
+.gp-login-form{ display:grid; gap:14px; }
+.gp-login-field label{
+  display:block;
+  font-size:.78rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  color:var(--gp-muted);
+  margin-bottom:6px;
+}
+.gp-login-field input{
+  width:100%;
+  border-radius:12px;
+  border:1px solid #d1d5db;
+  padding:11px 12px;
+  font-family:inherit;
+  font-size:.95rem;
+  outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.gp-login-field input:focus{
+  border-color:var(--gp-blue);
+  box-shadow:0 0 0 2px rgba(0,91,165,.12);
+}
+.gp-login-submit{ width:100%; height:48px; }
+
+.gp-login-links{ text-align:center; margin-top:-2px; }
+.gp-login-link{
+  color:var(--gp-blue);
+  text-decoration:none;
+  font-weight:700;
+  font-size:.9rem;
+}
+.gp-login-link:hover{ text-decoration:underline; }
+
+.gp-login-divider{ position:relative; text-align:center; margin:6px 0 2px; }
+.gp-login-divider::before{
+  content:"";
+  position:absolute;
+  left:0; right:0;
+  top:50%;
+  height:1px;
+  background:rgba(15,23,42,.10);
+}
+.gp-login-divider span{
+  position:relative;
+  display:inline-block;
+  padding:0 10px;
+  background:var(--gp-white);
+  color:var(--gp-muted);
+  font-weight:700;
+  font-size:.85rem;
+}
+.gp-login-google{
+  width:100%;
+  height:48px;
+  border-radius:var(--gp-radius-pill);
+  border:2px solid rgba(15,23,42,.12);
+  background:#fff;
+  font-weight:800;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+.gp-login-google i{ font-size:1.05rem; }
+.gp-login-google:hover{
+  border-color:var(--gp-green-dark);
+  box-shadow:0 12px 26px rgba(15,23,42,.10);
+}
+.gp-login-bottom{ margin:2px 0 0; text-align:center; color:var(--gp-muted); font-size:.95rem; }
+.gp-login-create{ color:var(--gp-blue-dark); font-weight:900; text-decoration:none; }
+.gp-login-create:hover{ text-decoration:underline; }

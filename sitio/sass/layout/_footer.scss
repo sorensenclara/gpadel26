@@ -1,0 +1,30 @@
+/* ===============================
+FOOTER
+=============================== */
+.gp-footer{
+  background:#000;
+  color:#fff;
+  padding:50px 20px 30px;
+  font-family:var(--gp-font);
+  text-align:center;
+  margin-top:auto;
+}
+.gp-footer-icon{
+  font-size:42px;
+  color:var(--gp-white);
+  transition:color .25s ease;
+}
+.gp-footer-text{
+  font-size:.95rem;
+  line-height:1.4;
+  transition:color .25s ease;
+}
+.gp-footer a,
+.gp-footer-link{
+  color:var(--gp-white);
+  text-decoration:none;
+}
+.gp-footer-link:hover .gp-footer-icon,
+.gp-footer-link:hover .gp-footer-text{
+  color:var(--gp-green);
+}

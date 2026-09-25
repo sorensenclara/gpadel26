@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Elegí la modalidad del partido</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@500;700&display=swap">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+body { font-family: "Titillium Web", sans-serif; }
+</style>
+
+</head>
+<body>
+  <div class="box-mode">
+    {% if match.personalizado and match.logo %}
+      <img src="{{ match.logo.url }}" alt="{{ match.nombre_creador|default:'Marcador' }}" style="height:120px; margin-bottom:20px;">
+    {% else %}
+      <img src="{% static 'sitio/img/gpadel-logo.svg' %}" alt="GPADEL" style="height:60px; margin-bottom:20px;">
+    {% endif %}
+    <h1>Elegí la modalidad del partido</h1>
+    <p><strong>Código:</strong> {{ match.code }}</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <label class="label-mode">
+        <input type="radio" name="mode" value="3_sets" checked>
+        Partido a 3 sets
+      </label>
+      <label class="label-mode">
+        <input type="radio" name="mode" value="2_sets_super_tb">
+        2 sets + super tie-break
+      </label>
+      <p class="help-text">
+        El super tie-break se juega cuando ambos equipos ganan un set (1–1),
+        a 10 puntos y con diferencia mínima de 2.
+      </p>
+      <button class="btn-primary">Ir al marcador</button>
+    </form>
+  </div>
+</body>
+</html>

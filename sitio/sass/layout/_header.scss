@@ -1,0 +1,262 @@
+// =========================================================
+// Header + Nav
+// =========================================================
+@use "../base/variables" as *;
+@use "../base/mixins" as *;
+
+// ================= HEADER =================
+.gp-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--gp-white);
+  box-shadow: 0 1px 0 rgba(0,0,0,.06);
+
+  &-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+  }
+}
+
+.gp-logo-link { text-decoration: none; }
+.gp-logo-img { height: 36px; width: auto; }
+
+// ================= NAV DESKTOP =================
+.gp-nav {
+  display: flex;
+  gap: 24px;
+  font-size: .85rem;
+  text-transform: uppercase;
+
+  &-link {
+    position: relative;
+    text-decoration: none;
+    color: #4b5563;
+    font-weight: 600;
+    padding-bottom: 4px;
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gp-green);
+      border-radius: 999px;
+      transition: width .2s ease;
+    }
+
+    &:hover::after,
+    &--active::after { width: 100%; }
+
+    &--active {
+      color: var(--gp-green-dark);
+      font-weight: 800;
+    }
+  }
+}
+
+// ================= HEADER ACTIONS =================
+.gp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gp-header-cta {
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: var(--gp-radius-pill);
+  background: var(--gp-green-light);
+  border: 1px solid var(--gp-green-light);
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--gp-blue-text);
+
+  &:hover { background: var(--gp-green); }
+}
+
+// ================= LOGIN ICON =================
+.gp-header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+
+  background: var(--gp-bg);
+  border: 1px solid var(--gp-green-light);
+
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+
+  .sign {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .text { display: none; }
+
+  i {
+    font-size: .95rem;
+    color: var(--gp-blue-text);
+  }
+
+  &:hover { background: var(--gp-green); }
+}
+
+.gp-header-icon--login {
+  background: var(--gp-green-light);
+}
+
+// ================= LOGIN ANIMADO (SOLO PARA DESKTOP) =================
+@include mq(min, desktop-from) {
+  .gp-header-icon--login {
+    justify-content: flex-start;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--gp-green);
+    box-shadow: 0 4px 12px rgba(0,0,0,.12);
+
+    transition: width .3s ease, border-radius .3s ease, transform .1s ease;
+
+    .sign {
+      width: 100%;
+      transition: width .3s ease, padding .3s ease;
+    }
+
+    .text {
+      display: inline-block;
+      position: absolute;
+      right: 0;
+      width: 0;
+      opacity: 0;
+      white-space: nowrap;
+      padding-left: 10px;
+      padding-right: 16px;
+      font-size: .9em;
+      font-weight: 600;
+      color: var(--gp-blue-text);
+      transition: width .3s ease, opacity .3s ease;
+    }
+
+    &:hover {
+      width: 120px;
+      border-radius: 40px;
+
+      .sign {
+        width: 30%;
+        padding-left: 18px;
+      }
+
+      .text {
+        width: 70%;
+        opacity: 1;
+      }
+    }
+
+    &:active { transform: translate(2px, 2px); }
+  }
+}
+
+// ================= BURGER =================
+.gp-header-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #f3f4ff;
+  border: 1px solid var(--gp-white-dark);
+  cursor: pointer;
+  z-index: 1100;
+
+  i { font-size: .95rem; color: var(--gp-muted); }
+
+  .fa-xmark { display: none; }
+
+  &.is-open {
+    .fa-bars { display: none; }
+    .fa-xmark { display: inline-block; }
+  }
+}
+
+// ================= NAV MOBILE =================
+.gp-nav-mobile {
+  display: none;
+  flex-direction: column;
+  background: #fff;
+  border: 2px solid var(--gp-green);
+  border-radius: var(--gp-radius-lg);
+  margin: 0 16px 12px;
+  padding: 0;
+  box-shadow: 0 18px 40px rgba(15,23,42,.16);
+
+  a {
+    display: block;
+    padding: 18px 24px;
+    font-weight: 700;
+    color: var(--gp-blue-text);
+    text-decoration: none;
+    
+    & + a:not(.gp-nav-mobile-switch) {
+      border-top: 1px solid var(--gp-green);
+    }
+
+    &:hover {
+      background: var(--gp-green);
+      color: var(--gp-blue-text);
+    }
+  }
+
+  &--open { display: flex; }
+}
+
+// ================= DIVISOR CAMBIO USUARIO =================
+.gp-nav-mobile-divider {
+  height: 2px;
+  background: var(--gp-green);
+  margin: 12px 24px;
+  opacity: .6;
+}
+
+// ================= SWITCH CAMBIO USUARIO =================
+.gp-nav-mobile-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 24px;
+  font-weight: 800;
+  color: var(--gp-blue-text);
+  text-decoration: none;
+
+  i { font-size: 1rem; }
+
+  &:hover {
+    background: var(--gp-green-light);
+  }
+}
+
+// ================= RESPONSIVE =================
+@include mq(max, m800) {
+  .gp-logo-img { height: 32px; }
+  .gp-nav { display: none; }
+  .gp-header-cta { display: none; }
+  .gp-header-burger { display: inline-flex; }
+}
+
+@include mq(min, desktop-from) {
+  .gp-nav-mobile { display: none; }
+}

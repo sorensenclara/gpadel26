@@ -1,0 +1,33 @@
+// =========================================================
+// Reset / Base
+// =========================================================
+@use "variables" as *;
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: var(--gp-font);
+  color: var(--gp-text);
+  background: var(--gp-white);
+}
+
+// Layout base
+.gp-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gp-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}

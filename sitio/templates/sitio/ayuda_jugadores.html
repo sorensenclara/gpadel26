@@ -1,0 +1,170 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Cómo funciona GPADEL | Gestión y marcador de pádel para jugadores{% endblock %}
+{% block meta_description %}Descubrí cómo funciona GPADEL para jugadores de pádel. Gestioná tu perfil, llevá el marcador de partidos, seguí tu progreso y participá en torneos.{% endblock %}
+
+{% block body_class %}gp-layout gp-page-how{% endblock %}
+
+{% block nav_ayuda_class %}gp-nav-link--active{% endblock %}
+
+{% block content %}
+<!-- MAIN -->
+  <main class="gp-main">
+
+    <!-- HERO -->
+    <section class="gp-pages-hero">
+      <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}"  alt="" fetchpriority="high" decoding="async">
+
+      <div class="gp-container">
+        <h1>¿Cómo funciona?</h1>
+        <p>
+          100% gratuito para jugadores.
+          Reservá canchas, llevá el score y mirá tu progreso en tu perfil.
+        </p>
+
+        <div class="gp-hero-cta">
+          <a href="{% url 'sitio:reservar_cancha' %}" class="gp-btn gp-btn--primary">
+            Buscar canchas
+          </a>
+          <a href="{% url 'scoreboard:index' %}" class="gp-btn gp-btn--secondary">
+            Usar el marcador
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+<!-- PERFIL DASHBOARD -->
+<section id="perfil-dashboard" class="gp-dashboard">
+  <div class="container-fluid px-0">
+    <div class="row g-0 align-items-stretch gp-dashboard-grid">
+
+      <!-- Imagen-->
+      <div class="col-12 col-lg-5 gp-dashboard-image">
+        <img src="{% static 'sitio/img/jugador.png' %}" alt="Perfil deportivo del jugador GPADEL" loading="lazy">
+      </div>
+
+      <!-- Contenido -->
+      <div class="col-12 col-lg-7 gp-dashboard-right">
+        <div class="gp-container gp-dashboard-content">
+
+          <h2 class="gp-dashboard-title">
+            Con GPADEL tu perfil deportivo siempre actualizado
+          </h2>
+
+          <p class="gp-dashboard-subtitle">
+            Centraliza tu historial como jugador: estadisticas de partidos, torneos y actividades.
+          </p>
+
+          <div class="d-grid gap-3">
+
+            <!-- Beneficio 1 -->
+            <div class="p-4 rounded-4 bg-white shadow-sm">
+              <div class="d-flex align-items-start gap-3">
+                <div class="gp-benefit-icon">
+                  <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <h3 class="h5 mb-2 gp-benefit-title">Estadísticas y evolución</h3>
+                  <ul class="mb-0 gp-benefit-list">
+                    <li>Partidos y torneos jugados</li>
+                    <li>Resultados y progreso en el tiempo</li>
+                    <li>Compañeros con los que jugaste</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Beneficio 2 -->
+            <div class="p-4 rounded-4 bg-white shadow-sm">
+              <div class="d-flex align-items-start gap-3">
+                <div class="gp-benefit-icon">
+                  <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <h3 class="h5 mb-2 gp-benefit-title">Historial completo y control</h3>
+                  <ul class="mb-0 gp-benefit-list">
+                    <li>Reservas jugadas, solicitadas y canceladas</li>
+                    <li>Carga manual de partidos y torneos</li>
+                    <li>Completá tu historial aunque el torneo no esté cargado</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- CTA -->
+          <div class="mt-4 d-flex flex-wrap gap-2">
+            <a href="{% url 'sitio:login' %}" class="gp-btn gp-btn--primary">Ver mi perfil</a>
+            <a href="{% url 'sitio:torneos' %}" class="gp-btn gp-btn--secondary text-black">Ver torneos</a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+    <!-- COMO FUNCIONA (pagina principal) -->
+    <section id="como-funciona" class="gp-section">
+      <div class="gp-container">
+        <h2 class="gp-section-title">Empezar es simple</h2>
+
+        <div class="gp-steps">
+
+          <article class="gp-step">
+            <div class="gp-step-icon">
+              <img src="{% static 'sitio/img/icon-buscar.svg' %}" alt="Buscar canchas">
+            </div>
+            <div class="gp-step-card">
+              <h3>Buscá la cancha</h3>
+              <p>Encontrá canchas cerca tuyo, filtrá por ciudad, fecha y horario.</p>
+            </div>
+          </article>
+
+          <article class="gp-step">
+            <div class="gp-step-icon">
+              <img src="{% static 'sitio/img/icon-reservar.svg' %}" alt="Reservar cancha">
+            </div>
+            <div class="gp-step-card">
+              <h3>Reservá</h3>
+              <p>Confirmá tu turno fácilmente y revisá el estado: solicitada, confirmada o cancelada.</p>
+            </div>
+          </article>
+
+          <article class="gp-step">
+            <div class="gp-step-icon">
+              <img src="{% static 'sitio/img/icon-cancha.svg' %}" alt="Marcador en vivo">
+            </div>
+            <div class="gp-step-card">
+              <h3>Llevá el score</h3>
+              <p>Usá el marcador GPADEL en vivo y compartí el partido con tu equipo.</p>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- CTA AUSPICIOS -->
+    <section class="gp-cta-band">
+      <div class="gp-container">
+        <div class="gp-cta-inner">
+          <div>
+            <h3>¿Tenés una marca y querés auspiciar un torneo?</h3>
+            <p>Escribinos y te contactamos para armar una propuesta.</p>
+          </div>
+          <a href="mailto:info@gpadel.com.ar" class="gp-btn gp-btn--primary">Escribir a info@gpadel.com.ar</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+<!-- FOOTER (Bootstrap + agrego accesibilidad con arial-lavel en iconos) -->
+{% endblock %}

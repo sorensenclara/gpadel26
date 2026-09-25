@@ -1,0 +1,29 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Marcador de pádel en vivo | Crear y compartir score – GPADEL{% endblock %}
+{% block meta_description %}Creá tu marcador de pádel en vivo con GPADEL. Llevá el score del partido y compartilo con tu equipo o con quien quieras en tiempo real.{% endblock %}
+
+{% block body_class %}gp-layout gp-page-score{% endblock %}
+
+{% block nav_marcador_class %}gp-nav-link--active{% endblock %}
+
+{% block content %}
+  <main class="gp-main">
+
+    <section class="gp-pages-hero">
+      <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+      <div class="gp-container">
+        <h1>Marcador de pádel en vivo</h1>
+        <p>
+          Creá tu partido, llevá el score y compartilo con tu equipo o con el mundo.
+        </p>
+        <div class="gp-hero-cta">
+          <button type="button" class="gp-btn gp-btn--primary" onclick="gpAuth.requireAuth({{ user.is_authenticated|yesno:'true,false' }}, function(){ window.location.href = '{% url "scoreboard:new_match_auto" %}'; })">Crear marcador</button>
+          <a href="{% url 'sitio:partidos_vivo' %}" class="gp-btn gp-btn--secondary">Partidos en vivo</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% load static %}
+<div class="gp-auth-modal-overlay" id="gpAuthModal">
+  <div class="gp-auth-modal">
+    <button type="button" class="gp-auth-modal-close" onclick="gpAuth.close()" aria-label="Cerrar">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <h2>Ingresá a tu cuenta</h2>
+    <p class="gp-auth-modal-sub">Iniciá sesión para continuar.</p>
+
+    <div class="gp-auth-modal-error" id="gpAuthError" style="display:none;"></div>
+
+    <form id="gpAuthForm" autocomplete="on" action="{% url 'sitio:login' %}">
+      {% csrf_token %}
+      <div class="gp-auth-field">
+        <i class="fa-regular fa-user"></i>
+        <input type="text" name="username" id="gpAuthUser" placeholder="Usuario" autocomplete="username" required>
+      </div>
+      <div class="gp-auth-field">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" name="password" id="gpAuthPass" placeholder="Contraseña" autocomplete="current-password" required>
+      </div>
+      <div class="gp-auth-row">
+        <label><input type="checkbox" name="recordarme"> Recordarme</label>
+        <a href="{% url 'sitio:login' %}" target="_blank" rel="noopener">¿Olvidaste tu contraseña?</a>
+      </div>
+      <button type="submit" class="gp-btn gp-btn--primary" id="gpAuthSubmit" style="width:100%;">Iniciar sesión</button>
+    </form>
+
+    <div class="gp-auth-divider">o continuá con</div>
+    <a href="{% url 'google_login' %}" class="gp-auth-google"><i class="fa-brands fa-google"></i> Ingresar con Google</a>
+
+    <p class="gp-auth-bottom">¿No tenés cuenta? <a href="{% url 'sitio:registro' %}">Registrate</a></p>
+  </div>
+</div>
