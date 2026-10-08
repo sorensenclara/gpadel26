@@ -1,0 +1,82 @@
+========================================================================
+PREFLIGHT DE IDENTIDAD — solo lectura (no se modificó nada)
+Datos personales: ENMASCARADOS (informe compartible)
+========================================================================
+
+0. Migraciones previas
+   OK: no hay migraciones previas sin aplicar.
+
+1. Resumen
+   cuentas                    6
+   identidades                5
+   perfiles jugador           4
+   perfiles organizador       1
+   torneos                    1
+   categorias de torneo       1
+   inscripciones              8
+   organizadores: 1 (con torneos: 1, con canchas: 0) -> se crearía 1 membresía(s) de administrador
+   jugadores sin categoría oficial: 2 | inscripciones sin categoría declarada (J1/J2): 7/7
+
+2. Hallazgos
+   [DECISIÓN HUMANA] Cuentas con el mismo DNI (comparado sin puntos): 1
+       -> Quedan marcadas en revisión. No se fusionan ni se borran; las resuelve una persona.
+   [DECISIÓN HUMANA] Jugadores de inscripciones cuyo DNI coincide con varias cuentas: 1
+       -> No se vinculan; queda un caso de revisión abierto.
+   [DECISIÓN HUMANA] Jugadores cuyo DNI coincide con UNA cuenta pero el nombre no se parece: 1
+       -> Posible error de tipeo del DNI. No se vinculan; quedan en revisión.
+   [DECISIÓN HUMANA] Un mismo DNI sin cuenta con nombres incompatibles: 1
+       -> No se crea una persona: se revisa si es un error o son dos personas.
+   [DECISIÓN HUMANA] Inscripciones anteriores a la cuenta que ya quedaron vinculadas solo por DNI: 1
+       -> No se deshacen. Quedan listadas para que decidas si se verifican.
+   [DECISIÓN HUMANA] Inscripciones donde el DNI tipeado no coincide con el de la cuenta enlazada: 2
+       -> No se vinculan por DNI; se revisan.
+   [informativo] Jugadores sin DNI utilizable en inscripciones (vacío o de largo imposible): 9
+       -> Quedan sin persona asociada (no hay forma segura de identificarlos).
+   [informativo] DNI guardados con puntos o espacios: 1
+       -> Se agrega el DNI normalizado al lado; el original no se modifica.
+   [informativo] DNI de inscripciones sin identidad (personas sin cuenta a crear): 2
+       -> Se crean recién con tu aprobación, mediante un comando aparte en modo simulación.
+
+3. Detalle
+
+  Cuentas con el mismo DNI normalizado (1):
+    - DNI ***001: cuenta 2 (an***, DNI tipeado ***001, cat. oficial 6); cuenta 3 (am***, DNI tipeado ***001, cat. oficial None)
+
+  DNI de inscripciones que coincide con varias cuentas (1):
+    - inscripción 1 lado 2, DNI ***001, cuentas [2, 3]
+
+  DNI de una cuenta pero nombre dudoso (1):
+    - inscripción 4 lado 2: declarado «R. G.» vs cuenta 5 «L. M.»
+
+  Mismo DNI sin cuenta con nombres incompatibles (1):
+    - DNI ***222: H. S., L. P. (inscripciones [6, 7])
+
+  Vínculos retroactivos ya hechos solo por DNI (1):
+    - inscripción 5 (Torneo histórico, 2026-07-08) -> cuenta 6 creada 2026-10-06
+
+  DNI tipeado distinto del de la cuenta (jugador 1) (2):
+    - inscripción 2: tipeó ***, cuenta ***001
+    - inscripción 3: tipeó ***, cuenta ***000
+
+   Clasificación de jugadores en inscripciones (ambos lados):
+     sin dni valido                         9
+     sin identidad                          3
+     una identidad nombre compatible        2
+     una identidad nombre dudoso            1
+     varias identidades                     1
+     vínculos hechos al inscribir (ok)      1
+
+   Casos de revisión ya existentes: 1 abiertos, 0 resueltos
+
+4. Qué haría la migración
+   dnis distintos en inscripciones                  6
+   dnis que ya tienen identidad                     4
+   personas nuevas sin cuenta que se crearian       2
+   vinculos seguros por cuenta enlazada             4
+   identidades a marcar en revision                 2
+
+5. Veredicto
+   Las migraciones son solo aditivas: no borran ni modifican datos existentes.
+   6 tipo(s) de caso necesitan decisión humana. La migración los deja
+   MARCADOS; nada se vincula, se crea ni se fusiona sin tu aprobación.
+========================================================================

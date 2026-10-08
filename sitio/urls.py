@@ -16,6 +16,10 @@ urlpatterns = [
     path("canchas/<int:cancha_id>/", reservas_views.cancha_detalle, name="cancha_detalle"),
     path("canchas/<int:cancha_id>/reservar/", reservas_views.reservar_turno, name="reservar_turno"),
     path("torneos/", torneos_views.listado_torneos, name="torneos"),
+    path("mis-inscripciones/", torneos_views.mis_inscripciones, name="mis_inscripciones"),
+    # Antes que <slug:codigo>, que también matchearía "companero".
+    path("torneos/companero/", torneos_views.categoria_companero, name="categoria_companero"),
+    path("torneos/companeros/buscar/", torneos_views.buscar_companeros, name="buscar_companeros"),
     path("torneos/<slug:codigo>/", torneos_views.torneo_detalle, name="torneo_detalle"),
     path("ayuda/", views.AyudaJugadoresView.as_view(), name="ayuda"),
     path("contacto/", views.ContactoView.as_view(), name="contacto"),

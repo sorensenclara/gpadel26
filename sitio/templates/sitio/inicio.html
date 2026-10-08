@@ -39,9 +39,16 @@
   @media (max-width: 900px) { .gp-home-hero-right { padding: 20px; } }
   .gp-home-login-card { background:#fff; border-radius:18px; box-shadow:0 20px 50px rgba(15,23,42,.12); padding:32px; width:100%; max-width:380px; }
   .gp-home-login-card h2 { margin:0 0 20px; font-size:1.2rem; text-align:center; }
-  .gp-home-login-field { position:relative; margin-bottom:14px; }
-  .gp-home-login-field i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; }
-  .gp-home-login-field input { width:100%; border:1px solid #d1d5db; border-radius:10px; padding:11px 14px 11px 38px; font-size:.9rem; }
+  .gp-home-login-field {
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+    border:1px solid #d1d5db; border-radius:10px; padding:0 14px;
+  }
+  .gp-home-login-field i { color:#94a3b8; flex:0 0 auto; }
+  .gp-home-login-field input {
+    flex:1 1 auto; min-width:0; width:auto; border:none; outline:none;
+    padding:11px 0; font-size:.9rem; background:transparent;
+  }
+  .gp-home-login-field .gp-pass-toggle { position:static; flex:0 0 auto; }
   .gp-home-login-row { display:flex; justify-content:space-between; align-items:center; font-size:.82rem; margin-bottom:18px; }
   .gp-home-login-row label { display:flex; align-items:center; gap:6px; color:#475569; }
   .gp-home-login-row a { color: var(--gp-blue); text-decoration:none; font-weight:600; }
@@ -133,10 +140,13 @@
           <div class="gp-home-login-field">
             <i class="fa-solid fa-lock"></i>
             <input type="password" name="password" id="gpHomePass" placeholder="Contraseña" autocomplete="current-password" required>
+            <button type="button" class="gp-pass-toggle" onclick="gpTogglePassword('gpHomePass', this)" aria-label="Mostrar contraseña">
+              <i class="fa-regular fa-eye"></i>
+            </button>
           </div>
           <div class="gp-home-login-row">
             <label><input type="checkbox" name="recordarme"> Recordarme</label>
-            <a href="{% url 'sitio:login' %}">¿Olvidaste tu contraseña?</a>
+            <a href="{% url 'account_reset_password' %}">¿Olvidaste tu contraseña?</a>
           </div>
           <button type="submit" class="gp-btn gp-btn--primary" style="width:100%;">Iniciar sesión</button>
         </form>

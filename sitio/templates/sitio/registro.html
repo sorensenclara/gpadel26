@@ -146,6 +146,12 @@
             </div>
 
             <div class="gp-login-field">
+              <label for="gpRegLocalidad">Localidad</label>
+              {{ form.localidad }}
+              {% for error in form.localidad.errors %}<p class="gp-login-field-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="gp-login-field">
               <label>Tipo de cuenta</label>
               <div class="gp-role-picker" id="gpRolOptions">
                 <label class="gp-role-card" data-role="jugador">

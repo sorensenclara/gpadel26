@@ -2,24 +2,88 @@
 {% load static %}
 
 {% block title %}Reservar cancha de pádel online | GPADEL{% endblock %}
-{% block meta_description %}Reservá tu cancha de pádel online con GPADEL. Buscá por ciudad y encontrá canchas disponibles en segundos.{% endblock %}
+{% block meta_description %}Reservá tu cancha de pádel online con GPADEL. Buscá por ciudad, día y horario, y encontrá disponibilidad al instante.{% endblock %}
 
 {% block nav_reservar_class %}gp-nav-link gp-nav-link--active{% endblock %}
 
 {% block extra_head %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-  .gp-rc-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 16px 60px; }
-  .gp-rc-search { display:flex; gap:12px; flex-wrap:wrap; background:#fff; border-radius:14px; padding:16px 18px; box-shadow:0 6px 18px rgba(15,23,42,.05); margin-bottom:24px; }
-  .gp-rc-search input { border:1px solid #d1d5db; border-radius:999px; padding:10px 16px; font-size:.9rem; }
-  .gp-rc-search input[name="ciudad"] { flex:1 1 220px; }
-  .gp-rc-search button { background: var(--gp-green); border:none; border-radius:999px; padding:10px 24px; font-weight:800; font-size:.85rem; cursor:pointer; }
+  .gp-rc-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 16px 60px; }
 
-  .gp-rc-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:18px; }
-  .gp-rc-card { background:#fff; border-radius:14px; box-shadow:0 6px 18px rgba(15,23,42,.05); padding:20px; }
-  .gp-rc-card h3 { margin:0 0 6px; font-size:1.05rem; }
-  .gp-rc-card .gp-rc-ciudad { color:#64748b; font-size:.85rem; display:flex; align-items:center; gap:6px; margin-bottom:10px; }
-  .gp-rc-card .gp-rc-meta { display:flex; gap:14px; font-size:.83rem; color:#334155; margin-bottom:14px; }
-  .gp-rc-empty { background:#fff; border-radius:16px; padding:40px; text-align:center; color:#64748b; }
+  /* ---------- Buscador ---------- */
+  .gp-rc-filters { background:#fff; border-radius:14px; padding:18px 20px; box-shadow:0 6px 18px rgba(15,23,42,.05); margin-bottom:16px; }
+  .gp-rc-filters-row { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; }
+  .gp-rc-field { display:flex; flex-direction:column; gap:6px; flex:1 1 160px; }
+  .gp-rc-field label { font-size:.76rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:#94a3b8; }
+  .gp-rc-field input { border:1px solid #d1d5db; border-radius:999px; padding:10px 16px; font-size:.88rem; }
+  .gp-rc-hora-row { display:flex; gap:8px; align-items:center; flex:1 1 220px; }
+  .gp-rc-filtrar { background: var(--gp-green); border:none; border-radius:999px; padding:12px 26px; font-weight:800; font-size:.85rem; cursor:pointer; flex:0 0 auto; }
+
+  .gp-rc-tipo-row { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:14px; }
+  .gp-rc-tipo-pill {
+    border:1px solid #cbd5e1; background:#fff; color:#334155; border-radius:999px; padding:7px 16px;
+    font-size:.82rem; font-weight:700; cursor:pointer; text-decoration:none;
+  }
+  .gp-rc-tipo-pill.is-active { background: var(--gp-blue-dark); border-color: var(--gp-blue-dark); color:#fff; }
+  .gp-rc-limpiar { color: var(--gp-blue); font-weight:700; font-size:.82rem; text-decoration:none; margin-left:auto; }
+
+  /* ---------- Estado sin búsqueda ---------- */
+  .gp-rc-empty-start { background:#fff; border-radius:16px; padding:60px 24px; text-align:center; box-shadow:0 6px 18px rgba(15,23,42,.05); }
+  .gp-rc-empty-start i { font-size:2.4rem; color: var(--gp-blue); margin-bottom:16px; }
+  .gp-rc-empty-start h2 { margin:0 0 8px; font-size:1.3rem; color:#0f172a; }
+  .gp-rc-empty-start p { margin:0; color:#64748b; }
+
+  /* ---------- Sin resultados ---------- */
+  .gp-rc-sin-resultados { background:#fff; border-radius:16px; padding:40px 24px; text-align:center; box-shadow:0 6px 18px rgba(15,23,42,.05); }
+  .gp-rc-sin-resultados p { color:#64748b; margin:0 0 18px; }
+  .gp-rc-sin-resultados-cta { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+  /* ---------- Resumen + toggle mobile ---------- */
+  .gp-rc-summary { margin: 18px 0 14px; font-size:1.05rem; font-weight:700; color:#0f172a; }
+  .gp-rc-viewtoggle { display:none; gap:8px; margin-bottom:14px; }
+  .gp-rc-viewtoggle button { flex:1 1 0; border:1px solid #cbd5e1; background:#fff; color:#334155; border-radius:999px; padding:10px; font-weight:700; font-size:.85rem; cursor:pointer; }
+  .gp-rc-viewtoggle button.is-active { background: var(--gp-blue-dark); border-color: var(--gp-blue-dark); color:#fff; }
+
+  /* ---------- Layout lista + mapa ---------- */
+  .gp-rc-layout { display:grid; grid-template-columns: 1.7fr 1fr; gap:20px; align-items:start; }
+  @media (max-width: 960px) { .gp-rc-layout { grid-template-columns: 1fr; } }
+
+  .gp-rc-card { background:#fff; border-radius:14px; box-shadow:0 6px 18px rgba(15,23,42,.05); padding:18px 20px; margin-bottom:14px; transition:box-shadow .15s ease; }
+  .gp-rc-card.is-highlight { box-shadow:0 0 0 2px var(--gp-blue), 0 6px 18px rgba(15,23,42,.08); }
+  .gp-rc-card h3 { margin:0 0 4px; font-size:1.05rem; }
+  .gp-rc-ciudad { display:flex; align-items:center; gap:6px; color:#64748b; font-size:.83rem; margin-bottom:6px; }
+  .gp-rc-tags { display:flex; gap:14px; font-size:.82rem; color:#334155; margin-bottom:12px; }
+  .gp-rc-tags span { display:flex; align-items:center; gap:6px; }
+  .gp-rc-tags i { color: var(--gp-blue); }
+
+  .gp-rc-horarios-label { font-size:.78rem; font-weight:700; color:#64748b; margin-bottom:8px; }
+  .gp-rc-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .gp-rc-chip { position:relative; }
+  .gp-rc-chip input { position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; }
+  .gp-rc-chip span {
+    display:block; border:1.5px solid #cbd5e1; border-radius:999px; padding:7px 14px;
+    font-size:.84rem; font-weight:700; color:#334155;
+  }
+  .gp-rc-chip input:checked + span { background: var(--gp-blue-dark); border-color: var(--gp-blue-dark); color:#fff; }
+
+  .gp-rc-card-bottom { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  .gp-rc-precio { font-weight:800; color:#0f172a; font-size:.95rem; }
+  .gp-rc-precio small { font-weight:400; color:#94a3b8; font-size:.78rem; }
+  .gp-rc-card-actions { display:flex; gap:10px; }
+  .gp-rc-btn { border-radius:999px; padding:9px 18px; font-weight:700; font-size:.82rem; text-decoration:none; border:1.5px solid transparent; cursor:pointer; }
+  .gp-rc-btn--outline { background:#fff; border-color: var(--gp-blue); color: var(--gp-blue); }
+  .gp-rc-btn--green { background: var(--gp-green); color:#0f172a; }
+  .gp-rc-btn--green:disabled { background:#e2e8f0; color:#94a3b8; cursor:not-allowed; }
+
+  .gp-rc-map-wrap { position:sticky; top:16px; }
+  #gpRcMap { height:520px; border-radius:16px; box-shadow:0 8px 24px rgba(15,23,42,.08); margin-bottom:10px; }
+
+  @media (max-width: 960px) {
+    .gp-rc-viewtoggle { display:flex; }
+    body.gp-rc-view-mapa .gp-rc-list { display:none; }
+    body.gp-rc-view-lista .gp-rc-map-col { display:none; }
+  }
 </style>
 {% endblock %}
 
@@ -29,33 +93,257 @@
     <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
     <div class="gp-container">
       <h1>Reservar Cancha</h1>
+      <p>Encontrá una cancha disponible donde y cuando quieras jugar.</p>
     </div>
   </section>
 
   <div class="gp-rc-wrap">
-    <form method="get" class="gp-rc-search">
-      <input type="text" name="ciudad" value="{{ ciudad }}" placeholder="Ciudad">
-      <input type="date" name="fecha" value="{{ fecha|date:'Y-m-d' }}">
-      <button type="submit">Buscar</button>
+
+    {% if messages %}
+      {% for message in messages %}
+        <p style="color: {% if message.tags == 'error' %}#991b1b{% else %}#166534{% endif %}; font-weight:600;">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+
+    <form method="get" class="gp-rc-filters" id="gpRcForm">
+      <div class="gp-rc-filters-row">
+        <div class="gp-rc-field" style="flex:1 1 220px;">
+          <label for="gpRcLugar">¿Dónde?</label>
+          <input type="text" name="lugar" id="gpRcLugar" value="{{ lugar }}" placeholder="Ciudad o localidad">
+        </div>
+        <div class="gp-rc-field">
+          <label for="gpRcFecha">Día</label>
+          <input type="date" name="fecha" id="gpRcFecha" value="{{ fecha|date:'Y-m-d' }}">
+        </div>
+        <div class="gp-rc-field">
+          <label>Horario</label>
+          <div class="gp-rc-hora-row">
+            <input type="time" name="desde" value="{{ desde|time:'H:i' }}">
+            <span style="color:#94a3b8;">a</span>
+            <input type="time" name="hasta" value="{{ hasta|time:'H:i' }}">
+          </div>
+        </div>
+        <input type="hidden" name="tipo" id="gpRcTipoHidden" value="{{ tipo }}">
+        <button type="submit" class="gp-rc-filtrar"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+      </div>
+
+      <div class="gp-rc-tipo-row">
+        <a href="#" class="gp-rc-tipo-pill gp-rc-tipo-js {% if not tipo %}is-active{% endif %}" data-tipo="">Todas</a>
+        <a href="#" class="gp-rc-tipo-pill gp-rc-tipo-js {% if tipo == 'techada' %}is-active{% endif %}" data-tipo="techada">Techada</a>
+        <a href="#" class="gp-rc-tipo-pill gp-rc-tipo-js {% if tipo == 'aire_libre' %}is-active{% endif %}" data-tipo="aire_libre">Aire libre</a>
+        {% if hubo_busqueda %}
+        <a href="{% url 'sitio:reservar_cancha' %}" class="gp-rc-limpiar">Limpiar filtros</a>
+        {% endif %}
+      </div>
     </form>
 
-    <div class="gp-rc-grid">
-      {% for cancha in canchas %}
-      <div class="gp-rc-card">
-        <h3>{{ cancha.nombre }}</h3>
-        <div class="gp-rc-ciudad"><i class="fa-solid fa-location-dot"></i> {{ cancha.ciudad }}</div>
-        <div class="gp-rc-meta">
-          <span><i class="fa-solid fa-{% if cancha.techada %}house{% else %}sun{% endif %}"></i> {% if cancha.techada %}Techada{% else %}Al aire libre{% endif %}</span>
-          <span><i class="fa-solid fa-tag"></i> ${{ cancha.precio_hora }}/hora</span>
+    {% if not hubo_busqueda %}
+      <div class="gp-rc-empty-start">
+        <i class="fa-solid fa-magnifying-glass-location"></i>
+        <h2>Encontrá tu próxima cancha</h2>
+        <p>Elegí dónde, cuándo y a qué hora querés jugar.</p>
+      </div>
+
+    {% elif not resultados %}
+      <div class="gp-rc-sin-resultados">
+        <p>No encontramos canchas disponibles en ese horario.</p>
+        <div class="gp-rc-sin-resultados-cta">
+          <a href="#gpRcLugar" class="gp-rc-btn gp-rc-btn--outline" onclick="document.getElementById('gpRcLugar').focus();">Cambiar horario</a>
+          <a href="?lugar={{ lugar }}&fecha={{ fecha|date:'Y-m-d' }}" class="gp-rc-btn gp-rc-btn--green">Ver todo el día</a>
         </div>
-        <a href="{% url 'sitio:cancha_detalle' cancha.id %}?fecha={{ fecha|date:'Y-m-d' }}" class="gp-btn gp-btn--primary" style="width:100%; text-align:center;">Ver horarios</a>
       </div>
-      {% empty %}
-      <div class="gp-rc-empty" style="grid-column:1/-1;">
-        {% if ciudad %}No encontramos canchas en "{{ ciudad }}".{% else %}Todavía no hay canchas cargadas.{% endif %}
+
+    {% else %}
+      <div class="gp-rc-summary">
+        {{ resultados|length }} cancha{{ resultados|length|pluralize }} disponible{{ resultados|length|pluralize }}
+        {% if descripcion_fecha %}para {{ descripcion_fecha }}{% endif %}
       </div>
-      {% endfor %}
-    </div>
+
+      <div class="gp-rc-viewtoggle">
+        <button type="button" id="gpRcBtnLista" class="is-active">Lista</button>
+        <button type="button" id="gpRcBtnMapa">Mapa</button>
+      </div>
+
+      <div class="gp-rc-layout">
+        <div class="gp-rc-list">
+          {% for item in resultados %}
+          {% with cancha=item.cancha %}
+          <div class="gp-rc-card" id="gp-rc-card-{{ cancha.id }}" data-cancha-id="{{ cancha.id }}">
+            <h3>{{ cancha.nombre }}</h3>
+            <div class="gp-rc-ciudad"><i class="fa-solid fa-location-dot"></i> {{ cancha.ciudad }}</div>
+            <div class="gp-rc-tags">
+              <span><i class="fa-solid fa-{% if cancha.techada %}house{% else %}sun{% endif %}"></i> {% if cancha.techada %}Techada{% else %}Al aire libre{% endif %}</span>
+            </div>
+
+            <form method="post" action="{% url 'sitio:reservar_turno' cancha.id %}" class="gp-rc-reserva-form" data-requiere-login="1">
+              {% csrf_token %}
+              <input type="hidden" name="fecha" value="{{ fecha|date:'Y-m-d' }}">
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+              <div class="gp-rc-horarios-label">Horarios disponibles</div>
+              <div class="gp-rc-chips">
+                {% for hora in item.horarios %}
+                <label class="gp-rc-chip">
+                  <input type="radio" name="hora_inicio" value="{{ hora|time:'H:i:s' }}" required>
+                  <span>{{ hora|time:'H:i' }}</span>
+                </label>
+                {% endfor %}
+              </div>
+
+              <div class="gp-rc-card-bottom">
+                <div class="gp-rc-precio">${{ cancha.precio_hora }} <small>/ hora</small></div>
+                <div class="gp-rc-card-actions">
+                  <a href="{% url 'sitio:cancha_detalle' cancha.id %}?fecha={{ fecha|date:'Y-m-d' }}" class="gp-rc-btn gp-rc-btn--outline">Ver cancha</a>
+                  <button type="submit" class="gp-rc-btn gp-rc-btn--green" disabled>Reservar</button>
+                </div>
+              </div>
+            </form>
+          </div>
+          {% endwith %}
+          {% endfor %}
+        </div>
+
+        <div class="gp-rc-map-col">
+          <div class="gp-rc-map-wrap">
+            {{ canchas_mapa|json_script:"gpRcMapData" }}
+            <div id="gpRcMap"></div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
   </div>
 </main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Pills de tipo (Techada/Aire libre): disparan el mismo buscador.
+  document.querySelectorAll('.gp-rc-tipo-js').forEach(function (pill) {
+    pill.addEventListener('click', function (e) {
+      e.preventDefault();
+      document.getElementById('gpRcTipoHidden').value = pill.dataset.tipo;
+      document.getElementById('gpRcForm').submit();
+    });
+  });
+
+  // Habilitar "Reservar" recién cuando se eligió un horario, y pedir login
+  // antes de enviar si hace falta (mismo modal reutilizable de siempre).
+  (function () {
+    var yaLogueado = {{ user.is_authenticated|yesno:'true,false' }};
+    document.querySelectorAll('.gp-rc-reserva-form').forEach(function (form) {
+      var btn = form.querySelector('.gp-rc-btn--green');
+      form.querySelectorAll('input[name="hora_inicio"]').forEach(function (radio) {
+        radio.addEventListener('change', function () { btn.disabled = false; });
+      });
+      if (!yaLogueado) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          gpAuth.requireAuth(false, function () { form.submit(); });
+        });
+      }
+    });
+  })();
+
+  // Mapa: mismo proveedor (Esri, sin key) y mismo patrón de geocodificar
+  // por ciudad cuando no hay coordenadas guardadas.
+  (function () {
+    var mapEl = document.getElementById('gpRcMap');
+    if (!mapEl) return;
+    var dataEl = document.getElementById('gpRcMapData');
+    var canchasData = dataEl ? JSON.parse(dataEl.textContent) : [];
+    if (!canchasData.length) return;
+
+    var map = L.map('gpRcMap').setView([-38.4, -63.6], 4);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri', maxZoom: 18,
+    }).addTo(map);
+
+    var marcadores = {};
+    var bounds = [];
+
+    function ajustarVista() {
+      if (!bounds.length) return;
+      if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30] });
+      else map.setView(bounds[0], 13);
+    }
+
+    function agregarPin(c) {
+      var marker = L.circleMarker([c.lat, c.lon], {
+        radius: 9, color: '#fff', weight: 2, fillColor: '#3b82f6', fillOpacity: 1,
+      }).addTo(map);
+      marker.bindPopup(
+        '<strong>' + c.nombre + '</strong><br>Desde $' + c.precio_hora + '/h<br>' +
+        c.cantidad_horarios + ' horario(s) disponible(s)<br>' +
+        '<a href="' + c.url + '">Ver cancha</a>'
+      );
+      marker.on('click', function () { resaltarCard(c.id); });
+      marcadores[c.id] = marker;
+      bounds.push([c.lat, c.lon]);
+      ajustarVista();
+    }
+
+    function resaltarCard(id) {
+      document.querySelectorAll('.gp-rc-card').forEach(function (card) {
+        card.classList.toggle('is-highlight', card.dataset.canchaId === String(id));
+      });
+      var card = document.getElementById('gp-rc-card-' + id);
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    document.querySelectorAll('.gp-rc-card').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('form') || e.target.closest('a')) return;
+        var id = card.dataset.canchaId;
+        resaltarCard(id);
+        var marker = marcadores[id];
+        if (marker) { map.panTo(marker.getLatLng()); marker.openPopup(); }
+      });
+    });
+
+    var geocodeCache = {};
+    function geocodificar(ciudad) {
+      if (geocodeCache[ciudad]) return geocodeCache[ciudad];
+      var partes = ciudad.split(',');
+      var nombre = partes[0].trim();
+      var provincia = partes[1] ? partes[1].trim() : '';
+      var url = 'https://apis.datos.gob.ar/georef/api/localidades?nombre=' +
+        encodeURIComponent(nombre) + '&max=1&campos=estandar';
+      if (provincia) url += '&provincia=' + encodeURIComponent(provincia);
+      geocodeCache[ciudad] = fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+        var loc = (data.localidades || [])[0];
+        return loc ? { lat: loc.centroide.lat, lon: loc.centroide.lon } : null;
+      }).catch(function () { return null; });
+      return geocodeCache[ciudad];
+    }
+
+    canchasData.forEach(function (c) {
+      if (c.lat != null && c.lon != null) {
+        agregarPin(c);
+      } else if (c.ciudad) {
+        geocodificar(c.ciudad).then(function (coords) {
+          if (coords) agregarPin(Object.assign({}, c, { lat: coords.lat, lon: coords.lon }));
+        });
+      }
+    });
+  })();
+
+  // Toggle Lista/Mapa en mobile.
+  (function () {
+    var btnLista = document.getElementById('gpRcBtnLista');
+    var btnMapa = document.getElementById('gpRcBtnMapa');
+    if (!btnLista || !btnMapa) return;
+    btnLista.addEventListener('click', function () {
+      document.body.classList.remove('gp-rc-view-mapa');
+      document.body.classList.add('gp-rc-view-lista');
+      btnLista.classList.add('is-active'); btnMapa.classList.remove('is-active');
+    });
+    btnMapa.addEventListener('click', function () {
+      document.body.classList.remove('gp-rc-view-lista');
+      document.body.classList.add('gp-rc-view-mapa');
+      btnMapa.classList.add('is-active'); btnLista.classList.remove('is-active');
+    });
+  })();
+</script>
 {% endblock %}

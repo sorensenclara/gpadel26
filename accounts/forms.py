@@ -4,7 +4,8 @@ from django.contrib.auth.forms import AuthenticationForm
 
 from allauth.socialaccount.forms import SignupForm as SocialSignupFormBase
 
-from .models import Identidad, Jugador, Organizador
+from .identidad import dar_identidad_a_cuenta
+from .models import Identidad, Jugador, Organizador, dni_ya_registrado
 
 User = get_user_model()
 
@@ -59,7 +60,13 @@ def _crear_perfil(user, cleaned):
 
     rol = cleaned["rol"]
     perfil_identidad = Identidad.PERFIL_JUGADOR if rol == ROL_JUGADOR else Identidad.PERFIL_ORGANIZADOR
-    Identidad.objects.create(usuario=user, dni=cleaned["dni"], ultimo_perfil=perfil_identidad)
+    # DNI libre -> identidad propia. DNI de una identidad existente sin cuenta -> la cuenta
+    # NO se apropia de ella ni de su historial: queda un reclamo pendiente de verificación
+    # del staff y la cuenta usa el sistema normalmente (ver accounts.identidad).
+    identidad, reclamo = dar_identidad_a_cuenta(
+        user, cleaned["dni"], localidad=cleaned.get("localidad", ""), ultimo_perfil=perfil_identidad
+    )
+    user.reclamo_identidad_creado = reclamo  # para que la vista avise (no se persiste)
 
     if rol == ROL_JUGADOR:
         return Jugador.objects.create(usuario=user, celular=cleaned.get("celular", ""))
@@ -67,7 +74,7 @@ def _crear_perfil(user, cleaned):
 
 
 class _IdentidadFieldsMixin(forms.Form):
-    """Nombre, apellido y DNI: identifican a la persona, no al perfil."""
+    """Nombre, apellido, DNI y localidad: identifican a la persona, no al perfil."""
 
     nombre = forms.CharField(
         max_length=100,
@@ -84,10 +91,17 @@ class _IdentidadFieldsMixin(forms.Form):
         label="DNI",
         widget=forms.TextInput(attrs={"id": "gpRegDni", "inputmode": "numeric"}),
     )
+    localidad = forms.CharField(
+        max_length=100,
+        label="Localidad",
+        widget=forms.TextInput(attrs={"id": "gpRegLocalidad", "autocomplete": "address-level2"}),
+    )
 
     def clean_dni(self):
         dni = self.cleaned_data["dni"].strip()
-        if Identidad.objects.filter(dni=dni).exists():
+        # Comparación normalizada: "30.100.001" y "30100001" son el mismo DNI.
+        # Permitir ambos crearía cuentas ambiguas que después no se pueden vincular.
+        if dni_ya_registrado(dni):
             raise forms.ValidationError("Ya existe una cuenta registrada con ese DNI.")
         return dni
 

@@ -59,6 +59,9 @@
         {% if gp_tiene_organizador %}
         <a href="{% url 'torneos:mis_torneos' %}" class="gp-header-cta">Mis torneos</a>
         {% endif %}
+        {% if gp_tiene_jugador %}
+        <a href="{% url 'sitio:mis_inscripciones' %}" class="gp-header-cta">Mis inscripciones</a>
+        {% endif %}
 
         {% if user.is_authenticated %}
         <a href="{% url 'accounts:mi_cuenta' %}" class="gp-header-cta" style="background:transparent; border:1px solid rgba(15,23,42,.12);">
@@ -114,6 +117,11 @@
       <a href="{% url 'torneos:mis_torneos' %}" class="gp-nav-mobile-switch">
         <i class="fa-solid fa-trophy"></i>
         Mis torneos
+      </a>
+      {% elif gp_tiene_jugador %}
+      <a href="{% url 'sitio:mis_inscripciones' %}" class="gp-nav-mobile-switch">
+        <i class="fa-solid fa-clipboard-list"></i>
+        Mis inscripciones
       </a>
       {% endif %}
     </nav>

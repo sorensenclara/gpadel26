@@ -1,3 +1,17 @@
+/* Mostrar/ocultar contraseña: reutilizable en cualquier input de
+ * contraseña del sitio (login, tarjeta de la home, modal). */
+window.gpTogglePassword = function (inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (!input) return;
+  var mostrando = input.type === 'text';
+  input.type = mostrando ? 'password' : 'text';
+  var icon = btn.querySelector('i');
+  if (icon) {
+    icon.classList.toggle('fa-eye', mostrando);
+    icon.classList.toggle('fa-eye-slash', !mostrando);
+  }
+};
+
 /* Modal de login reutilizable: gpAuth.requireAuth(callback) ejecuta el
  * callback directo si ya hay sesión, o abre el modal, loguea por fetch
  * (sin recargar la página) y recién ahí ejecuta el callback — así el

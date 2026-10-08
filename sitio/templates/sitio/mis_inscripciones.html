@@ -1,0 +1,66 @@
+{% extends "sitio/base.html" %}
+{% load static %}
+
+{% block title %}Mis inscripciones | GPADEL{% endblock %}
+{% block body_class %}gp-layout{% endblock %}
+
+{% block extra_head %}
+<style>
+  .gp-mi-wrap { max-width: 900px; margin: 0 auto; padding: 32px 16px 60px; }
+  .gp-mi-card {
+    background:#fff; border-radius:16px; box-shadow:0 6px 18px rgba(15,23,42,.06);
+    padding:22px 26px; margin-bottom:16px; display:flex; justify-content:space-between;
+    align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  .gp-mi-card h3 { margin:0 0 4px; font-size:1.05rem; }
+  .gp-mi-meta { display:flex; flex-wrap:wrap; gap:16px; font-size:.85rem; color:#64748b; margin-top:6px; }
+  .gp-mi-meta span { display:flex; align-items:center; gap:6px; }
+  .gp-mi-pareja { font-size:.88rem; color:#334155; margin-top:8px; }
+  .gp-mi-estado {
+    display:inline-flex; align-items:center; gap:6px; padding:4px 14px; border-radius:999px;
+    font-size:.76rem; font-weight:800; text-transform:uppercase; white-space:nowrap;
+  }
+  .gp-mi-estado--pendiente { background:#fef9c3; color:#854d0e; }
+  .gp-mi-estado--confirmada { background: var(--gp-green-light); color:#166534; }
+  .gp-mi-estado--rechazada { background:#fee2e2; color:#991b1b; }
+  .gp-mi-empty { background:#fff; border-radius:16px; padding:50px 20px; text-align:center; color:#64748b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="gp-main">
+  <section class="gp-pages-hero">
+    <img class="gp-hero-bg" src="{% static 'sitio/img/bggpadel.webp' %}" alt="" decoding="async">
+    <div class="gp-container">
+      <h5>Tus torneos</h5>
+      <h1>Mis inscripciones</h1>
+    </div>
+  </section>
+
+  <div class="gp-mi-wrap">
+    {% for insc in inscripciones %}
+    <div class="gp-mi-card">
+      <div>
+        <h3>{{ insc.torneo.nombre }}</h3>
+        <div class="gp-mi-meta">
+          <span><i class="fa-regular fa-calendar"></i> {{ insc.torneo.fecha_inicio|date:'d/m/Y' }}</span>
+          <span><i class="fa-solid fa-location-dot"></i> {{ insc.torneo.ciudad|default:"A confirmar" }}</span>
+          <span><i class="fa-solid fa-table-cells"></i> {{ insc.categoria.nombre }}</span>
+        </div>
+        <div class="gp-mi-pareja"><i class="fa-solid fa-user-group"></i> Con {{ insc.mi_companero }}{% if insc.la_hizo_mi_pareja %} <small style="color:#64748b;">· te inscribió {{ insc.nombre_completo_1 }}</small>{% endif %}</div>
+        <div class="gp-mi-pareja" style="margin-top:4px;"><i class="fa-regular fa-clock"></i> Disponibilidad: {% if insc.disponibilidad %}{{ insc.disponibilidad }}{% else %}todos los días y horarios{% endif %}</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+        <span class="gp-mi-estado gp-mi-estado--{{ insc.estado }}">{{ insc.get_estado_display }}</span>
+        <a href="{% url 'sitio:torneo_detalle' insc.torneo.codigo %}" class="gp-tl-btn gp-tl-btn--outline">Ver torneo</a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="gp-mi-empty">
+      <p style="margin:0 0 14px;">Todavía no te inscribiste a ningún torneo.</p>
+      <a href="{% url 'sitio:torneos' %}" class="gp-btn gp-btn--primary">Ver torneos disponibles</a>
+    </div>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}

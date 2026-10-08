@@ -127,6 +127,47 @@
           </div>
         </div>
 
+        <div class="gp-wiz-field">
+          <label>Modalidad de categorías <span class="req">*</span></label>
+          <div class="gp-formato-grid" id="gpModalidadOptions">
+            <label class="gp-formato-card" data-value="por_categoria">
+              {{ torneo_form.modalidad_categoria.0.tag }}
+              <i class="fa-solid fa-ranking-star"></i>
+              <span>
+                <strong>Por categoría</strong>
+                <span>Se ubica según el jugador de mayor nivel de la pareja.</span>
+              </span>
+            </label>
+            <label class="gp-formato-card" data-value="por_sumatoria">
+              {{ torneo_form.modalidad_categoria.1.tag }}
+              <i class="fa-solid fa-plus-minus"></i>
+              <span>
+                <strong>Por sumatoria</strong>
+                <span>Se ubica según la suma de categorías de los dos jugadores.</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="gp-wiz-field" id="gpPermitirSubirField">
+          <label for="{{ torneo_form.categorias_permitir_subir.id_for_label }}">
+            Categorías que se permite subir
+          </label>
+          {{ torneo_form.categorias_permitir_subir }}
+          <p style="font-size:.75rem; color:#94a3b8; margin:4px 0 0;">
+            0 = la pareja solo puede jugar en su categoría. Nunca se permite bajar a una inferior.
+          </p>
+        </div>
+
+        <div class="gp-wiz-field">
+          <label style="display:flex; gap:10px; align-items:flex-start; font-weight:600; cursor:pointer;">
+            {{ torneo_form.permite_multiples_categorias }}
+            <span>Permitir que un jugador se inscriba en más de una categoría
+              <small style="display:block; font-weight:400; color:#94a3b8;">Solo en categorías más altas que la anterior y siempre con otra pareja. Nunca en la misma categoría dos veces.</small>
+            </span>
+          </label>
+        </div>
+
         <div class="gp-wiz-row2">
           <div class="gp-wiz-field">
             <label for="{{ torneo_form.fecha_inicio.id_for_label }}">Fecha de inicio <span class="req">*</span></label>
@@ -156,7 +197,22 @@
         </div>
       </div>
 
-      <div class="gp-wiz-card">
+      <div class="gp-wiz-card" id="gpSumatoriaCard" style="display:none;">
+        <div class="gp-wiz-step-head">
+          <span class="gp-wiz-step-icon gp-wiz-step-icon--cat"><i class="fa-solid fa-plus-minus"></i></span>
+          <div>
+            <h2>Sumatoria del torneo</h2>
+            <p>Este torneo queda definido exclusivamente por este valor (ej: "SUMA 13") — no hay categorías separadas.</p>
+          </div>
+        </div>
+        <div class="gp-wiz-field">
+          <label for="{{ torneo_form.sumatoria_valor.id_for_label }}">Suma mínima para inscribirse <span class="req">*</span></label>
+          {{ torneo_form.sumatoria_valor }}
+          {% for error in torneo_form.sumatoria_valor.errors %}<p class="gp-wiz-error">{{ error }}</p>{% endfor %}
+        </div>
+      </div>
+
+      <div class="gp-wiz-card" id="gpCategoriasCard">
         <div class="gp-wiz-step-head">
           <span class="gp-wiz-step-icon gp-wiz-step-icon--cat"><i class="fa-solid fa-tag"></i></span>
           <div>
@@ -289,6 +345,43 @@
       });
     });
     actualizarFormato();
+
+    var modalidadCards = document.querySelectorAll('#gpModalidadOptions .gp-formato-card');
+    var permitirSubirField = document.getElementById('gpPermitirSubirField');
+
+    function modalidadActual() {
+      var sel = document.querySelector('#gpModalidadOptions input[type="radio"]:checked');
+      return sel ? sel.value : 'por_categoria';
+    }
+
+    function actualizarModalidad() {
+      var modalidad = modalidadActual();
+      modalidadCards.forEach(function (card) {
+        card.classList.toggle('is-selected', card.dataset.value === modalidad);
+      });
+      var esSumatoria = modalidad === 'por_sumatoria';
+      if (permitirSubirField) permitirSubirField.style.display = esSumatoria ? 'none' : 'block';
+      var sumatoriaCard = document.getElementById('gpSumatoriaCard');
+      var categoriasCard = document.getElementById('gpCategoriasCard');
+      if (sumatoriaCard) sumatoriaCard.style.display = esSumatoria ? 'block' : 'none';
+      if (categoriasCard) categoriasCard.style.display = esSumatoria ? 'none' : 'block';
+    }
+    modalidadCards.forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.tagName !== 'INPUT') {
+          card.querySelector('input[type="radio"]').checked = true;
+        }
+        actualizarModalidad();
+      });
+    });
+    actualizarModalidad();
+
+    var addCategoriaBtn2 = document.getElementById('gpAddCategoria');
+    if (addCategoriaBtn2) {
+      addCategoriaBtn2.addEventListener('click', function () {
+        setTimeout(actualizarModalidad, 0);
+      });
+    }
   })();
 </script>
 {% endblock %}

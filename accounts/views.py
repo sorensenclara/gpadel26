@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST
 
 from .forms import (
     ActivarJugadorForm,
@@ -10,7 +11,9 @@ from .forms import (
     GPadelAuthenticationForm,
     RegistroForm,
 )
-from .models import Identidad
+from torneos.servicios import categoria_minima_declarada, declaradas_por_terceros
+
+from .models import NIVEL_CHOICES, NIVEL_LABELS, Identidad, puede_subir_categoria
 
 
 def _perfiles_de(user):
@@ -94,6 +97,13 @@ def registro_view(request):
             user, rol, perfil = form.save()
             login(request, user, backend="django.contrib.auth.backends.ModelBackend")
 
+            if getattr(user, "reclamo_identidad_creado", None) is not None:
+                messages.warning(
+                    request,
+                    "Tu DNI ya figura en GPADEL: verificaremos que sos esa persona antes de asociarte su "
+                    "historial. Mientras tanto podés usar la plataforma con normalidad.",
+                )
+                return redirect("accounts:mi_cuenta")
             if rol == RegistroForm.ROL_JUGADOR:
                 messages.success(request, "¡Cuenta creada! Ya podés armar tu marcador.")
                 return redirect("sitio:jugadores")
@@ -143,6 +153,31 @@ def mi_cuenta(request):
     """
     tiene_jugador, tiene_organizador = _perfiles_de(request.user)
     identidad = getattr(request.user, "identidad", None)
+    celular = getattr(getattr(request.user, "jugador", None), "celular", None) or getattr(
+        getattr(request.user, "organizador", None), "celular", None
+    )
+
+    categoria_oficial = getattr(getattr(request.user, "jugador", None), "categoria_oficial", None)
+    # Solo se ofrecen categorías MEJORES que la actual (la regla también se valida al enviar).
+    categorias_para_subir = [
+        (valor, nombre) for valor, nombre in NIVEL_CHOICES
+        if categoria_oficial and valor < categoria_oficial
+    ]
+
+    # Categoría declarada por terceros, pendiente de confirmación del titular.
+    categoria_piso = None
+    declaradas = []
+    if categoria_oficial is None:
+        categoria_piso = categoria_minima_declarada(request.user)
+        declaradas = [
+            {"torneo": insc.torneo, "categoria": NIVEL_LABELS[insc.categoria_oficial_2]}
+            for insc in declaradas_por_terceros(request.user)
+        ]
+    categorias_para_confirmar = [
+        (valor, nombre) for valor, nombre in NIVEL_CHOICES if categoria_piso and valor <= categoria_piso
+    ]
+    revision_abierta = request.user.revisiones_identidad.filter(estado="abierta").exists()
+    reclamo_abierto = request.user.reclamos_identidad.filter(estado__in=["pendiente", "en_conflicto"]).first()
 
     jugador_form = None
     organizador_form = None
@@ -176,9 +211,69 @@ def mi_cuenta(request):
         "sitio/mi_cuenta.html",
         {
             "identidad": identidad,
+            "celular": celular,
+            "categoria_oficial": categoria_oficial,
+            "categoria_oficial_label": NIVEL_LABELS.get(categoria_oficial, ""),
+            "categorias_para_subir": categorias_para_subir,
+            "categoria_piso": categoria_piso,
+            "categoria_piso_label": NIVEL_LABELS.get(categoria_piso, ""),
+            "declaradas_por_terceros": declaradas,
+            "categorias_para_confirmar": categorias_para_confirmar,
+            "revision_abierta": revision_abierta,
+            "reclamo_abierto": reclamo_abierto,
             "tiene_jugador": tiene_jugador,
             "tiene_organizador": tiene_organizador,
             "jugador_form": jugador_form,
             "organizador_form": organizador_form,
         },
     )
+
+
+@login_required
+@require_POST
+def actualizar_categoria(request):
+    """
+    Desde su propia cuenta, un jugador puede SUBIR su categoría oficial. Nunca
+    bajarla, y la primera vez se declara al inscribirse a un torneo. Lo mismo
+    que se valida en la inscripción, acá también en backend.
+    """
+    jugador = getattr(request.user, "jugador", None)
+    if jugador is None:
+        messages.error(request, "Esta acción es solo para perfiles de Jugador.")
+        return redirect("accounts:mi_cuenta")
+
+    try:
+        nueva = int(request.POST.get("categoria_oficial", ""))
+    except ValueError:
+        nueva = None
+    if nueva not in NIVEL_LABELS:
+        messages.error(request, "Elegí una categoría válida.")
+    elif jugador.categoria_oficial is None:
+        # Todavía sin categoría oficial. Si otras personas ya declararon una (y el
+        # organizador la confirmó), el titular puede CONFIRMARLA o declarar una
+        # superior, nunca una inferior. Sin ninguna declaración previa, la
+        # primera categoría se declara al inscribirse a un torneo.
+        piso = categoria_minima_declarada(request.user)
+        if piso is None:
+            messages.error(request, "Tu categoría oficial se declara en tu primera inscripción a un torneo.")
+        elif not puede_subir_categoria(piso, nueva):
+            messages.error(
+                request,
+                f"Ya figurás declarado como {NIVEL_LABELS[piso]}: podés confirmarla o elegir una superior, no una inferior.",
+            )
+        else:
+            jugador.categoria_oficial = nueva
+            jugador.save(update_fields=["categoria_oficial"])
+            messages.success(request, f"Confirmaste tu categoría oficial: {NIVEL_LABELS[nueva]}.")
+    elif nueva == jugador.categoria_oficial:
+        messages.info(request, "Esa ya es tu categoría oficial.")
+    elif not puede_subir_categoria(jugador.categoria_oficial, nueva):
+        messages.error(
+            request,
+            f"Tu categoría oficial es {NIVEL_LABELS[jugador.categoria_oficial]}: podés subirla, no bajarla.",
+        )
+    else:
+        jugador.categoria_oficial = nueva
+        jugador.save(update_fields=["categoria_oficial"])
+        messages.success(request, f"Tu categoría oficial ahora es {NIVEL_LABELS[nueva]}.")
+    return redirect("accounts:mi_cuenta")

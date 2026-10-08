@@ -50,9 +50,17 @@
               {{ form.username }}
             </div>
 
-            <div class="gp-login-field">
+            <div class="gp-login-field" style="position:relative;">
               <label for="gpPass">Contraseña</label>
               {{ form.password }}
+              <button type="button" class="gp-pass-toggle" onclick="gpTogglePassword('gpPass', this)" aria-label="Mostrar contraseña">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+
+            <div class="gp-login-row">
+              <label><input type="checkbox" name="recordarme"> Recordarme</label>
+              <a href="{% url 'account_reset_password' %}">¿Olvidaste tu contraseña?</a>
             </div>
 
             <button type="submit"

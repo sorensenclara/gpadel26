@@ -42,6 +42,7 @@
   .gp-tl-badge--inscripcion_abierta { background:#dcfce7; color:#166534; }
   .gp-tl-badge--en_juego { background:#dbeafe; color:#1e40af; }
   .gp-tl-badge--finalizado { background:#e2e8f0; color:#475569; }
+  .gp-tl-badge--inscripto { background:#166534; color:#fff; }
   .gp-tl-badge-dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
   .gp-tl-tuyo { background:#eff6ff; color: var(--gp-blue-dark); font-size:.7rem; font-weight:800; padding:3px 10px; border-radius:999px; white-space:nowrap; }
   .gp-tl-card h3 { margin:0 0 4px; font-size:1rem; }
@@ -190,6 +191,7 @@
           <div class="gp-tl-card-main">
             <div class="gp-tl-card-top">
               <span class="gp-tl-badge gp-tl-badge--{{ torneo.estado_visual }}"><span class="gp-tl-badge-dot"></span>{% if torneo.estado_visual == 'finalizado' %}FINALIZADO{% elif torneo.estado_visual == 'inscripcion_abierta' %}INSCRIPCIÓN ABIERTA{% else %}EN JUEGO{% endif %}</span>
+              {% if torneo.inscripto_en %}<span class="gp-tl-badge gp-tl-badge--inscripto" data-inscripto-badge title="{{ torneo.inscripto_en|join:', ' }}"><i class="fa-solid fa-circle-check"></i> INSCRIPTO</span>{% endif %}
               {% if mi_organizador_id and torneo.organizador_id == mi_organizador_id %}
                 <span class="gp-tl-tuyo"><i class="fa-solid fa-star"></i> Tu torneo</span>
               {% endif %}
@@ -224,9 +226,15 @@
               data-estado="{% if torneo.estado_visual == 'finalizado' %}FINALIZADO{% elif torneo.estado_visual == 'inscripcion_abierta' %}INSCRIPCIÓN ABIERTA{% else %}EN JUEGO{% endif %}"
               data-url="{% url 'sitio:torneo_detalle' torneo.codigo %}"
               data-puede-inscribir="{% if torneo.estado_visual == 'inscripcion_abierta' %}1{% else %}0{% endif %}"
+              data-inscripto="{% if torneo.inscripto_en %}1{% else %}0{% endif %}"
+              data-inscripto-cats="{{ torneo.inscripto_en|join:', ' }}"
+              data-puede-otra="{% if torneo.puede_otra_categoria %}1{% else %}0{% endif %}"
+              data-mis-inscripciones="{% url 'sitio:mis_inscripciones' %}"
             >Ver detalle</button>
-            {% if torneo.estado_visual == 'inscripcion_abierta' %}
-              <a href="{% url 'sitio:torneo_detalle' torneo.codigo %}" class="gp-tl-btn gp-tl-btn--green">Inscribirme</a>
+            {% if torneo.estado_visual == 'inscripcion_abierta' and torneo.inscripto_en and not torneo.puede_otra_categoria %}
+              <a href="{% url 'sitio:mis_inscripciones' %}" class="gp-tl-btn gp-tl-btn--muted">Ver mi inscripción</a>
+            {% elif torneo.estado_visual == 'inscripcion_abierta' %}
+              <a href="{% url 'sitio:torneo_detalle' torneo.codigo %}" class="gp-tl-btn gp-tl-btn--green gp-inscribirme-link">{% if torneo.inscripto_en %}Inscribirme en otra categoría{% else %}Inscribirme{% endif %}</a>
             {% elif torneo.estado_visual == 'en_juego' %}
               <a href="{% url 'sitio:torneo_detalle' torneo.codigo %}" class="gp-tl-btn gp-tl-btn--muted">Ver resultados</a>
             {% elif torneo.estado_visual == 'finalizado' %}
@@ -271,7 +279,7 @@
 <div class="gp-tl-modal-overlay" id="gpDetalleModal">
   <div class="gp-tl-modal">
     <button type="button" class="gp-tl-modal-close" onclick="gpCerrarDetalleModal()"><i class="fa-solid fa-xmark"></i></button>
-    <span class="gp-tl-badge" id="gpDetalleEstado"></span>
+    <span class="gp-tl-badge" id="gpDetalleEstado"></span> <span class="gp-tl-badge gp-tl-badge--inscripto" id="gpDetalleInscripto" style="display:none;"></span>
     <h2 id="gpDetalleNombre"></h2>
 
     <div class="gp-tl-modal-row"><i class="fa-solid fa-location-dot"></i> <span id="gpDetalleCiudad"></span> <span id="gpDetalleSedeWrap">— <span id="gpDetalleSede"></span></span></div>
@@ -319,11 +327,20 @@
 
         var inscribirmeBtn = document.getElementById('gpDetalleInscribirme');
         inscribirmeBtn.href = d.url;
-        if (d.puedeInscribir === '1') {
+        var insBadge = document.getElementById('gpDetalleInscripto');
+        insBadge.style.display = d.inscripto === '1' ? 'inline-flex' : 'none';
+        insBadge.textContent = d.inscripto === '1' ? 'INSCRIPTO · ' + d.inscriptoCats : '';
+        if (d.puedeInscribir === '1' && d.inscripto === '1' && d.puedeOtra !== '1') {
+          inscribirmeBtn.href = d.misInscripciones;
+          inscribirmeBtn.textContent = 'Ver mi inscripción';
+          inscribirmeBtn.dataset.esInscripcion = '0';
+        } else if (d.puedeInscribir === '1') {
           inscribirmeBtn.style.display = 'block';
-          inscribirmeBtn.textContent = 'Inscribirme';
+          inscribirmeBtn.textContent = d.inscripto === '1' ? 'Inscribirme en otra categoría' : 'Inscribirme';
+          inscribirmeBtn.dataset.esInscripcion = '1';
         } else {
           inscribirmeBtn.textContent = 'Ver torneo';
+          inscribirmeBtn.dataset.esInscripcion = '0';
         }
 
         overlay.classList.add('is-open');
@@ -393,10 +410,20 @@
       var marker = L.circleMarker([t.lat, t.lon], {
         radius: 9, color: '#fff', weight: 2, fillColor: colorDe(t), fillOpacity: 1,
       }).addTo(m);
-      marker.bindPopup(
-        '<strong>' + t.nombre + '</strong><br>' + (t.ciudad || '') + '<br>' +
-        '<a href="' + t.url + '">Ver torneo</a>'
-      );
+      marker.on('click', function () {
+        // Mismo modal que el botón "Ver detalle" de la tarjeta: lo
+        // encontramos por su data-url (coincide con la url del torneo
+        // en el mapa) y disparamos su click, en vez de armar un popup aparte.
+        var btn = document.querySelector('.gp-tl-ver-detalle[data-url="' + t.url + '"]');
+        if (btn) {
+          btn.click();
+        } else {
+          // Torneo geocodificado que no está en la lista visible con los
+          // filtros actuales (p. ej. filtrado por otra ciudad): fallback
+          // simple, lo mandamos al detalle real.
+          window.location.href = t.url;
+        }
+      });
       markers.push({ marker: marker, data: t });
       ajustarVista();
     }
@@ -444,6 +471,33 @@
           if (!mostrar && x.marker._map) map.removeLayer(x.marker);
         });
         ajustarVista();
+      });
+    }
+  })();
+
+  (function () {
+    var yaLogueado = {{ user.is_authenticated|yesno:'true,false' }};
+    if (yaLogueado) return;  // el servidor ya procesa todo normal
+
+    // "Inscribirme" de cada tarjeta de la lista: pedir login antes de
+    // navegar al torneo.
+    document.querySelectorAll('.gp-inscribirme-link').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        var href = link.getAttribute('href');
+        gpAuth.requireAuth(false, function () { window.location.href = href; });
+      });
+    });
+
+    // "Inscribirme" del modal de detalle: solo pedir login cuando es una
+    // inscripción real (si dice "Ver torneo" lo dejamos navegar libre).
+    var modalBtn = document.getElementById('gpDetalleInscribirme');
+    if (modalBtn) {
+      modalBtn.addEventListener('click', function (e) {
+        if (modalBtn.dataset.esInscripcion !== '1') return;
+        e.preventDefault();
+        var href = modalBtn.getAttribute('href');
+        gpAuth.requireAuth(false, function () { window.location.href = href; });
       });
     }
   })();

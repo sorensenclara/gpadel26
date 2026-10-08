@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     "scoreboard",
     "accounts",
     "torneos",
+    "competencia",
+    "rankings",
     "reservas",
     "allauth",
     "allauth.account",

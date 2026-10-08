@@ -16,7 +16,7 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from accounts.models import Jugador, Organizador
+from accounts.models import Identidad, Jugador, Organizador
 from reservas.models import Cancha, Reserva
 from torneos.models import Categoria, Inscripcion, Torneo
 
@@ -32,11 +32,11 @@ class Command(BaseCommand):
 
         # ---------- Jugadores ----------
         jugadores = []
-        for i, (username, nombre, celular) in enumerate(
+        for i, (username, nombre, celular, dni, localidad) in enumerate(
             [
-                ("jugador1", "Juan Pérez", "2494100001"),
-                ("jugador2", "Ana Gómez", "2494100002"),
-                ("jugador3", "Carlos Ruiz", "2494100003"),
+                ("jugador1", "Juan Pérez", "2494100001", "30100001", "Tandil, Buenos Aires"),
+                ("jugador2", "Ana Gómez", "2494100002", "30100002", "San Cayetano, Buenos Aires"),
+                ("jugador3", "Carlos Ruiz", "2494100003", "30100003", "Necochea, Buenos Aires"),
             ]
         ):
             user, creado = User.objects.get_or_create(
@@ -44,10 +44,19 @@ class Command(BaseCommand):
             )
             if creado:
                 user.set_password(PASSWORD_DEMO)
-                user.save()
+            nombre_pila, _, apellido = nombre.partition(" ")
+            user.first_name = nombre_pila
+            user.last_name = apellido
+            user.save()
             jugador, _ = Jugador.objects.get_or_create(
                 usuario=user, defaults={"nombre": nombre, "celular": celular}
             )
+            identidad, _ = Identidad.objects.get_or_create(
+                usuario=user, defaults={"dni": dni, "ultimo_perfil": Identidad.PERFIL_JUGADOR}
+            )
+            if not identidad.localidad:
+                identidad.localidad = localidad
+                identidad.save(update_fields=["localidad"])
             jugadores.append(jugador)
         self.stdout.write(self.style.SUCCESS(f"Jugadores listos: {len(jugadores)}"))
 
@@ -201,8 +210,8 @@ class Command(BaseCommand):
         Inscripcion.objects.get_or_create(
             torneo=torneo1,
             categoria=cat_5ta,
-            nombre_1="Juan Pérez",
-            nombre_2="Martín López",
+            nombre_1="Juan", apellido_1="Pérez",
+            nombre_2="Martín", apellido_2="López",
             defaults={
                 "dni_1": "30111222",
                 "localidad_1": "San Cayetano",
@@ -216,8 +225,8 @@ class Command(BaseCommand):
         Inscripcion.objects.get_or_create(
             torneo=torneo1,
             categoria=cat_5ta,
-            nombre_1="Ana Gómez",
-            nombre_2="Lucía Fernández",
+            nombre_1="Ana", apellido_1="Gómez",
+            nombre_2="Lucía", apellido_2="Fernández",
             defaults={
                 "dni_1": "30555666",
                 "localidad_1": "Tres Arroyos",

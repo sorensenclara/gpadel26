@@ -178,7 +178,7 @@
         <tbody>
           {% for insc in categoria.inscripciones.all %}
           <tr>
-            <td>{{ insc.nombre_1 }} / {{ insc.nombre_2 }}</td>
+            <td>{{ insc.nombre_completo_1 }} / {{ insc.nombre_completo_2 }}</td>
             <td>{{ insc.telefono }}</td>
             <td>{{ insc.get_metodo_pago_display }}</td>
             <td><span class="gp-badge gp-badge--{{ insc.estado }}">{{ insc.get_estado_display }}</span></td>

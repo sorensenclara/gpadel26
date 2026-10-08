@@ -60,16 +60,83 @@
   .gp-tdet-step-head p { margin:0; color:#64748b; font-size:.85rem; }
 
   .gp-tdet-field { margin: 10px 0; }
+  .gp-comp-resultados { list-style:none; margin:6px 0 0; padding:0; }
+  .gp-comp-resultados button { width:100%; text-align:left; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; margin-bottom:6px; cursor:pointer; font-size:.88rem; }
+  .gp-comp-resultados button:hover { border-color: var(--gp-blue); background:#f8fafc; }
+  .gp-comp-resultados small { color:#64748b; display:block; }
+  .gp-comp-elegido { background:#ecfdf5; border-radius:12px; padding:14px 16px; margin:8px 0; color:#14532d; }
+  .gp-comp-elegido small { display:block; color:#166534; margin-top:4px; }
+  .gp-tdet-field input[readonly] { background:#f1f5f9; color:#475569; cursor:not-allowed; }
+  .gp-tdet-previas { background:#ecfdf5; border-radius:14px; padding:16px 20px; margin:0 0 14px; color:#14532d; }
+  .gp-tdet-previas h4 { margin:0 0 6px; font-size:.95rem; } .gp-tdet-previas ul { margin:0; padding-left:18px; font-size:.88rem; }
+
+  .gp-tdet-mensaje {
+    display:flex; align-items:center; gap:10px; border-radius:14px; padding:16px 20px;
+    font-weight:600; font-size:.95rem; margin: 24px 0 0;
+  }
+  .gp-tdet-mensaje--ok { background: var(--gp-green-light); color:#14532d; }
+  .gp-tdet-mensaje--error { background:#fee2e2; color:#991b1b; }
+  .gp-tdet-mensaje i { font-size:1.2rem; }
+
+  .gp-tdet-jugador-head { display:flex; justify-content:space-between; align-items:center; }
+  .gp-tdet-editar-btn {
+    background:#fff; border:1.5px solid var(--gp-blue); color: var(--gp-blue); border-radius:999px;
+    padding:6px 14px; font-size:.82rem; font-weight:700; cursor:pointer;
+  }
+  .gp-tdet-editar-btn:hover { background:#eff6ff; }
+  .gp-tdet-jug1-resumen {
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin: 14px 0 6px;
+    background:#f8fafc; border-radius:12px; padding:16px;
+  }
+  @media (max-width:700px) { .gp-tdet-jug1-resumen { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width:400px) { .gp-tdet-jug1-resumen { grid-template-columns:1fr; } }
+  .gp-tdet-jug1-resumen strong { display:block; font-size:.74rem; text-transform:uppercase; letter-spacing:.04em; color:#94a3b8; margin-bottom:3px; }
+  .gp-tdet-jug1-resumen span { font-size:.95rem; color:#0f172a; font-weight:600; }
+  .gp-tdet-jug1-nota { font-size:.8rem; color:#94a3b8; margin: 0 0 6px; }
+  .gp-tdet-obligatorio { color:#dc2626; }
+
+  .gp-tdet-disponibilidad-box {
+    margin: 18px 0 6px; padding: 20px; border-radius: 14px;
+    background: #eff6ff; border: 1.5px solid #bfdbfe;
+  }
+  .gp-tdet-disponibilidad-box > label { display:block; font-weight:700; margin-bottom:6px; color: var(--gp-blue-dark); }
+  .gp-tdet-disp-hint { margin: 0 0 14px; font-size: .85rem; color: #475569; }
+
+  .gp-tdet-disp-fila {
+    display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #e2e8f0;
+    border-radius:12px; padding:10px 12px; margin-bottom:10px;
+  }
+  .gp-tdet-disp-fila select,
+  .gp-tdet-disp-fila input[type="time"] {
+    border:1px solid #cbd5e1; border-radius:10px; padding:9px 12px; font-size:.88rem; background:#fff; flex:1 1 0; min-width:0;
+  }
+  .gp-tdet-disp-fila span.gp-tdet-disp-a { color:#64748b; font-size:.85rem; flex:0 0 auto; }
+  .gp-tdet-disp-borrar {
+    flex:0 0 auto; border:none; background:#fee2e2; color:#dc2626; width:38px; height:38px; border-radius:10px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.95rem;
+  }
+  .gp-tdet-disp-borrar:hover { background:#fecaca; }
+
+  .gp-tdet-disp-agregar {
+    width:100%; border:1.5px dashed #93c5fd; background:transparent; color: var(--gp-blue);
+    border-radius:12px; padding:12px; font-weight:700; font-size:.88rem; cursor:pointer;
+  }
+  .gp-tdet-disp-agregar:hover { background:#eff6ff; }
+
+  @media (max-width:560px) {
+    .gp-tdet-disp-fila { flex-wrap:wrap; }
+    .gp-tdet-disp-fila select { flex-basis:100%; }
+  }
   .gp-tdet-field label { display:block; font-size:.8rem; font-weight:700; color:#475569; margin-bottom:6px; }
   .gp-tdet-field input[type="text"],
   .gp-tdet-field select { width:100%; border-radius:10px; border:1px solid #d1d5db; padding:10px 12px; font-size:.9rem; }
   .gp-tdet-row2 { display:grid; grid-template-columns:1fr 1fr; gap: 0 16px; }
   @media (max-width:560px) { .gp-tdet-row2 { grid-template-columns:1fr; } }
-  .gp-tdet-check-inline { display:flex; align-items:center; gap:8px; font-size:.85rem; color:#475569; margin-top: 26px; }
+  .gp-tdet-check-inline { display:flex; align-items:center; gap:8px; font-size:.85rem; color:#475569; }
   .gp-tdet-check-inline input { width:16px; height:16px; }
 
   .gp-tdet-jugador-panel { background:#f8fafc; border-radius:14px; padding:18px 20px; margin: 14px 0; }
-  .gp-tdet-jugador-panel h3 { display:flex; align-items:center; justify-content:space-between; font-size:1rem; color: var(--gp-blue-dark); margin:0 0 8px; }
+  .gp-tdet-jugador-panel h3 { display:flex; align-items:center; gap:8px; font-size:1rem; color: var(--gp-blue-dark); margin:0 0 8px; }
   .gp-tdet-jugador-panel h3 i { color: var(--gp-blue); opacity:.6; }
   .gp-tdet-check-row { display:flex; align-items:center; gap:8px; margin: 8px 0; font-size:.85rem; color:#475569; }
 
@@ -132,6 +199,15 @@
   </section>
 
   <div class="gp-container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="gp-tdet-mensaje {% if message.tags == 'error' %}gp-tdet-mensaje--error{% else %}gp-tdet-mensaje--ok{% endif %}">
+          {% if message.tags != 'error' %}<i class="fa-solid fa-circle-check"></i>{% else %}<i class="fa-solid fa-circle-exclamation"></i>{% endif %}
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
     <div class="gp-tdet-layout">
 
       <!-- COLUMNA FORM -->
@@ -140,8 +216,28 @@
           <div class="gp-tdet-card">
             <p style="margin:0;">La inscripción para este torneo ya cerró ({{ torneo.fecha_limite_inscripcion|date:'d/m/Y' }}).</p>
           </div>
+        {% elif bloqueado_por_inscripcion %}
+          <div class="gp-tdet-previas">
+            <h4><i class="fa-solid fa-circle-check"></i> INSCRIPTO</h4>
+            <ul>
+              {% for e in inscripciones_previas %}
+              <li>{{ e.categoria.nombre }} con {{ e.mi_companero }} · {{ e.get_estado_display }}{% if e.mi_lado == 2 %} (te inscribió {{ e.nombre_completo_1 }}){% endif %}</li>
+              {% endfor %}
+            </ul>
+            <p style="margin:10px 0 0; font-size:.85rem;">
+              {% if torneo.permite_multiples_categorias %}No hay otra categoría más alta disponible para vos en este torneo.
+              {% else %}El organizador no habilitó jugar más de una categoría en este torneo.{% endif %}
+              <a href="{% url 'sitio:mis_inscripciones' %}">Ver mis inscripciones</a>
+            </p>
+          </div>
         {% else %}
-
+        {% if puede_otra_categoria %}
+          <div class="gp-tdet-previas">
+            <h4><i class="fa-solid fa-circle-check"></i> INSCRIPTO</h4>
+            <ul>{% for e in inscripciones_previas %}<li>{{ e.categoria.nombre }} con {{ e.mi_companero }}</li>{% endfor %}</ul>
+            <p style="margin:10px 0 0; font-size:.85rem;">El organizador habilitó sumar otra categoría: tiene que ser <strong>más alta</strong> y con <strong>otra pareja</strong>.</p>
+          </div>
+        {% endif %}
         {% if form.non_field_errors %}
           <div class="gp-tdet-card">
             {% for error in form.non_field_errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
@@ -161,21 +257,10 @@
               </div>
             </div>
 
-            <div class="gp-tdet-row2" style="align-items:end;">
-              <div class="gp-tdet-field">
-                <label for="{{ form.categoria.id_for_label }}">Categoría declarada</label>
-                {{ form.categoria }}
-                {% for error in form.categoria.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
-              </div>
-              <div class="gp-tdet-check-inline">
-                <input type="checkbox" id="gpToggleCatReal">
-                <label for="gpToggleCatReal">Mi categoría real es diferente a la declarada</label>
-              </div>
-            </div>
-
-            <div class="gp-tdet-field" id="gpCatRealField" style="display:none;">
-              <label for="{{ form.categoria_real.id_for_label }}">Categoría real</label>
-              {{ form.categoria_real }}
+            <div class="gp-tdet-field">
+              <label for="{{ form.categoria.id_for_label }}">Categoría declarada</label>
+              {{ form.categoria }}
+              {% for error in form.categoria.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
             </div>
           </div>
 
@@ -190,27 +275,74 @@
             </div>
 
             <div class="gp-tdet-jugador-panel">
-              <h3>Jugador 1 <i class="fa-regular fa-circle-user"></i></h3>
-              <div class="gp-tdet-field">
-                <label for="{{ form.nombre_1.id_for_label }}">Apellido y nombre</label>
-                {{ form.nombre_1 }}
-                {% for error in form.nombre_1.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+              <div class="gp-tdet-jugador-head">
+                <h3><i class="fa-regular fa-circle-user"></i> Jugador 1</h3>
+                {% if form.datos_cuenta_completos %}
+                <button type="button" class="gp-tdet-editar-btn" id="gpJug1EditarBtn">
+                  <i class="fa-solid fa-pen"></i> Editar
+                </button>
+                {% endif %}
               </div>
-              <div class="gp-tdet-row2">
-                <div class="gp-tdet-field">
-                  <label for="{{ form.dni_1.id_for_label }}">DNI</label>
-                  {{ form.dni_1 }}
+
+              <div class="gp-tdet-field" style="margin-top:6px;">
+                <label for="{{ form.categoria_oficial_1.id_for_label }}">Mi categoría actual <span class="gp-tdet-obligatorio">*</span></label>
+                {{ form.categoria_oficial_1 }}
+                {% for error in form.categoria_oficial_1.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+                {% if form.categoria_oficial_actual %}
+                  <p class="gp-tdet-disp-hint" style="margin:6px 0 0;">Podés mejorarla, pero no bajarla manualmente.</p>
+                {% elif form.categoria_piso %}
+                  <p class="gp-tdet-disp-hint" style="margin:6px 0 0;">Figurás declarado como {{ form.categoria_piso_label }} en torneos anteriores. Confirmala o elegí una superior: no podés elegir una inferior. Queda guardada en tu perfil.</p>
+                {% else %}
+                  <p class="gp-tdet-disp-hint" style="margin:6px 0 0;">Es tu primera inscripción: esta categoría queda guardada en tu perfil.</p>
+                {% endif %}
+              </div>
+
+              {% if form.datos_cuenta_completos %}
+              <div class="gp-tdet-jug1-resumen" id="gpJug1Resumen">
+                <div><strong>Nombre y apellido</strong><span>{{ form.nombre_1.value }} {{ form.apellido_1.value }}</span></div>
+                <div><strong>DNI</strong><span>{{ form.dni_1.value }}</span></div>
+                <div><strong>Celular</strong><span>{{ form.celular_1.value }}</span></div>
+                <div><strong>Localidad</strong><span>{{ form.localidad_1.value }}</span></div>
+              </div>
+              <p class="gp-tdet-jug1-nota">Son los datos de tu cuenta. Si algo cambió, tocá "Editar".</p>
+              {% endif %}
+
+              <div id="gpJug1Editable" {% if form.datos_cuenta_completos %}style="display:none;"{% endif %}>
+                <div class="gp-tdet-row2">
+                  <div class="gp-tdet-field">
+                    <label for="{{ form.nombre_1.id_for_label }}">Nombre</label>
+                    {{ form.nombre_1 }}
+                    {% for error in form.nombre_1.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+                  </div>
+                  <div class="gp-tdet-field">
+                    <label for="{{ form.apellido_1.id_for_label }}">Apellido</label>
+                    {{ form.apellido_1 }}
+                    {% for error in form.apellido_1.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+                  </div>
+                </div>
+                <div class="gp-tdet-row2">
+                  <div class="gp-tdet-field">
+                    <label for="{{ form.dni_1.id_for_label }}">DNI</label>
+                    {{ form.dni_1 }}
+                  </div>
+                  <div class="gp-tdet-field">
+                    <label for="{{ form.celular_1.id_for_label }}">Celular</label>
+                    {{ form.celular_1 }}
+                    {% for error in form.celular_1.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+                  </div>
                 </div>
                 <div class="gp-tdet-field">
-                  <label for="{{ form.localidad_1.id_for_label }}">Localidad</label>
+                  <label for="{{ form.localidad_1.id_for_label }}">Localidad <span class="gp-tdet-obligatorio">*</span></label>
                   {{ form.localidad_1 }}
+                  {% for error in form.localidad_1.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
                 </div>
               </div>
+
               <div class="gp-tdet-check-row">
                 {{ form.socio_1 }}
                 <label for="{{ form.socio_1.id_for_label }}">Es socio del club</label>
               </div>
-              <div class="gp-tdet-row2">
+              <div class="gp-tdet-row2 gp-tdet-socio-campos" id="gpSocioCampos1" style="display:none;">
                 <div class="gp-tdet-field">
                   <label for="{{ form.club_socio_1.id_for_label }}">Club del que es socio (opcional)</label>
                   {{ form.club_socio_1 }}
@@ -223,10 +355,32 @@
             </div>
 
             <div class="gp-tdet-jugador-panel">
-              <h3>Jugador 2 <i class="fa-regular fa-circle-user"></i></h3>
-              <div class="gp-tdet-field">
-                <label for="{{ form.nombre_2.id_for_label }}">Apellido y nombre</label>
-                {{ form.nombre_2 }}
+              <h3><i class="fa-regular fa-circle-user"></i> Jugador 2</h3>
+              {{ form.companero_id }}
+              {% for error in form.companero_id.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+              <div id="gpCompBusqueda">
+                <label for="gpCompBuscar" style="font-weight:700; font-size:.85rem;">Buscá a tu compañero por nombre y apellido o DNI</label>
+                <input type="search" id="gpCompBuscar" placeholder="Ej.: Beto Ruiz  ó  27555000" autocomplete="off"
+                       style="width:100%; border:1px solid #d1d5db; border-radius:10px; padding:11px 14px; font-size:.92rem;">
+                <ul id="gpCompResultados" class="gp-comp-resultados"></ul>
+                <p id="gpCompSinResultados" class="gp-tdet-disp-hint" style="display:none; margin:6px 0 0;">No lo encontramos en GPADEL. Podés agregarlo manualmente.</p>
+                <p class="gp-tdet-disp-hint" style="margin:6px 0 0;"><a href="#" id="gpCompManualLink">¿No está en GPADEL? Agregarlo manualmente</a></p>
+              </div>
+              <div id="gpCompElegido" class="gp-comp-elegido" style="display:none;"
+                   {% if form.companero_elegido %}data-id="{{ form.companero_elegido.id }}" data-nombre="{{ form.companero_elegido.nombre }}" data-apellido="{{ form.companero_elegido.apellido }}" data-localidad="{{ form.companero_elegido.localidad }}" data-categoria="{{ form.companero_elegido.categoria|default_if_none:'' }}"{% endif %}></div>
+              <div id="gpCompManualCampos">
+              <p class="gp-tdet-disp-hint" id="gpCompaneroSistema" style="display:none; margin:0 0 6px; color:#166534; font-weight:600;"></p>
+              <div class="gp-tdet-row2">
+                <div class="gp-tdet-field">
+                  <label for="{{ form.nombre_2.id_for_label }}">Nombre <span class="gp-tdet-obligatorio">*</span></label>
+                  {{ form.nombre_2 }}
+                  {% for error in form.nombre_2.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+                </div>
+                <div class="gp-tdet-field">
+                  <label for="{{ form.apellido_2.id_for_label }}">Apellido <span class="gp-tdet-obligatorio">*</span></label>
+                  {{ form.apellido_2 }}
+                  {% for error in form.apellido_2.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+                </div>
               </div>
               <div class="gp-tdet-row2">
                 <div class="gp-tdet-field">
@@ -234,15 +388,25 @@
                   {{ form.dni_2 }}
                 </div>
                 <div class="gp-tdet-field">
-                  <label for="{{ form.localidad_2.id_for_label }}">Localidad</label>
+                  <label for="{{ form.localidad_2.id_for_label }}">Localidad <span class="gp-tdet-obligatorio">*</span></label>
                   {{ form.localidad_2 }}
+                  {% for error in form.localidad_2.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
                 </div>
+              </div>
+              </div>
+              <div id="gpCompCategoria">
+              <div class="gp-tdet-field">
+                <label for="{{ form.categoria_oficial_2.id_for_label }}">Categoría oficial del compañero <span class="gp-tdet-obligatorio">*</span></label>
+                {{ form.categoria_oficial_2 }}
+                {% for error in form.categoria_oficial_2.errors %}<p class="gp-tdet-error">{{ error }}</p>{% endfor %}
+                <p class="gp-tdet-disp-hint" id="gpCompaneroNota" style="margin:6px 0 0;"></p>
+              </div>
               </div>
               <div class="gp-tdet-check-row">
                 {{ form.socio_2 }}
                 <label for="{{ form.socio_2.id_for_label }}">Es socio del club</label>
               </div>
-              <div class="gp-tdet-row2">
+              <div class="gp-tdet-row2 gp-tdet-socio-campos" id="gpSocioCampos2" style="display:none;">
                 <div class="gp-tdet-field">
                   <label for="{{ form.club_socio_2.id_for_label }}">Club del que es socio (opcional)</label>
                   {{ form.club_socio_2 }}
@@ -264,15 +428,22 @@
                 <p>Indicá tus días y horarios disponibles y un teléfono de contacto de la pareja.</p>
               </div>
             </div>
-            <div class="gp-tdet-row2">
-              <div class="gp-tdet-field">
-                <label for="{{ form.telefono.id_for_label }}"><i class="fa-solid fa-phone"></i> Teléfono de la pareja</label>
-                {{ form.telefono }}
-              </div>
-              <div class="gp-tdet-field">
-                <label for="{{ form.disponibilidad.id_for_label }}"><i class="fa-regular fa-calendar"></i> Días y horarios disponibles (opcional)</label>
-                {{ form.disponibilidad }}
-              </div>
+            <div class="gp-tdet-field">
+              <label for="{{ form.telefono.id_for_label }}"><i class="fa-solid fa-phone"></i> Teléfono de la pareja</label>
+              {{ form.telefono }}
+            </div>
+
+            <div class="gp-tdet-disponibilidad-box">
+              <label><i class="fa-regular fa-calendar-check"></i> Días y horarios disponibles <span style="font-weight:400; color:#94a3b8;">(opcional)</span></label>
+              <p class="gp-tdet-disp-hint">Indicá los días y horarios en los que la pareja puede jugar. Si no agregás ninguno, se entiende que están disponibles todos los días y a cualquier hora.</p>
+
+              <div id="gpDispFilas"></div>
+
+              <button type="button" id="gpDispAgregar" class="gp-tdet-disp-agregar">
+                <i class="fa-solid fa-plus"></i> Agregar otro día y horario
+              </button>
+
+              {{ form.disponibilidad }}
             </div>
           </div>
 
@@ -405,6 +576,279 @@
       gpAuth.requireAuth(false, function () {
         inscForm.submit();  // form.submit() no vuelve a disparar 'submit'
       });
+    });
+  })();
+</script>
+
+<script>
+  // Selección del compañero: se busca por nombre y apellido o DNI; si ya está en GPADEL se ELIGE de la
+  // lista y sus datos se muestran como información del sistema (el servidor igual usa su identidad,
+  // no lo que mande el navegador). Si no está, se agrega manualmente.
+  (function () {
+    var buscar = document.getElementById('gpCompBuscar');
+    if (!buscar) return;
+    var url = "{% url 'sitio:buscar_companeros' %}";
+    var idInput = document.getElementById('gpCompaneroId'), lista = document.getElementById('gpCompResultados'),
+        sinRes = document.getElementById('gpCompSinResultados'), busqueda = document.getElementById('gpCompBusqueda'),
+        card = document.getElementById('gpCompElegido'), manual = document.getElementById('gpCompManualCampos'),
+        link = document.getElementById('gpCompManualLink'), cat = document.getElementById('gpCompCategoria'),
+        catSel = document.getElementById('gpCategoriaOficial2'), dni = document.getElementById('id_dni_2');
+    var ETQ = {1:'1ra',2:'2da',3:'3ra',4:'4ta',5:'5ta',6:'6ta',7:'7ma',8:'8va'}, temporizador = null;
+
+    function modoManual(si) {
+      manual.style.display = cat.style.display = si ? 'block' : 'none';
+      link.parentNode.style.display = si ? 'none' : 'block';
+    }
+    function elegir(c) {
+      idInput.value = c.id;
+      while (card.firstChild) card.removeChild(card.firstChild);
+      var nombre = document.createElement('strong');
+      nombre.textContent = c.nombre + ' ' + c.apellido + (c.localidad ? ' · ' + c.localidad : '');
+      var info = document.createElement('small');
+      var tiene = c.categoria !== null && c.categoria !== '' && c.categoria !== undefined;
+      info.textContent = tiene
+        ? 'Categoría oficial ' + ETQ[c.categoria] + ' (dato del sistema: no se puede modificar). Ya está en GPADEL: no hace falta completar nada más.'
+        : 'Ya está en GPADEL pero todavía no tiene categoría oficial: indicá cuál es; la confirma él o ella desde su cuenta.';
+      var cambiar = document.createElement('a');
+      cambiar.href = '#'; cambiar.textContent = 'Cambiar compañero'; cambiar.style.cssText = 'display:inline-block; margin-top:6px; font-size:.82rem;';
+      cambiar.addEventListener('click', function (e) { e.preventDefault(); idInput.value = ''; card.style.display = 'none'; busqueda.style.display = 'block'; modoManual(false); cat.style.display = 'none'; buscar.focus(); });
+      card.appendChild(nombre); card.appendChild(info); card.appendChild(cambiar);
+      card.style.display = 'block'; busqueda.style.display = 'none'; manual.style.display = 'none';
+      if (tiene) { catSel.value = String(c.categoria); cat.style.display = 'none'; } else { cat.style.display = 'block'; }
+    }
+    function resultados(items) {
+      while (lista.firstChild) lista.removeChild(lista.firstChild);
+      sinRes.style.display = items.length ? 'none' : 'block';
+      items.forEach(function (c) {
+        var li = document.createElement('li'), b = document.createElement('button'), s = document.createElement('small');
+        b.type = 'button'; b.textContent = c.nombre + ' ' + c.apellido;
+        s.textContent = [c.localidad, c.categoria_oficial ? 'Cat. ' + ETQ[c.categoria_oficial] : 'Sin categoría oficial'].filter(Boolean).join(' · ');
+        b.appendChild(s);
+        b.addEventListener('click', function () { lista.innerHTML = ''; elegir({id: c.id, nombre: c.nombre, apellido: c.apellido, localidad: c.localidad, categoria: c.categoria_oficial}); });
+        li.appendChild(b); lista.appendChild(li);
+      });
+    }
+    buscar.addEventListener('input', function () {
+      clearTimeout(temporizador);
+      var q = buscar.value.trim();
+      if (q.length < 3) { resultados([]); sinRes.style.display = 'none'; return; }
+      temporizador = setTimeout(function () {
+        fetch(url + '?q=' + encodeURIComponent(q), { credentials: 'same-origin' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { if (d) resultados(d.resultados || []); })
+          .catch(function () {});
+      }, 300);
+    });
+    link.addEventListener('click', function (e) {
+      e.preventDefault(); modoManual(true);
+      var q = buscar.value.trim();
+      if (dni && /^[0-9.\s]{6,}$/.test(q) && !dni.value) dni.value = q;
+    });
+    // Estado inicial (si el formulario vuelve con errores o con un compañero ya elegido).
+    if (card.dataset.id) {
+      elegir({id: card.dataset.id, nombre: card.dataset.nombre, apellido: card.dataset.apellido, localidad: card.dataset.localidad, categoria: card.dataset.categoria === '' ? null : parseInt(card.dataset.categoria, 10)});
+    } else {
+      var hayManual = ['id_nombre_2', 'id_apellido_2', 'id_dni_2'].some(function (i) { var e = document.getElementById(i); return e && e.value; })
+        || document.querySelector('#gpCompManualCampos .gp-tdet-error, #gpCompCategoria .gp-tdet-error');
+      modoManual(!!hayManual);
+    }
+  })();
+</script>
+
+<script>
+  // Categoría del compañero: al escribir su DNI se consulta si tiene cuenta.
+  // Si ya tiene categoría oficial, se muestra y NO se puede cambiar desde acá
+  // (el servidor igual lo ignora: esto es solo para que se vea).
+  (function () {
+    var dni = document.getElementById('id_dni_2');
+    var select = document.getElementById('gpCategoriaOficial2');
+    var nota = document.getElementById('gpCompaneroNota');
+    if (!dni || !select || !nota) return;
+    var url = "{% url 'sitio:categoria_companero' %}";
+    var ultimo = null, temporizador = null;
+
+    function desbloquear() {
+      Array.from(select.options).forEach(function (o) { o.disabled = false; });
+    }
+    // Tiene cuenta sin categoría oficial pero ya hay una declarada: no se puede declarar una inferior.
+    function limitar(maximo) {
+      Array.from(select.options).forEach(function (o) {
+        var v = parseInt(o.value, 10);
+        o.disabled = !isNaN(v) && v > maximo;
+      });
+    }
+    function bloquear(valor) {
+      select.value = String(valor);
+      Array.from(select.options).forEach(function (o) { o.disabled = o.value !== String(valor); });
+    }
+    var nom = document.getElementById('id_nombre_2'), ape = document.getElementById('id_apellido_2'),
+        loc = document.getElementById('id_localidad_2'), avisoSistema = document.getElementById('gpCompaneroSistema');
+    var datosDelSistema = false;
+    // Si el compañero ya está en GPADEL con su nombre, se completan solos y no se pueden tocar:
+    // el servidor igual usa los datos del sistema (esto es solo para que se vea).
+    function autocompletar(d) {
+      if (d && d.nombre && d.apellido) {
+        nom.value = d.nombre; ape.value = d.apellido; nom.readOnly = ape.readOnly = true;
+        if (d.localidad) { loc.value = d.localidad; loc.readOnly = true; }
+        datosDelSistema = true;
+        avisoSistema.style.display = 'block';
+        avisoSistema.textContent = 'Ya está en GPADEL: usamos sus datos, no hace falta completar nada más.';
+      } else if (datosDelSistema) {
+        nom.value = ape.value = ''; if (loc.readOnly) loc.value = '';
+        nom.readOnly = ape.readOnly = loc.readOnly = false;
+        datosDelSistema = false; avisoSistema.style.display = 'none';
+      }
+    }
+    function consultar() {
+      var valor = dni.value.trim();
+      if (valor.replace(/\D/g, '').length < 6) { desbloquear(); nota.textContent = ''; ultimo = null; return; }
+      if (valor === ultimo) return;
+      ultimo = valor;
+      fetch(url + '?dni=' + encodeURIComponent(valor), { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d) return;
+          autocompletar(d);
+          if (d.error === 'mismo_usuario') {
+            desbloquear(); nota.textContent = 'El compañero tiene que ser otra persona.';
+          } else if (d.bloqueada) {
+            bloquear(d.categoria_oficial);
+            nota.textContent = 'Es la categoría oficial registrada en su perfil. Si necesita cambiarla, tiene que actualizarla desde su propia cuenta.';
+          } else if (d.ambiguo) {
+            desbloquear();
+            nota.textContent = 'Este DNI coincide con más de una cuenta, así que no se puede identificar a la persona. La categoría queda declarada solo para esta inscripción y el caso se revisa para verificar su identidad.';
+          } else if (d.tiene_cuenta) {
+            if (d.categoria_minima) { limitar(d.categoria_minima); } else { desbloquear(); }
+            nota.textContent = 'Tiene cuenta en GPADEL pero todavía no confirmó su categoría oficial. La que indiques queda declarada para esta inscripción y la tendrá que confirmar él o ella desde su cuenta.' + (d.categoria_minima ? ' Ya figura declarada una categoría: no podés indicar una inferior.' : '');
+          } else {
+            desbloquear();
+            nota.textContent = 'No tiene cuenta en GPADEL: la categoría queda declarada solo para esta inscripción.';
+          }
+        })
+        .catch(function () {});
+    }
+    dni.addEventListener('input', function () { clearTimeout(temporizador); temporizador = setTimeout(consultar, 400); });
+    dni.addEventListener('blur', consultar);
+    consultar();  // por si la página vuelve con errores y el DNI ya estaba cargado
+  })();
+</script>
+
+<script>
+  (function () {
+    [1, 2].forEach(function (n) {
+      var check = document.getElementById('id_socio_' + n);
+      var campos = document.getElementById('gpSocioCampos' + n);
+      if (!check || !campos) return;
+      function actualizar() { campos.style.display = check.checked ? 'grid' : 'none'; }
+      check.addEventListener('change', actualizar);
+      actualizar();  // respeta el estado si la página vuelve con errores
+    });
+  })();
+</script>
+
+<script>
+  (function () {
+    var actual = {{ form.categoria_limite|default:"null" }};
+    var select1 = document.getElementById('gpCategoriaOficial1');
+    if (actual && select1) {
+      Array.from(select1.options).forEach(function (opt) {
+        if (parseInt(opt.value, 10) > actual) opt.disabled = true;
+      });
+    }
+  })();
+</script>
+
+<script>
+  (function () {
+    var btn = document.getElementById('gpJug1EditarBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      document.getElementById('gpJug1Resumen').style.display = 'none';
+      document.getElementById('gpJug1Editable').style.display = 'block';
+      btn.style.display = 'none';
+    });
+  })();
+</script>
+
+<script>
+  (function () {
+    var hidden = document.getElementById('gpDispHidden');
+    var filasBox = document.getElementById('gpDispFilas');
+    var btnAgregar = document.getElementById('gpDispAgregar');
+    if (!hidden || !filasBox || !btnAgregar) return;
+
+    var DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    function crearFila(dia, desde, hasta) {
+      var fila = document.createElement('div');
+      fila.className = 'gp-tdet-disp-fila';
+
+      var select = document.createElement('select');
+      DIAS.forEach(function (d) {
+        var opt = document.createElement('option');
+        opt.value = d; opt.textContent = d;
+        if (d === dia) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      var inputDesde = document.createElement('input');
+      inputDesde.type = 'time';
+      inputDesde.value = desde || '16:00';
+
+      var separador = document.createElement('span');
+      separador.className = 'gp-tdet-disp-a';
+      separador.textContent = 'a';
+
+      var inputHasta = document.createElement('input');
+      inputHasta.type = 'time';
+      inputHasta.value = hasta || '20:00';
+
+      var btnBorrar = document.createElement('button');
+      btnBorrar.type = 'button';
+      btnBorrar.className = 'gp-tdet-disp-borrar';
+      btnBorrar.innerHTML = '<i class="fa-solid fa-trash"></i>';
+      btnBorrar.addEventListener('click', function () {
+        fila.remove();
+        sincronizar();
+      });
+
+      [select, inputDesde, inputHasta].forEach(function (el) {
+        el.addEventListener('change', sincronizar);
+      });
+
+      fila.appendChild(select);
+      fila.appendChild(inputDesde);
+      fila.appendChild(separador);
+      fila.appendChild(inputHasta);
+      fila.appendChild(btnBorrar);
+      filasBox.appendChild(fila);
+    }
+
+    function sincronizar() {
+      var partes = [];
+      filasBox.querySelectorAll('.gp-tdet-disp-fila').forEach(function (fila) {
+        var els = fila.querySelectorAll('select, input[type="time"]');
+        var dia = els[0].value, desde = els[1].value, hasta = els[2].value;
+        if (desde && hasta) partes.push(dia + ' de ' + desde + ' a ' + hasta);
+      });
+      hidden.value = partes.join(', ');
+    }
+
+    // Si el form vuelve con errores y ya había algo cargado (o precargado
+    // desde el servidor), reconstruimos las filas a partir del texto guardado.
+    var yaCargadas = [];
+    if (hidden.value) {
+      hidden.value.split(',').forEach(function (texto) {
+        var m = texto.trim().match(/^(\S+) de (\d{2}:\d{2}) a (\d{2}:\d{2})$/);
+        if (m) yaCargadas.push({ dia: m[1], desde: m[2], hasta: m[3] });
+      });
+    }
+    yaCargadas.forEach(function (e) { crearFila(e.dia, e.desde, e.hasta); });
+    sincronizar();
+
+    btnAgregar.addEventListener('click', function () {
+      crearFila('Lunes', '16:00', '20:00');
+      sincronizar();
     });
   })();
 </script>

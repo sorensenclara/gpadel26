@@ -19,10 +19,13 @@
       <div class="gp-auth-field">
         <i class="fa-solid fa-lock"></i>
         <input type="password" name="password" id="gpAuthPass" placeholder="Contraseña" autocomplete="current-password" required>
+        <button type="button" class="gp-pass-toggle" onclick="gpTogglePassword('gpAuthPass', this)" aria-label="Mostrar contraseña">
+          <i class="fa-regular fa-eye"></i>
+        </button>
       </div>
       <div class="gp-auth-row">
         <label><input type="checkbox" name="recordarme"> Recordarme</label>
-        <a href="{% url 'sitio:login' %}" target="_blank" rel="noopener">¿Olvidaste tu contraseña?</a>
+        <a href="{% url 'account_reset_password' %}" target="_blank" rel="noopener">¿Olvidaste tu contraseña?</a>
       </div>
       <button type="submit" class="gp-btn gp-btn--primary" id="gpAuthSubmit" style="width:100%;">Iniciar sesión</button>
     </form>

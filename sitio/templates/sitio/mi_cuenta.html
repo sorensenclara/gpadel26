@@ -44,6 +44,22 @@
       {% for message in messages %}<p style="color:#166534;">{{ message }}</p>{% endfor %}
     {% endif %}
 
+    {% if reclamo_abierto %}
+    <div class="gp-mc-card">
+      <h2>Identidad en verificación</h2>
+      <p style="margin:0 0 10px; color:#475569;">
+        El DNI que ingresaste ya figura en GPADEL. Antes de asociarte su historial, el equipo tiene que
+        verificar que sos esa persona. Mientras tanto podés usar la plataforma con normalidad; tus
+        inscripciones y resultados nuevos quedan guardados en tu cuenta.
+      </p>
+      <div class="gp-mc-datos">
+        <div class="gp-mc-dato"><strong>DNI declarado</strong><span>{{ reclamo_abierto.dni_declarado }}</span></div>
+        <div class="gp-mc-dato"><strong>Estado</strong><span>{{ reclamo_abierto.get_estado_display }}</span></div>
+        <div class="gp-mc-dato"><strong>Usuario</strong><span>{{ request.user.username }}</span></div>
+      </div>
+    </div>
+    {% endif %}
+
     {% if identidad %}
     <div class="gp-mc-card">
       <h2>Tus datos</h2>
@@ -51,7 +67,67 @@
         <div class="gp-mc-dato"><strong>Nombre</strong><span>{{ request.user.first_name }}</span></div>
         <div class="gp-mc-dato"><strong>Apellido</strong><span>{{ request.user.last_name }}</span></div>
         <div class="gp-mc-dato"><strong>DNI</strong><span>{{ identidad.dni }}</span></div>
+        <div class="gp-mc-dato"><strong>Celular</strong><span>{{ celular|default:"—" }}</span></div>
+        <div class="gp-mc-dato"><strong>Localidad</strong><span>{{ identidad.localidad|default:"—" }}</span></div>
         <div class="gp-mc-dato"><strong>Usuario</strong><span>{{ request.user.username }}</span></div>
+        {% if tiene_jugador %}
+        <div class="gp-mc-dato" style="grid-column: 1 / -1;">
+          <strong>Categoría oficial</strong>
+          {% if categoria_oficial %}
+            <span>{{ categoria_oficial_label }}</span>
+            {% if categorias_para_subir %}
+            <form method="post" action="{% url 'accounts:actualizar_categoria' %}" style="display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;">
+              {% csrf_token %}
+              <select name="categoria_oficial" style="border:1px solid #d1d5db; border-radius:10px; padding:8px 12px;">
+                {% for valor, nombre in categorias_para_subir %}<option value="{{ valor }}">{{ nombre }}</option>{% endfor %}
+              </select>
+              <button type="submit" class="gp-btn gp-btn--primary" style="padding:8px 16px;">Subir de categoría</button>
+            </form>
+            <small style="color:#94a3b8;">Solo se puede subir, no bajar.</small>
+            {% endif %}
+          {% elif categoria_piso %}
+            <span>Sin confirmar</span>
+            <small style="color:#475569; display:block; margin:4px 0 8px;">
+              Otras personas declararon tu categoría como <strong>{{ categoria_piso_label }}</strong>
+              al inscribirte como compañero. Todavía no es tu categoría oficial: confirmala, o elegí una superior.
+              No podés elegir una inferior.
+            </small>
+            <ul style="margin:0 0 8px 18px; padding:0; font-size:.85rem; color:#475569;">
+              {% for item in declaradas_por_terceros %}
+              <li>{{ item.torneo.nombre }}: {{ item.categoria }}</li>
+              {% endfor %}
+            </ul>
+            <form method="post" action="{% url 'accounts:actualizar_categoria' %}" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              {% csrf_token %}
+              <select name="categoria_oficial" style="border:1px solid #d1d5db; border-radius:10px; padding:8px 12px;">
+                {% for valor, nombre in categorias_para_confirmar %}<option value="{{ valor }}" {% if valor == categoria_piso %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+              </select>
+              <button type="submit" class="gp-btn gp-btn--primary" style="padding:8px 16px;">Confirmar categoría</button>
+            </form>
+          {% else %}
+            <span>Todavía no registrada</span>
+            <small style="color:#94a3b8;">Se declara en tu primera inscripción a un torneo.</small>
+          {% endif %}
+        </div>
+        {% elif declaradas_por_terceros %}
+        <div class="gp-mc-dato" style="grid-column: 1 / -1;">
+          <strong>Categoría oficial</strong>
+          <span>Sin confirmar</span>
+          <small style="color:#475569; display:block; margin-top:4px;">
+            Figurás como compañero en inscripciones con una categoría declarada por otras personas.
+            Activá tu perfil de Jugador (más abajo) para confirmarla. Tu perfil de Organizador no cambia.
+          </small>
+        </div>
+        {% endif %}
+        {% if revision_abierta %}
+        <div class="gp-mc-dato" style="grid-column: 1 / -1; background:#fef9c3; border-radius:10px; padding:10px 14px;">
+          <strong style="color:#854d0e;">Tu DNI está en revisión</strong>
+          <small style="color:#854d0e; display:block; margin-top:4px;">
+            Tu DNI coincide con otra cuenta, así que por seguridad no se vinculan participaciones anteriores
+            hasta verificar tu identidad. Contactá a GPADEL para resolverlo.
+          </small>
+        </div>
+        {% endif %}
       </div>
     </div>
     {% endif %}
